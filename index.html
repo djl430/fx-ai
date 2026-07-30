@@ -1,0 +1,2742 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef3f9">
+  <title>飞象智批 · 批改工作台改版 Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18223b;
+      --muted: #6f7890;
+      --line: rgba(90, 107, 143, .16);
+      --panel: rgba(255, 255, 255, .68);
+      --panel-strong: rgba(255, 255, 255, .88);
+      --navy: #202b4b;
+      --blue: #647be9;
+      --lavender: #9a87dd;
+      --mint: #7ec9b6;
+      --amber: #d99343;
+      --red: #df5b62;
+      --shadow: 0 24px 70px rgba(73, 85, 125, .13);
+      --soft-shadow: 0 12px 32px rgba(73, 85, 125, .09);
+      font-family: "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: #dfe5ee; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 17% 10%, rgba(220, 235, 255, .92), transparent 32%),
+        radial-gradient(circle at 83% 18%, rgba(227, 220, 252, .72), transparent 31%),
+        linear-gradient(135deg, #e9eff6 0%, #e8eaf3 48%, #dde7f2 100%);
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(100, 123, 233, .28);
+      outline-offset: 3px;
+    }
+    .app-shell {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      min-height: calc(100vh - 32px);
+      margin: 16px;
+      border: 1px solid rgba(255, 255, 255, .72);
+      border-radius: 30px;
+      overflow: hidden;
+      background: rgba(244, 247, 252, .66);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(28px);
+    }
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      padding: 28px 20px 20px;
+      border-right: 1px solid var(--line);
+      background: rgba(250, 252, 255, .64);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px;
+    }
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 15px;
+      color: white;
+      font-weight: 800;
+      background: linear-gradient(145deg, #8194f3, #8d78d8);
+      box-shadow: 0 12px 24px rgba(111, 101, 206, .28);
+    }
+    .brand strong, .brand small { display: block; }
+    .brand strong { font-size: 17px; letter-spacing: -.02em; }
+    .brand small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .primary-nav { display: grid; gap: 8px; }
+    .primary-nav button, .return-scanner {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 12px;
+      border: 0;
+      border-radius: 15px;
+      padding: 13px 14px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+    .primary-nav button::before, .return-scanner::before {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(122, 136, 188, .09);
+      font-size: 14px;
+      content: attr(data-icon);
+    }
+    .primary-nav button:hover, .return-scanner:hover { background: rgba(255, 255, 255, .74); }
+    .primary-nav button[aria-current="page"] {
+      color: #26345f;
+      background: rgba(255, 255, 255, .9);
+      box-shadow: var(--soft-shadow);
+    }
+    .primary-nav button[aria-current="page"]::before {
+      color: white;
+      background: linear-gradient(145deg, #7c90ee, #8c78da);
+    }
+    .sidebar-note {
+      margin-top: auto;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .52);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .return-scanner {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .58);
+    }
+    .main-column { min-width: 0; }
+    .workspace { padding: 30px; }
+    .panel {
+      border: 1px solid rgba(255, 255, 255, .76);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(18px);
+    }
+    .page-stack { display: grid; gap: 22px; animation: page-in .42s ease both; }
+    @keyframes page-in { from { opacity: 0; transform: translateY(8px); } }
+    .page-heading, .panel-heading, .hero, .task-row, .exception-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .page-heading h1, .panel-heading h2, .hero h1 { margin: 0; letter-spacing: -.035em; }
+    .page-heading h1 { font-size: clamp(28px, 3.4vw, 42px); }
+    .page-heading p, .panel-heading p, .hero p { margin: 7px 0 0; color: var(--muted); }
+    .eyebrow {
+      margin: 0 0 7px !important;
+      color: #6978a8 !important;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .hero {
+      min-height: 184px;
+      padding: 30px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 88% 20%, rgba(178, 164, 235, .32), transparent 34%),
+        radial-gradient(circle at 67% 100%, rgba(149, 205, 225, .28), transparent 38%),
+        var(--panel-strong);
+    }
+    .hero h1 { font-size: clamp(32px, 4vw, 54px); }
+    .hero-copy { max-width: 650px; }
+    .hero-actions { display: flex; align-items: center; gap: 10px; }
+    .scan-task-entry { position: relative; padding-right: 35px; }
+    .notification-bubble {
+      position: absolute;
+      top: -7px;
+      right: -5px;
+      display: grid;
+      min-width: 24px;
+      height: 24px;
+      place-items: center;
+      border: 2px solid #f7f9ff;
+      border-radius: 999px;
+      padding: 0 6px;
+      color: #fff;
+      background: #d66b51;
+      font-size: 10px;
+      font-weight: 800;
+      box-shadow: 0 6px 14px rgba(183, 75, 54, .24);
+    }
+    .button-primary, .button-secondary, .button-ghost, .text-button, .filter-chip {
+      border: 0;
+      border-radius: 13px;
+      cursor: pointer;
+    }
+    .button-primary, .button-secondary {
+      min-height: 44px;
+      padding: 0 17px;
+      font-weight: 760;
+    }
+    .button-primary {
+      color: white;
+      background: linear-gradient(135deg, #263456, #5265b2);
+      box-shadow: 0 12px 25px rgba(44, 56, 103, .23);
+    }
+    .button-secondary {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .78);
+    }
+    .button-ghost, .text-button {
+      padding: 8px 10px;
+      color: #56659e;
+      background: transparent;
+      font-weight: 700;
+    }
+    .button-primary:hover, .button-secondary:hover, .text-button:hover { transform: translateY(-1px); }
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .processing-card { display: grid; gap: 16px; padding: 22px 24px; background: linear-gradient(125deg, rgba(255,255,255,.88), rgba(239,243,255,.82)); }
+    .processing-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .processing-title { display: flex; gap: 13px; align-items: flex-start; }
+    .processing-title > span { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; color: #5b6dc6; background: #e9edff; font-size: 21px; }
+    .processing-title h2 { margin: 5px 0; font-size: 19px; }
+    .processing-title p { margin: 0; color: var(--muted); }
+    .processing-progress strong { display: flex; justify-content: space-between; margin-bottom: 9px; font-size: 12px; }
+    .processing-progress__track { display: block; height: 9px; overflow: hidden; border-radius: 999px; background: #e6eafa; }
+    .processing-progress__track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #6374d9, #7e8bea); }
+    .processing-meta { display: flex; flex-wrap: wrap; gap: 15px; color: #4f806b; font-size: 11px; }
+    .processing-meta span { white-space: nowrap; }
+    .metric {
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, .75);
+      border-radius: 19px;
+      background: rgba(255, 255, 255, .58);
+    }
+    .metric strong { display: block; font-size: 28px; letter-spacing: -.04em; }
+    .metric span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .content-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .section-panel { padding: 23px; }
+    .panel-heading { margin-bottom: 18px; }
+    .panel-heading h2 { font-size: 21px; }
+    .task-list, .exception-list { display: grid; gap: 10px; }
+    .task-row, .exception-row {
+      width: 100%;
+      padding: 15px 16px;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      color: inherit;
+      background: rgba(255, 255, 255, .52);
+      cursor: pointer;
+      text-align: left;
+    }
+    .task-row:hover, .exception-row:hover { border-color: var(--line); background: rgba(255, 255, 255, .84); }
+    .task-main { display: flex; min-width: 0; align-items: center; gap: 13px; }
+    .task-icon, .exception-icon {
+      display: grid;
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 14px;
+      color: #5668b2;
+      background: linear-gradient(145deg, #edf2ff, #eee9fb);
+    }
+    .task-main strong, .task-main small { display: block; }
+    .task-main small { margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .task-meta { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: #4e5d93;
+      background: #eef1ff;
+      font-size: 11px;
+      font-weight: 760;
+    }
+    .status-badge.warning { color: #8a5921; background: #fff2df; }
+    .exception-card {
+      min-height: 100%;
+      padding: 23px;
+      color: #3e3440;
+      background:
+        radial-gradient(circle at 100% 0, rgba(242, 187, 109, .28), transparent 38%),
+        rgba(255, 251, 245, .75);
+    }
+    .exception-total { display: block; margin: 20px 0 2px; font-size: 46px; letter-spacing: -.05em; }
+    .exception-card > p { margin: 4px 0 22px; color: #7d6b60; line-height: 1.55; }
+    .exception-types { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+    .exception-types span { border-radius: 999px; padding: 7px 9px; background: rgba(255, 255, 255, .68); font-size: 11px; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-chip { padding: 8px 12px; color: var(--muted); background: rgba(255, 255, 255, .56); }
+    .filter-chip[aria-pressed="true"] { color: white; background: var(--navy); }
+    .back-row { display: flex; align-items: center; gap: 10px; }
+    .back-row .button-ghost { padding-left: 0; }
+    .exception-group { padding: 19px; }
+    .exception-group + .exception-group { margin-top: 14px; }
+    .exception-group__title { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .exception-group__title h2 { margin: 0; font-size: 18px; }
+    .exception-group__title span { color: var(--amber); font-size: 12px; font-weight: 760; }
+    .exception-row { cursor: default; }
+    .exception-row button { flex: 0 0 auto; }
+    .task-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 25px;
+    }
+    .task-header h1 { margin: 0; font-size: clamp(27px, 3vw, 39px); letter-spacing: -.04em; }
+    .task-header p { margin: 8px 0 0; color: var(--muted); }
+    .task-header__stats { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .task-tabs {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, .75);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, .54);
+      scrollbar-width: none;
+    }
+    .task-tabs::-webkit-scrollbar { display: none; }
+    .task-tabs button {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 14px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 720;
+    }
+    .task-tabs button[aria-selected="true"] {
+      color: var(--ink);
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 8px 18px rgba(74, 85, 123, .1);
+    }
+    .task-body { min-height: 420px; }
+    .overview-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; }
+    .overview-grid > section { padding: 23px; }
+    .stage-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; margin-top: 20px; }
+    .stage {
+      position: relative;
+      min-height: 100px;
+      padding: 14px;
+      border-radius: 15px;
+      background: rgba(245, 247, 252, .86);
+    }
+    .stage[data-state="complete"] { color: #315e58; background: #e7f5f1; }
+    .stage[data-state="current"] { color: #5d4d8f; background: #eeeafb; }
+    .stage strong, .stage small { display: block; }
+    .stage small { margin-top: 8px; color: inherit; opacity: .72; }
+    .summary-list { display: grid; gap: 11px; margin-top: 18px; }
+    .summary-list div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .summary-list span { color: var(--muted); }
+    .submission-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .submission-table { width: 100%; border-collapse: collapse; }
+    .submission-table th, .submission-table td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+    .submission-table th { color: var(--muted); font-size: 11px; font-weight: 760; letter-spacing: .05em; }
+    .submission-table td { font-size: 13px; }
+    .submission-table tr:last-child td { border-bottom: 0; }
+    .student-cell { display: flex; align-items: center; gap: 10px; }
+    .student-avatar {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 11px;
+      color: #4f5f9f;
+      background: #edf0fc;
+      font-weight: 780;
+    }
+    .row-action { border: 0; color: #5969a6; background: transparent; cursor: pointer; font-weight: 740; }
+    .state-ok { color: #3f7a70; }
+    .state-warning { color: #a06425; }
+    .anomaly-layout { display: grid; grid-template-columns: 270px minmax(0, 1fr) 270px; gap: 16px; }
+    .anomaly-layout > section, .anomaly-layout > aside { padding: 20px; }
+    .anomaly-nav { display: grid; gap: 8px; margin-top: 16px; }
+    .anomaly-nav button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .52);
+      cursor: pointer;
+      text-align: left;
+    }
+    .anomaly-nav button[aria-current="true"] { border-color: rgba(213, 143, 65, .34); background: #fff7ea; }
+    .paper-preview {
+      position: relative;
+      min-height: 330px;
+      margin-top: 16px;
+      padding: 28px;
+      border: 1px solid #dfe3ec;
+      border-radius: 8px;
+      color: #444b5a;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(125, 138, 164, .08) 27px 28px),
+        #fff;
+      box-shadow: 0 18px 35px rgba(51, 61, 89, .12);
+      font-family: "Songti SC", serif;
+      line-height: 1.9;
+    }
+    .paper-preview .problem-zone { margin-top: 18px; padding: 12px; border: 2px dashed rgba(219, 144, 61, .72); background: rgba(255, 244, 225, .65); }
+    .impact-list { display: grid; gap: 9px; margin: 16px 0; }
+    .impact-list span { display: flex; justify-content: space-between; padding: 10px; border-radius: 12px; background: rgba(255, 255, 255, .62); font-size: 12px; }
+    .action-stack { display: grid; gap: 9px; }
+    .toast {
+      position: fixed;
+      z-index: 20;
+      right: 28px;
+      bottom: 28px;
+      max-width: 380px;
+      border: 1px solid rgba(255, 255, 255, .82);
+      border-radius: 16px;
+      padding: 14px 17px;
+      color: white;
+      background: rgba(36, 49, 78, .94);
+      box-shadow: var(--shadow);
+    }
+    .drawer-backdrop {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      display: flex;
+      justify-content: flex-end;
+      background: rgba(31, 39, 60, .18);
+      backdrop-filter: blur(5px);
+    }
+    .student-drawer {
+      width: min(520px, 94vw);
+      height: 100%;
+      overflow-y: auto;
+      padding: 28px;
+      background: rgba(249, 251, 255, .97);
+      box-shadow: -20px 0 60px rgba(43, 54, 86, .18);
+    }
+    .drawer-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+    .drawer-heading h2 { margin: 0; font-size: 27px; }
+    .drawer-heading button { border: 0; background: transparent; cursor: pointer; font-size: 22px; }
+    .drawer-card { margin-top: 18px; padding: 18px; border: 1px solid var(--line); border-radius: 17px; background: white; }
+    .drawer-card h3 { margin: 0 0 11px; }
+    .drawer-card p { color: var(--muted); line-height: 1.6; }
+    .student-detail-page { display: grid; gap: 18px; animation: page-in .42s ease both; }
+    .student-detail-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .student-detail-toolbar h1 { margin: 7px 0 5px; font-size: clamp(28px, 3vw, 42px); letter-spacing: -.045em; }
+    .student-detail-toolbar p { margin: 0; color: var(--muted); }
+    .student-detail-layout {
+      display: grid;
+      grid-template-columns: 220px minmax(420px, 1fr) 330px;
+      align-items: start;
+      gap: 16px;
+    }
+    .student-detail-layout > section,
+    .student-detail-layout > aside { padding: 20px; }
+    .detail-student-list {
+      display: grid;
+      gap: 8px;
+      max-height: 690px;
+      margin-top: 15px;
+      overflow-y: auto;
+    }
+    .detail-student-list button {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .54);
+      cursor: pointer;
+      text-align: left;
+    }
+    .detail-student-list button[aria-current="true"] {
+      border-color: rgba(91, 109, 194, .28);
+      background: #eef1ff;
+      box-shadow: 0 8px 20px rgba(67, 80, 135, .08);
+    }
+    .detail-student-list .student-avatar { width: 34px; height: 34px; }
+    .detail-student-list strong,
+    .detail-student-list small { display: block; }
+    .detail-student-list small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .detail-student-list b { font-size: 13px; }
+    .detail-paper-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .detail-paper-head h2 { margin: 5px 0 0; font-size: 24px; }
+    .detail-paper-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .question-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    .question-nav button {
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .68);
+      cursor: pointer;
+    }
+    .question-nav button[aria-current="true"] { color: #fff; border-color: var(--navy); background: var(--navy); }
+    .grading-paper {
+      position: relative;
+      min-height: 560px;
+      padding: 30px;
+      border: 1px solid #dfe3ec;
+      border-radius: 9px;
+      background:
+        linear-gradient(90deg, transparent 0 44px, rgba(211, 78, 78, .07) 44px 45px, transparent 45px),
+        repeating-linear-gradient(0deg, transparent 0 29px, rgba(125, 138, 164, .08) 29px 30px),
+        #fff;
+      box-shadow: 0 20px 40px rgba(51, 61, 89, .11);
+      font-family: "Songti SC", serif;
+    }
+    .grading-paper__identity { padding-bottom: 16px; border-bottom: 1px solid #e4e7ee; }
+    .grading-paper__identity strong { font-size: 19px; }
+    .grading-paper__identity span { float: right; color: var(--muted); font-size: 12px; }
+    .paper-question {
+      position: relative;
+      margin-top: 18px;
+      padding: 14px 64px 14px 14px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      line-height: 1.75;
+    }
+    .paper-question[data-selected="true"] { border-color: rgba(91, 109, 194, .3); background: rgba(239, 242, 255, .54); }
+    .paper-question strong,
+    .paper-question span { display: block; }
+    .paper-question span { margin-top: 7px; color: #4d5464; }
+    .paper-question__mark {
+      position: absolute;
+      top: 13px;
+      right: 14px;
+      color: var(--red);
+      font-family: "Kaiti SC", cursive;
+      font-size: 17px;
+      font-weight: 700;
+      transform: rotate(-5deg);
+    }
+    .question-review-panel { position: sticky; top: 18px; }
+    .question-review-panel h2 { margin: 6px 0 4px; font-size: 24px; }
+    .ai-review {
+      margin: 16px 0;
+      padding: 14px;
+      border: 1px solid rgba(92, 112, 195, .16);
+      border-radius: 14px;
+      background: #f2f4ff;
+    }
+    .ai-review strong,
+    .ai-review span { display: block; }
+    .ai-review span { margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .grade-form { display: grid; gap: 13px; }
+    .grade-field { display: grid; gap: 6px; color: var(--muted); font-size: 11px; }
+    .grade-field select,
+    .grade-field input,
+    .grade-field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px 11px;
+      color: var(--text);
+      background: rgba(255, 255, 255, .8);
+      font: inherit;
+      font-size: 13px;
+      outline: none;
+    }
+    .grade-field textarea { min-height: 96px; resize: vertical; line-height: 1.55; }
+    .grade-field select:focus,
+    .grade-field input:focus,
+    .grade-field textarea:focus { border-color: rgba(91, 109, 194, .55); box-shadow: 0 0 0 3px rgba(91, 109, 194, .1); }
+    .grade-saved {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 12px;
+      color: #247a64;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .student-workspace {
+      display: grid;
+      grid-template-columns: 205px minmax(480px, 1fr) 310px;
+      align-items: start;
+      gap: 16px;
+    }
+    .student-workspace > aside,
+    .student-workspace > section { padding: 18px; }
+    .student-name-nav { position: sticky; top: 16px; }
+    .student-name-nav h2 { margin: 5px 0 0; font-size: 20px; }
+    .student-name-list {
+      display: grid;
+      gap: 7px;
+      max-height: 760px;
+      margin-top: 15px;
+      overflow-y: auto;
+    }
+    .student-name-list button {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 11px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.5);
+      cursor: pointer;
+      text-align: left;
+    }
+    .student-name-list button[aria-current="true"] {
+      border-color: rgba(91,109,194,.28);
+      background: #edf0ff;
+      box-shadow: 0 8px 18px rgba(67,80,135,.08);
+    }
+    .student-name-list strong,
+    .student-name-list small { display: block; }
+    .student-name-list small { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .student-name-list b { align-self: center; font-size: 12px; }
+    .scan-view { min-width: 0; }
+    .scan-view-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .scan-view-toolbar p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .scan-view-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .scan-paper {
+      position: relative;
+      min-height: 780px;
+      padding: 42px 46px 70px;
+      overflow: hidden;
+      border: 1px solid #d9dde6;
+      border-radius: 7px;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(130,140,160,.05), transparent 24%),
+        linear-gradient(90deg, transparent 0 37px, rgba(193,76,76,.06) 37px 38px, transparent 38px),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(125,138,164,.07) 31px 32px),
+        #fffefb;
+      box-shadow: 0 20px 42px rgba(51,61,89,.12);
+      color: #3d4350;
+      font-family: "Songti SC", serif;
+    }
+    .scan-paper::after {
+      content: "原始扫描件";
+      position: absolute;
+      right: 20px;
+      bottom: 18px;
+      color: rgba(70,80,100,.28);
+      font-family: sans-serif;
+      font-size: 10px;
+      letter-spacing: .15em;
+    }
+    .scan-paper__head { padding-bottom: 18px; border-bottom: 1px solid #e3e5e9; text-align: center; }
+    .scan-paper__head h2 { margin: 6px 0; font-size: 23px; }
+    .scan-paper__head p { display: flex; justify-content: space-between; margin: 0; color: #646b78; font-size: 11px; }
+    .scan-question {
+      position: relative;
+      min-height: 120px;
+      margin-top: 24px;
+      padding: 13px 86px 18px 12px;
+      line-height: 1.9;
+    }
+    .scan-question + .scan-question { border-top: 1px dashed rgba(100,110,130,.14); }
+    .scan-question strong,
+    .scan-question__answer { display: block; }
+    .scan-question__answer { margin-top: 9px; font-family: "Kaiti SC", cursive; font-size: 16px; }
+    .scan-mark {
+      position: absolute;
+      top: 12px;
+      right: 10px;
+      color: var(--red);
+      font-family: "Kaiti SC", cursive;
+      font-size: 20px;
+      font-weight: 800;
+      transform: rotate(-5deg);
+    }
+    .scan-mark.is-correct { font-size: 28px; }
+    .step-error-circle {
+      position: relative;
+      display: inline-block;
+      padding: 0 5px;
+      color: #343943;
+    }
+    .step-error-circle::after {
+      content: "";
+      position: absolute;
+      inset: -5px -7px;
+      border: 2px solid rgba(225,70,78,.8);
+      border-radius: 48% 54% 45% 58%;
+      transform: rotate(-7deg);
+    }
+    .step-error-label {
+      display: inline-block;
+      margin-left: 12px;
+      color: var(--red);
+      font-family: "Kaiti SC", cursive;
+      font-size: 14px;
+      transform: rotate(-3deg);
+    }
+    .trace-guidance {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-left: 3px solid rgba(220,64,73,.78);
+      border-radius: 0 10px 10px 0;
+      color: #bd4650;
+      background: rgba(255,242,243,.72);
+      font-family: "Kaiti SC", cursive;
+      line-height: 1.65;
+    }
+    .trace-guidance strong,
+    .trace-guidance span { display: block; }
+    .video-qr-trace {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      width: fit-content;
+      margin: 26px 0 0 auto;
+      padding: 10px 13px 10px 10px;
+      border: 1px solid rgba(189, 70, 80, .24);
+      border-radius: 10px;
+      color: #b6424d;
+      background: rgba(255, 248, 248, .9);
+      cursor: pointer;
+      text-align: left;
+      transform: rotate(-1deg);
+    }
+    .video-qr-trace strong,
+    .video-qr-trace small { display: block; }
+    .video-qr-trace strong { font-family: "Kaiti SC", cursive; font-size: 14px; }
+    .video-qr-trace small { margin-top: 3px; color: #c46a72; font-size: 9px; }
+    .qr-code-demo {
+      position: relative;
+      display: block;
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      border: 5px solid #fff;
+      outline: 1px solid rgba(182, 66, 77, .18);
+      background:
+        repeating-conic-gradient(#a93440 0 25%, transparent 0 50%) 0 0 / 10px 10px,
+        #fff;
+      box-shadow: inset 0 0 0 2px #a93440;
+    }
+    .qr-code-demo::before,
+    .qr-code-demo::after {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border: 4px solid #fff;
+      background: #a93440;
+      box-shadow: 0 0 0 3px #a93440;
+      content: "";
+    }
+    .qr-code-demo::before { top: 4px; left: 4px; }
+    .qr-code-demo::after { right: 4px; bottom: 4px; }
+    .grading-rail {
+      display: grid;
+      gap: 11px;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      position: sticky;
+      top: 16px;
+    }
+    .grading-rail > header { padding: 2px 2px 7px; }
+    .grading-rail > header h2 { margin: 5px 0 0; font-size: 20px; }
+    .grading-question-card {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255,255,255,.67);
+    }
+    .grading-question-card__head { display: flex; justify-content: space-between; gap: 12px; }
+    .grading-question-card__head h3 { margin: 3px 0 0; font-size: 15px; }
+    .grading-question-card__score { color: #5569bc; font-weight: 800; }
+    .grading-question-card .ai-review,
+    .grading-question-card .ai-suggestion-card { margin: 12px 0 0; }
+    .grading-question-card .grade-form { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .grading-question-card .grade-field textarea { min-height: 72px; }
+    .ai-review-entry { position: relative; padding-right: 38px; }
+    .ai-suggestion-card {
+      margin: 16px 0;
+      padding: 16px;
+      border: 1px solid rgba(91, 109, 194, .2);
+      border-radius: 15px;
+      background: linear-gradient(145deg, #f2f4ff, #fff);
+    }
+    .ai-suggestion-card > span { color: var(--muted); font-size: 11px; }
+    .ai-suggestion-card h3 { margin: 8px 0; font-size: 18px; }
+    .ai-suggestion-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+    .suggestion-actions { display: grid; gap: 8px; margin-top: 14px; }
+    .review-queue { display: grid; gap: 17px; }
+    .review-queue-hero { display: grid; grid-template-columns: 1.3fr repeat(3, .55fr) 1fr; align-items: center; gap: 18px; padding: 22px; background: linear-gradient(120deg, rgba(244,246,255,.96), rgba(232,238,255,.84)); }
+    .review-queue-hero h1 { margin: 7px 0; font-size: clamp(25px, 3.2vw, 38px); letter-spacing: -.05em; }
+    .review-queue-hero p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .review-hero-metric { padding-left: 18px; border-left: 1px solid var(--line); }
+    .review-hero-metric strong, .review-hero-metric span { display: block; }
+    .review-hero-metric strong { font-size: 25px; }
+    .review-hero-metric span { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .review-progress strong { display: flex; justify-content: space-between; margin-bottom: 9px; font-size: 12px; }
+    .review-progress__track { display: block; height: 8px; border-radius: 999px; background: rgba(105,119,185,.15); overflow: hidden; }
+    .review-progress__track i { display: block; height: 100%; border-radius: inherit; background: #6575d8; }
+    .review-workbench { display: grid; grid-template-columns: 240px minmax(0, 1fr) 285px; gap: 16px; align-items: start; }
+    .review-sidebar, .review-main, .impact-preview { padding: 20px; }
+    .review-sidebar h2, .review-main h2, .impact-preview h2 { margin: 6px 0 17px; }
+    .review-category-list { display: grid; gap: 8px; }
+    .review-category { display: grid; grid-template-columns: 35px 1fr auto; align-items: center; gap: 10px; padding: 12px; border: 1px solid transparent; border-radius: 14px; background: transparent; text-align: left; }
+    .review-category[aria-current="true"] { border-color: #cad2ff; background: #edf0ff; }
+    .review-category > span:first-child { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px; background: #eef1ff; color: #6374cc; font-weight: 800; }
+    .review-category strong, .review-category small { display: block; }
+    .review-category small { margin-top: 3px; color: var(--muted); }
+    .review-category b { min-width: 23px; padding: 5px 7px; border-radius: 999px; color: #596abf; background: #eef2fb; text-align: center; font-size: 10px; }
+    .review-source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .review-source-card { padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.62); }
+    .review-source-card > small { color: var(--muted); }
+    .review-source-card p { margin: 10px 0 0; line-height: 1.75; }
+    .scoring-points { display: grid; gap: 8px; margin-top: 10px; }
+    .scoring-point { display: grid; grid-template-columns: 25px 1fr auto; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .scoring-point i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; background: #eaf7f0; color: #45906d; font-style: normal; }
+    .scoring-point.is-missed i { background: #fff0f0; color: #c55e5e; }
+    .review-options { display: grid; gap: 9px; margin-top: 17px; }
+    .review-option { display: flex; gap: 11px; align-items: flex-start; padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.58); }
+    .review-option.is-recommended { border-color: #aebafd; background: #eef1ff; }
+    .review-option > span { width: 17px; height: 17px; margin-top: 2px; border: 2px solid #c2c9dc; border-radius: 50%; }
+    .review-option.is-recommended > span { border: 5px solid #6575d8; }
+    .review-option strong, .review-option small { display: block; }
+    .review-option small { margin-top: 4px; color: var(--muted); line-height: 1.5; }
+    .impact-preview { background: linear-gradient(145deg, rgba(240,250,245,.94), rgba(255,255,255,.7)); }
+    .impact-highlight { padding: 17px; border-radius: 15px; background: rgba(255,255,255,.7); }
+    .impact-highlight strong { display: block; margin-top: 7px; color: #4c8b69; font-size: 28px; }
+    .impact-lines { display: grid; gap: 0; margin-top: 14px; }
+    .impact-lines div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(92,130,110,.14); font-size: 11px; }
+    .review-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 20px; }
+    .review-footer p { margin: 0; color: var(--muted); font-size: 11px; }
+    .review-evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .review-evidence-grid div { padding: 14px; border-radius: 14px; background: rgba(255, 255, 255, .62); }
+    .review-evidence-grid strong, .review-evidence-grid span { display: block; }
+    .review-evidence-grid span { margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .diagnosis-report { display: grid; gap: 18px; }
+    .diagnosis-report > section { padding: 23px; }
+    .diagnosis-report__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 25px;
+    }
+    .diagnosis-report__header h2 { margin: 6px 0; font-size: clamp(26px, 3vw, 38px); letter-spacing: -.04em; }
+    .diagnosis-report__header p { margin: 0; color: var(--muted); }
+    .report-section-title { margin: 0 0 15px; font-size: 20px; }
+    .report-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
+    .report-summary-card { padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255, 255, 255, .6); }
+    .report-summary-card strong, .report-summary-card span, .report-summary-card small { display: block; }
+    .report-summary-card strong { font-size: 28px; letter-spacing: -.04em; }
+    .report-summary-card span { margin-top: 3px; font-weight: 740; }
+    .report-summary-card small { margin-top: 7px; color: var(--muted); line-height: 1.5; }
+    .diagnosis-conclusion {
+      margin-top: 14px;
+      padding: 17px 19px;
+      border-left: 4px solid #6576c9;
+      border-radius: 0 15px 15px 0;
+      background: #f2f4ff;
+      line-height: 1.8;
+    }
+    .diagnosis-conclusion strong { color: #48589d; }
+    .report-question-list { display: grid; gap: 13px; }
+    .report-question-card { padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, .58); }
+    .report-question-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .report-question-head h3 { margin: 5px 0 0; font-size: 18px; }
+    .report-question-card > p { color: var(--muted); line-height: 1.7; }
+    .typical-cause {
+      margin: 14px 0 0;
+      padding: 13px 15px;
+      border-left: 4px solid #6576c9;
+      border-radius: 0 12px 12px 0;
+      color: #27335f !important;
+      background: #eef1ff;
+    }
+    .typical-cause strong { color: #4b5db2; }
+    .answer-distribution { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 13px; }
+    .answer-distribution span { padding: 10px; border-radius: 11px; background: #f4f6fb; font-size: 11px; }
+    .teaching-advice { margin-top: 13px; color: var(--muted); line-height: 1.65; font-size: 11px; }
+    .teaching-advice strong { color: var(--ink); }
+    .diagnosis-student-table { width: 100%; border-collapse: collapse; }
+    .diagnosis-student-table th, .diagnosis-student-table td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+    .diagnosis-student-table th { color: var(--muted); font-size: 11px; }
+    .diagnosis-student-table td { font-size: 12px; }
+    .insights-hero,
+    .resources-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 25px;
+      background:
+        radial-gradient(circle at 86% 18%, rgba(128, 142, 232, .18), transparent 31%),
+        linear-gradient(130deg, rgba(255, 255, 255, .9), rgba(240, 245, 255, .72));
+    }
+    .insights-hero h2,
+    .resources-hero h2 { margin: 7px 0; font-size: clamp(23px, 3vw, 34px); letter-spacing: -.04em; }
+    .insights-hero p,
+    .resources-hero p { margin: 0; color: var(--muted); line-height: 1.65; }
+    .diagnostic-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 18px; }
+    .diagnostic-block { padding: 22px; }
+    .mastery-list { display: grid; gap: 17px; margin-top: 19px; }
+    .mastery-item > div:first-child { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .mastery-track { display: block; height: 8px; overflow: hidden; border-radius: 999px; background: #edf0f8; }
+    .mastery-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #6477cc, #8cb8db); }
+    .cause-list { display: grid; gap: 10px; margin-top: 17px; }
+    .cause-item { display: grid; grid-template-columns: 35px 1fr auto; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.62); }
+    .cause-item > span { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px; color: #5567b4; background: #edf0ff; font-weight: 760; }
+    .cause-item strong, .cause-item small { display: block; }
+    .cause-item small { margin-top: 3px; color: var(--muted); }
+    .cause-item em { color: #b56641; font-style: normal; font-weight: 780; }
+    .commentary-panel { padding: 22px; }
+    .commentary-cards { display: grid; gap: 11px; margin-top: 17px; }
+    .commentary-card { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 15px; padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.6); }
+    .commentary-rank { color: #7a88c8; font-size: 19px; font-weight: 800; }
+    .commentary-card strong, .commentary-card small { display: block; }
+    .commentary-card small { color: var(--muted); }
+    .commentary-card p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .ai-teaching-plan { padding: 20px 22px; border: 1px solid rgba(91, 108, 184, .2); border-radius: 18px; background: linear-gradient(120deg, rgba(236,240,255,.9), rgba(246,251,255,.76)); }
+    .ai-teaching-plan h3 { margin: 5px 0 12px; }
+    .ai-teaching-plan ol { margin: 0; padding-left: 20px; color: var(--muted); line-height: 1.75; }
+    .ai-summary-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 18px; }
+    .ai-diagnosis-summary,
+    .ai-teaching-summary { padding: 23px; }
+    .ai-diagnosis-summary h2,
+    .ai-teaching-summary h2 { margin: 6px 0 13px; font-size: 22px; }
+    .ai-diagnosis-summary p { margin: 0; color: var(--muted); line-height: 1.85; }
+    .ai-diagnosis-summary strong { color: #5364ad; }
+    .ai-teaching-summary ol { margin: 0; padding-left: 20px; color: var(--muted); line-height: 1.8; }
+    .resource-metrics { display: grid; grid-template-columns: repeat(3, minmax(90px, 1fr)); gap: 9px; min-width: 320px; }
+    .resource-metrics div { padding: 13px 15px; border: 1px solid rgba(255,255,255,.72); border-radius: 14px; background: rgba(255,255,255,.62); }
+    .resource-metrics dt { color: var(--muted); font-size: 11px; }
+    .resource-metrics dd { margin: 4px 0 0; font-size: 23px; font-weight: 800; }
+    .resource-section { display: grid; gap: 15px; }
+    .resource-section__heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+    .resource-section__heading h3 { margin: 5px 0 0; font-size: 20px; }
+    .resource-section__heading > span { color: #4c7d68; font-size: 12px; }
+    .resource-card { display: grid; gap: 13px; padding: 19px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.66); }
+    .resource-card header { display: flex; gap: 12px; align-items: flex-start; }
+    .resource-card__icon { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 12px; background: #edf0ff; color: #5b6dbc; font-size: 18px; }
+    .resource-card h4 { margin: 4px 0 0; font-size: 16px; }
+    .resource-card p { margin: 0; color: var(--muted); line-height: 1.6; }
+    .resource-provenance { padding: 10px 12px; border-radius: 11px; background: #f4f6fb; color: var(--muted); font-size: 11px; }
+    .resource-evidence { display: flex; flex-wrap: wrap; gap: 7px; }
+    .resource-evidence span { padding: 6px 9px; border-radius: 999px; background: #eef7f2; color: #46745e; font-size: 10px; }
+    .resource-card footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .resource-card footer small { color: var(--muted); }
+    .resource-card footer > span {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1;
+    }
+    .resource-card--personal { background: linear-gradient(135deg, rgba(250,247,255,.86), rgba(255,255,255,.68)); }
+    .personal-preference-note { display: flex; gap: 12px; padding: 16px 18px; border: 1px solid #e3def4; border-radius: 15px; background: rgba(249,247,255,.78); }
+    .personal-preference-note p { margin: 5px 0 0; color: var(--muted); line-height: 1.6; }
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 14px 16px;
+      border: 1px solid rgba(217, 147, 67, .2);
+      border-radius: 15px;
+      color: #725229;
+      background: rgba(255, 246, 229, .8);
+      line-height: 1.55;
+    }
+    .trace-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr) 280px; gap: 16px; }
+    .trace-layout > section, .trace-layout > aside { padding: 20px; }
+    .student-switch { display: grid; gap: 8px; margin-top: 16px; }
+    .student-switch button {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .52);
+      cursor: pointer;
+      text-align: left;
+    }
+    .student-switch button[aria-current="true"] { border-color: rgba(104, 121, 197, .24); background: #eff2ff; }
+    .paper-preview.trace-paper { min-height: 470px; }
+    .red-mark {
+      position: absolute;
+      color: var(--red);
+      font-family: "Kaiti SC", cursive;
+      font-size: 15px;
+      font-weight: 700;
+      transform: rotate(-3deg);
+    }
+    .red-mark.one { top: 150px; right: 35px; }
+    .red-mark.two { top: 255px; left: 60px; }
+    .red-mark.three { right: 48px; bottom: 45px; max-width: 180px; }
+    .match-card { display: grid; gap: 10px; margin-top: 16px; }
+    .match-card div { padding: 12px; border-radius: 13px; background: rgba(255, 255, 255, .58); }
+    .match-card strong, .match-card span { display: block; }
+    .match-card span { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .insight-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .insight-card { padding: 19px; }
+    .insight-card h3 { margin: 6px 0 14px; font-size: 17px; }
+    .insight-value { display: block; font-size: 34px; letter-spacing: -.05em; }
+    .exam-overview { grid-column: 1 / -1; padding: 20px; }
+    .exam-kpi-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+    .exam-kpi {
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, .78);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, .58);
+    }
+    .exam-kpi span,
+    .exam-kpi strong,
+    .exam-kpi small { display: block; }
+    .exam-kpi span { color: var(--muted); font-size: 11px; }
+    .exam-kpi strong { margin-top: 8px; font-size: 27px; letter-spacing: -.04em; }
+    .exam-kpi small { margin-top: 5px; color: var(--muted); font-size: 9px; }
+    .exam-basics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .exam-basics span { padding: 8px 11px; border-radius: 999px; color: #55628f; background: #eef1fb; font-size: 11px; }
+    .mini-bars { display: grid; gap: 11px; margin-top: 16px; }
+    .mini-bar { display: grid; grid-template-columns: 95px 1fr 42px; align-items: center; gap: 9px; font-size: 11px; }
+    .mini-bar__track { height: 7px; overflow: hidden; border-radius: 999px; background: #e7eaf3; }
+    .mini-bar__track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7e91e8, #8ecdc1); }
+    .insight-wide { grid-column: span 2; }
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag-cloud button, .tag-cloud span { border: 0; border-radius: 999px; padding: 8px 10px; color: #59669b; background: #eef1fc; font-size: 11px; }
+    .commentary-list { display: grid; gap: 9px; }
+    .commentary-list button {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .62);
+      cursor: pointer;
+      text-align: left;
+    }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .resource-option {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .58);
+    }
+    .resource-option input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--blue); }
+    .resource-option strong, .resource-option small { display: block; }
+    .resource-option small { margin-top: 7px; color: var(--muted); line-height: 1.5; }
+    .resource-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 17px; }
+    .resource-footer p { margin: 0; color: var(--muted); font-size: 12px; }
+    .evidence-dialog {
+      width: min(660px, 92vw);
+      max-height: 88vh;
+      overflow-y: auto;
+      margin: auto;
+      padding: 25px;
+      border-radius: 22px;
+      background: rgba(250, 252, 255, .98);
+      box-shadow: var(--shadow);
+    }
+    .source-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .source-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .source-card { padding: 19px; }
+    .source-card__type { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .source-card h2 { margin: 14px 0 7px; font-size: 18px; }
+    .source-card > p { min-height: 40px; margin: 0; color: var(--muted); line-height: 1.55; font-size: 12px; }
+    .source-card dl { display: grid; gap: 8px; margin: 17px 0 0; }
+    .source-card dl div { display: flex; justify-content: space-between; gap: 14px; font-size: 11px; }
+    .source-card dt { color: var(--muted); }
+    .source-card dd { margin: 0; text-align: right; }
+    .scanner-stage {
+      display: grid;
+      min-height: calc(100vh - 172px);
+      place-items: center;
+      padding: 28px;
+      border: 1px solid rgba(255, 255, 255, .72);
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(215, 236, 255, .7), transparent 35%),
+        radial-gradient(circle at 82% 12%, rgba(223, 215, 250, .58), transparent 35%),
+        rgba(249, 251, 255, .72);
+      box-shadow: var(--soft-shadow);
+    }
+    .scanner-card { width: min(820px, 100%); text-align: center; }
+    .scanner-card h1 { margin: 0; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.05em; }
+    .scanner-card > p { max-width: 620px; margin: 12px auto 27px; color: var(--muted); line-height: 1.65; }
+    .device-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 26px; }
+    .device-action-card {
+      display: grid;
+      min-height: 220px;
+      align-content: center;
+      justify-items: center;
+      gap: 22px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      color: inherit;
+      background: rgba(255, 255, 255, .72);
+      cursor: pointer;
+      text-align: center;
+      box-shadow: var(--soft-shadow);
+    }
+    .device-action-card:hover { transform: translateY(-2px); border-color: rgba(91, 109, 194, .28); }
+    .device-action-card--scan {
+      border-color: rgba(93, 139, 210, .22);
+      background: linear-gradient(145deg, rgba(226, 241, 255, .96), rgba(247, 251, 255, .82));
+    }
+    .device-action-card--trace {
+      border-color: rgba(139, 113, 205, .2);
+      background: linear-gradient(145deg, rgba(239, 232, 255, .92), rgba(252, 249, 255, .84));
+    }
+    .device-action-card strong,
+    .device-action-card span,
+    .device-action-card small { display: block; }
+    .device-action-card strong { font-size: 24px; }
+    .device-action-card small { margin-top: 8px; color: var(--muted); line-height: 1.55; }
+    .device-action-card > span:last-child { color: #5969aa; font-weight: 760; }
+    .trace-output-layout { display: grid; grid-template-columns: minmax(320px, 560px); justify-content: center; gap: 17px; margin-top: 22px; text-align: left; }
+    .trace-output-layout > div { padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255, 255, 255, .66); }
+    .trace-output-summary { box-shadow: var(--soft-shadow); }
+    .trace-detail-list { display: grid; gap: 9px; margin-top: 15px; }
+    .trace-detail-list div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 12px; border-radius: 12px; background: rgba(255, 255, 255, .72); }
+    .trace-detail-list span { color: var(--muted); font-size: 11px; }
+    .class-picks { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+    .class-picks button {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: rgba(255, 255, 255, .7);
+      cursor: pointer;
+      text-align: left;
+    }
+    .class-picks button[aria-pressed="true"] { border-color: rgba(101, 122, 221, .46); background: #f0f2ff; box-shadow: var(--soft-shadow); }
+    .class-picks strong, .class-picks span { display: block; }
+    .class-picks strong { font-size: 18px; }
+    .class-picks span { margin-top: 6px; color: var(--muted); font-size: 12px; }
+    .scanner-visual {
+      position: relative;
+      overflow: hidden;
+      width: min(500px, 90%);
+      height: 210px;
+      margin: 0 auto 25px;
+      border: 1px solid rgba(117, 137, 178, .18);
+      border-radius: 38px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, .95), rgba(222, 233, 245, .8));
+      box-shadow: 0 28px 55px rgba(61, 76, 112, .16);
+    }
+    .scanner-visual::before {
+      position: absolute;
+      inset: 28px 48px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fefefe, #eef3f9);
+      box-shadow: inset 0 0 0 1px rgba(86, 104, 144, .15);
+      content: "";
+    }
+    .scanner-paper {
+      position: absolute;
+      z-index: 2;
+      left: 50%;
+      top: 45px;
+      width: 160px;
+      height: 210px;
+      padding: 20px;
+      border-radius: 3px;
+      background: repeating-linear-gradient(0deg, #fff 0 19px, #e9edf4 19px 20px);
+      box-shadow: 0 16px 30px rgba(59, 70, 99, .17);
+      transform: translateX(-50%);
+    }
+    .scan-line {
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      top: 55px;
+      width: 170px;
+      height: 3px;
+      opacity: 0;
+      background: #6c8ef4;
+      box-shadow: 0 0 16px #7ea4ff;
+      transform: translateX(-50%);
+    }
+    .is-scanning .scan-line { opacity: 1; animation: scan 1.6s ease-in-out infinite alternate; }
+    @keyframes scan { to { top: 190px; } }
+    .scanner-progress { width: min(520px, 88%); height: 8px; overflow: hidden; margin: 18px auto; border-radius: 999px; background: #e3e8f2; }
+    .scanner-progress span { display: block; width: 68%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7187e9, #8ccfc0); }
+    .handoff-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 24px 0; }
+    .handoff-stats div { padding: 16px; border-radius: 16px; background: rgba(255, 255, 255, .68); }
+    .handoff-stats strong, .handoff-stats span { display: block; }
+    .handoff-stats strong { font-size: 22px; }
+    .handoff-stats span { margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .button-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .placeholder { padding: 48px; text-align: center; }
+    .placeholder h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 48px); letter-spacing: -.04em; }
+    .placeholder p { margin: 0; color: var(--muted); }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* 2026.07 reference visual refresh: mist stage + editorial learning workspace */
+    .app-shell[data-visual-theme="reference"] {
+      grid-template-columns: 224px minmax(0, 1fr);
+      min-height: calc(100vh - 36px);
+      margin: 18px;
+      border-color: rgba(255, 255, 255, .92);
+      background:
+        radial-gradient(circle at 82% 6%, rgba(190, 204, 244, .3), transparent 24rem),
+        rgba(247, 249, 253, .9);
+      box-shadow: 0 24px 70px rgba(55, 67, 116, .12);
+      backdrop-filter: blur(18px);
+    }
+    .app-shell[data-visual-theme="reference"] .sidebar {
+      gap: 0;
+      padding: 27px 17px 18px;
+      background: rgba(237, 242, 249, .68);
+    }
+    .app-shell[data-visual-theme="reference"] .brand {
+      gap: 11px;
+      margin: 0 8px 33px;
+      padding: 0;
+    }
+    .app-shell[data-visual-theme="reference"] .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: #293153;
+      box-shadow: 0 10px 22px rgba(41, 49, 83, .22);
+    }
+    .app-shell[data-visual-theme="reference"] .brand strong {
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 18px;
+      letter-spacing: .08em;
+    }
+    .app-shell[data-visual-theme="reference"] .brand small {
+      font-size: 10px;
+      letter-spacing: .08em;
+    }
+    .app-shell[data-visual-theme="reference"] .primary-nav { gap: 5px; }
+    .app-shell[data-visual-theme="reference"] .primary-nav button {
+      min-height: 43px;
+      padding: 0 13px;
+      border-radius: 13px;
+      color: #6f7892;
+    }
+    .app-shell[data-visual-theme="reference"] .primary-nav button::before {
+      width: 23px;
+      height: 23px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .app-shell[data-visual-theme="reference"] .primary-nav button[aria-current="page"] {
+      color: #293153;
+      background: rgba(255, 255, 255, .92);
+      box-shadow: 0 12px 32px rgba(55, 67, 116, .08);
+    }
+    .app-shell[data-visual-theme="reference"] .primary-nav button[aria-current="page"]::before {
+      background: #6475dc;
+      box-shadow: 0 7px 14px rgba(100, 117, 220, .22);
+    }
+    .nav-demo-note {
+      margin-left: auto;
+      padding: 3px 6px;
+      border-radius: 999px;
+      color: #7a839d;
+      background: rgba(104, 117, 169, .08);
+      font-size: 8px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .nav-label {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+    .app-shell[data-visual-theme="reference"] .sidebar-note {
+      margin-top: auto;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .44);
+      font-size: 10px;
+    }
+    .app-shell[data-visual-theme="reference"] .return-scanner {
+      position: relative;
+      min-height: 56px;
+      margin-top: 14px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 16px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 90% 10%, rgba(129, 149, 228, .42), transparent 5rem),
+        #293153;
+      box-shadow: 0 16px 32px rgba(41, 49, 83, .2);
+    }
+    .app-shell[data-visual-theme="reference"] .return-scanner::before {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      color: transparent;
+      background: #82e4bf;
+      box-shadow: 0 0 0 4px rgba(130, 228, 191, .13);
+    }
+    .app-shell[data-visual-theme="reference"] .workspace { padding: 30px 34px 36px; }
+    .app-shell[data-visual-theme="reference"] .page-stack { gap: 18px; }
+    .app-shell[data-visual-theme="reference"] .panel {
+      border-color: rgba(255, 255, 255, .82);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .76);
+      box-shadow: 0 12px 32px rgba(55, 67, 116, .08);
+      backdrop-filter: blur(14px);
+    }
+    .app-shell[data-visual-theme="reference"] h1,
+    .app-shell[data-visual-theme="reference"] .task-header h1,
+    .app-shell[data-visual-theme="reference"] .scanner-card h1 {
+      color: #293153;
+      font-family: "Songti SC", "STSong", serif;
+      font-weight: 700;
+      letter-spacing: -.035em;
+    }
+    .app-shell[data-visual-theme="reference"] h2,
+    .app-shell[data-visual-theme="reference"] h3 { color: #293153; }
+    .app-shell[data-visual-theme="reference"] .eyebrow {
+      color: #6475a4 !important;
+      font-size: 10px;
+      letter-spacing: .16em;
+    }
+    .app-shell[data-visual-theme="reference"] .hero {
+      min-height: 210px;
+      padding: 34px 38px;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(194, 202, 244, .54), transparent 31%),
+        radial-gradient(circle at 66% 108%, rgba(130, 228, 191, .18), transparent 34%),
+        rgba(255, 255, 255, .78);
+    }
+    .app-shell[data-visual-theme="reference"] .hero h1 {
+      font-size: clamp(38px, 4.4vw, 58px);
+      font-weight: 600;
+    }
+    .app-shell[data-visual-theme="reference"] .hero p { color: #7a839d; }
+    .app-shell[data-visual-theme="reference"] .metric {
+      padding: 19px 21px;
+      border: 0;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .76);
+      box-shadow: 0 12px 32px rgba(55, 67, 116, .08);
+    }
+    .app-shell[data-visual-theme="reference"] .metric strong {
+      color: #293153;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 31px;
+    }
+    .app-shell[data-visual-theme="reference"] .processing-card {
+      border-radius: 20px;
+      background: linear-gradient(125deg, rgba(255,255,255,.88), rgba(235,238,255,.88));
+    }
+    .app-shell[data-visual-theme="reference"] .processing-title > span {
+      color: #5969c9;
+      background: #e9edff;
+    }
+    .app-shell[data-visual-theme="reference"] .processing-progress__track i {
+      background: linear-gradient(90deg, #5e6ed7, #8f9ce5);
+    }
+    .app-shell[data-visual-theme="reference"] .section-panel { padding: 22px; }
+    .app-shell[data-visual-theme="reference"] .task-row,
+    .app-shell[data-visual-theme="reference"] .exception-row {
+      border-color: transparent;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .4);
+    }
+    .app-shell[data-visual-theme="reference"] .task-row:hover,
+    .app-shell[data-visual-theme="reference"] .exception-row:hover {
+      border-color: rgba(100, 117, 220, .14);
+      background: rgba(241, 244, 255, .82);
+      transform: translateX(2px);
+    }
+    .app-shell[data-visual-theme="reference"] .task-icon,
+    .app-shell[data-visual-theme="reference"] .exception-icon {
+      color: #6475dc;
+      background: #e9edff;
+    }
+    .app-shell[data-visual-theme="reference"] .status-badge {
+      color: #39745e;
+      background: #e5f8f1;
+    }
+    .app-shell[data-visual-theme="reference"] .status-badge.warning {
+      color: #9a6b28;
+      background: #fff5e5;
+    }
+    .app-shell[data-visual-theme="reference"] .button-primary {
+      background: #6475dc;
+      box-shadow: 0 12px 24px rgba(100, 117, 220, .23);
+    }
+    .app-shell[data-visual-theme="reference"] .button-secondary {
+      background: rgba(255, 255, 255, .72);
+    }
+    .app-shell[data-visual-theme="reference"] .filter-chip[aria-pressed="true"] {
+      background: #293153;
+    }
+    .app-shell[data-visual-theme="reference"] .task-header {
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 88% 12%, rgba(190, 204, 244, .34), transparent 26rem),
+        rgba(255, 255, 255, .76);
+    }
+    .app-shell[data-visual-theme="reference"] .task-tabs {
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, .78);
+      border-radius: 14px;
+      background: rgba(235, 238, 255, .54);
+    }
+    .app-shell[data-visual-theme="reference"] .task-tabs button {
+      min-height: 39px;
+      border-radius: 10px;
+    }
+    .app-shell[data-visual-theme="reference"] .task-tabs button[aria-selected="true"] {
+      color: #293153;
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 8px 20px rgba(55, 67, 116, .09);
+    }
+    .app-shell[data-visual-theme="reference"] .student-work-list,
+    .app-shell[data-visual-theme="reference"] .report-question-card,
+    .app-shell[data-visual-theme="reference"] .resource-card,
+    .app-shell[data-visual-theme="reference"] .source-card {
+      border-color: rgba(79, 92, 140, .1);
+      background: rgba(255, 255, 255, .7);
+      box-shadow: 0 12px 28px rgba(55, 67, 116, .055);
+    }
+    .app-shell[data-visual-theme="reference"] .typical-cause {
+      border-left-color: #6475dc;
+      color: #3e476d !important;
+      background: #eaedff;
+    }
+    .app-shell[data-visual-theme="reference"] .ai-diagnosis-summary {
+      background:
+        radial-gradient(circle at 92% 10%, rgba(100,117,220,.13), transparent 28%),
+        rgba(255,255,255,.78);
+    }
+    .app-shell[data-visual-theme="reference"] .ai-teaching-summary {
+      background:
+        radial-gradient(circle at 90% 12%, rgba(130,228,191,.17), transparent 30%),
+        rgba(255,255,255,.78);
+    }
+    .app-shell[data-visual-theme="reference"] .scanner-stage {
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 20% 12%, rgba(173, 194, 240, .36), transparent 34%),
+        radial-gradient(circle at 80% 14%, rgba(221, 208, 245, .38), transparent 34%),
+        rgba(245, 248, 252, .82);
+    }
+    .app-shell[data-visual-theme="reference"] .device-action-card--scan {
+      border-color: rgba(100,117,220,.12);
+      background: linear-gradient(145deg, rgba(235,238,255,.96), rgba(250,251,255,.84));
+    }
+    .app-shell[data-visual-theme="reference"] .device-action-card--trace {
+      border-color: rgba(74,184,143,.13);
+      background: linear-gradient(145deg, rgba(229,248,241,.94), rgba(250,255,253,.86));
+    }
+    .app-shell[data-visual-theme="reference"] button,
+    .app-shell[data-visual-theme="reference"] .panel,
+    .app-shell[data-visual-theme="reference"] .resource-card {
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    @media (max-width: 760px) {
+      .app-shell { grid-template-columns: 1fr; margin: 0; min-height: 100vh; border-radius: 0; }
+      .app-shell[data-visual-theme="reference"] { grid-template-columns: 1fr; min-height: 100vh; margin: 0; border-radius: 0; }
+      .sidebar { gap: 14px; padding: 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .primary-nav { grid-template-columns: 1fr 1fr; }
+      .sidebar-note { display: none; }
+      .return-scanner { justify-content: center; }
+      .workspace { padding: 18px; }
+      .hero, .page-heading, .panel-heading { align-items: flex-start; flex-direction: column; }
+      .hero-actions { width: 100%; flex-wrap: wrap; }
+      .metric-strip, .content-grid { grid-template-columns: 1fr; }
+      .task-row, .exception-row { align-items: flex-start; }
+      .task-meta { align-items: flex-end; flex-direction: column; }
+      .task-header { flex-direction: column; }
+      .task-header__stats { justify-content: flex-start; }
+      .overview-grid, .anomaly-layout { grid-template-columns: 1fr; }
+      .student-detail-toolbar { align-items: flex-start; flex-direction: column; }
+      .student-detail-layout { grid-template-columns: 1fr; }
+      .student-workspace { grid-template-columns: 1fr; }
+      .student-name-nav, .grading-rail { position: static; max-height: none; }
+      .student-name-list { grid-template-columns: 1fr 1fr; max-height: none; }
+      .detail-student-list { grid-template-columns: 1fr 1fr; max-height: none; }
+      .question-review-panel { position: static; }
+      .review-evidence-grid, .answer-distribution { grid-template-columns: 1fr; }
+      .diagnosis-report__header, .insights-hero, .resources-hero { flex-direction: column; align-items: flex-start; }
+      .report-summary-grid { grid-template-columns: 1fr 1fr; }
+      .trace-layout, .insight-grid, .resource-grid, .diagnostic-grid, .ai-summary-grid { grid-template-columns: 1fr; }
+      .resource-metrics { min-width: 0; width: 100%; }
+      .review-queue-hero { grid-template-columns: 1fr 1fr; }
+      .review-workbench { grid-template-columns: 1fr; }
+      .review-source-grid { grid-template-columns: 1fr; }
+      .exam-kpi-grid { grid-template-columns: 1fr 1fr; }
+      .source-grid { grid-template-columns: 1fr; }
+      .insight-wide { grid-column: auto; }
+      .stage-list { grid-template-columns: 1fr 1fr; }
+      .submission-table { min-width: 720px; }
+      .table-scroll { overflow-x: auto; }
+      .class-picks, .handoff-stats { grid-template-columns: 1fr 1fr; }
+      .device-actions, .trace-output-layout { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" data-visual-theme="reference">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">象</span>
+        <div><strong>飞象智批</strong><small>智能作业批改平台</small></div>
+      </div>
+      <nav class="primary-nav" aria-label="主导航">
+        <button type="button" data-primary-nav data-action="navigate" data-view="grading" data-icon="✓" aria-current="page">批改</button>
+        <button type="button" data-primary-nav data-action="navigate" data-view="sources" data-icon="◇"><span class="nav-label">校本题库</span><small class="nav-demo-note">仅演示入口</small></button>
+      </nav>
+      <div class="sidebar-note">演示数据涵盖普通作业与考试，可从高扫采集一路体验到留痕、学情和资源沉淀。</div>
+      <button class="return-scanner" type="button" data-action="show-scanner" data-icon="▣">高扫流程示例</button>
+    </aside>
+    <section class="main-column">
+      <main id="app-view" class="workspace" tabindex="-1"></main>
+    </section>
+  </div>
+  <div id="live-region" class="sr-only" aria-live="polite"></div>
+  <script>
+    (() => {
+      const taskSeeds = [
+        {
+          id: "homework",
+          title: "二次函数单元作业",
+          kind: "作业",
+          className: "九年级 2 班",
+          students: 42,
+          pages: 84,
+          anomalyCount: 5,
+          status: "待处理异常",
+          progress: 97,
+          updated: "12 分钟前",
+          anomalies: [
+            { id: "hw-a1", student: "王晓宇", type: "缺页", detail: "缺少第 2 页", count: 1 },
+            { id: "hw-a2", student: "李思雨", type: "学生匹配失败", detail: "姓名区域被涂改", count: 1 },
+            { id: "hw-a3", student: "陈子涵等 3 人", type: "图像质量异常", detail: "答案区轻微模糊，可批量增强", count: 3 },
+          ],
+          studentRows: [
+            { id: "hw-s1", name: "王晓宇", pages: "1 / 2 页", match: "已匹配", grading: "待处理", anomaly: "缺少第 2 页", score: "—" },
+            { id: "hw-s2", name: "李思雨", pages: "2 / 2 页", match: "待确认", grading: "待处理", anomaly: "姓名区域被涂改", score: "—" },
+            { id: "hw-s3", name: "陈子涵", pages: "2 / 2 页", match: "已匹配", grading: "待处理", anomaly: "图像轻微模糊", score: "—" },
+            { id: "hw-s4", name: "张可欣", pages: "2 / 2 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "92" },
+            { id: "hw-s5", name: "周明远", pages: "2 / 2 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "88" },
+            { id: "hw-s6", name: "许安然", pages: "2 / 2 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "95" },
+          ],
+        },
+        {
+          id: "exam",
+          title: "数学期中质量检测",
+          kind: "考试",
+          className: "八年级 5 班",
+          students: 40,
+          pages: 240,
+          anomalyCount: 8,
+          status: "批改中",
+          progress: 95,
+          updated: "今天 10:42",
+          anomalies: [
+            { id: "ex-a1", student: "赵子轩", type: "重复扫描", detail: "第 3 页重复 1 次", count: 1 },
+            { id: "ex-a2", student: "周语桐等 2 人", type: "页面顺序异常", detail: "第 4、5 页顺序待确认", count: 2 },
+            { id: "ex-a3", student: "刘梓豪等 5 人", type: "图像质量异常", detail: "答题卡定位点偏暗", count: 5 },
+          ],
+          studentRows: [
+            { id: "ex-s1", name: "赵子轩", pages: "6 / 6 页", match: "已匹配", grading: "待处理", anomaly: "第 3 页重复扫描", score: "—" },
+            { id: "ex-s2", name: "周语桐", pages: "6 / 6 页", match: "已匹配", grading: "待处理", anomaly: "页面顺序异常", score: "—" },
+            { id: "ex-s3", name: "刘梓豪", pages: "6 / 6 页", match: "已匹配", grading: "待处理", anomaly: "答题卡定位点偏暗", score: "—" },
+            { id: "ex-s4", name: "徐嘉禾", pages: "6 / 6 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "87" },
+            { id: "ex-s5", name: "顾言希", pages: "6 / 6 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "91" },
+          ],
+        },
+        {
+          id: "practice",
+          title: "相似三角形课堂练习",
+          kind: "作业",
+          className: "九年级 1 班",
+          students: 38,
+          pages: 38,
+          anomalyCount: 0,
+          status: "已完成",
+          progress: 100,
+          updated: "昨天 16:20",
+          anomalies: [],
+          studentRows: [
+            { id: "pr-s1", name: "赵晨曦", pages: "1 / 1 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "A" },
+          ],
+        },
+        {
+          id: "quiz",
+          title: "一次函数随堂检测",
+          kind: "考试",
+          className: "八年级 3 班",
+          students: 36,
+          pages: 72,
+          anomalyCount: 2,
+          status: "待处理异常",
+          progress: 98,
+          updated: "昨天 14:05",
+          anomalies: [
+            { id: "q-a1", student: "蒋文博", type: "缺页", detail: "缺少答题卡背面", count: 1 },
+            { id: "q-a2", student: "孙欣然", type: "学生匹配失败", detail: "未填写姓名", count: 1 },
+          ],
+          studentRows: [
+            { id: "q-s1", name: "蒋文博", pages: "1 / 2 页", match: "已匹配", grading: "待处理", anomaly: "缺少答题卡背面", score: "—" },
+            { id: "q-s2", name: "孙欣然", pages: "2 / 2 页", match: "待确认", grading: "待处理", anomaly: "未填写姓名", score: "—" },
+          ],
+        },
+      ];
+      let tasks = JSON.parse(JSON.stringify(taskSeeds));
+      const initialState = {
+        view: "grading",
+        gradingMode: "home",
+        activeTaskId: null,
+        taskTab: "submissions",
+        anomalyTaskId: null,
+        anomalyStudentId: null,
+        drawerStudentId: null,
+        detailStudentId: null,
+        detailQuestionId: "q1",
+        studentWorkMode: "list",
+        showGradeEditor: false,
+        selectedAnomalyId: null,
+        toast: "",
+        traceStudentId: null,
+        traceAfter: true,
+        resourceSelected: [],
+        resourceDeposited: {
+          homework: [],
+          exam: [],
+          practice: ["practice-paper"],
+          quiz: [],
+        },
+        evidenceOpen: false,
+        scannerStep: "home",
+        scannerTaskId: "homework",
+      };
+      let state = JSON.parse(JSON.stringify(initialState));
+      const app = document.querySelector("#app-view");
+
+      function statusClass(task) {
+        return task.anomalyCount ? "status-badge warning" : "status-badge";
+      }
+
+      const questionTemplates = [
+        {
+          id: "q1",
+          number: 1,
+          title: "判断函数图像开口方向",
+          prompt: "二次函数 y = 2x² - 4x + 1 的图像开口方向是（ ）。",
+          answer: "向上",
+          maxScore: 4,
+          score: 4,
+          judgment: "正确",
+          aiBasis: "二次项系数 2 ＞ 0，结论与标准答案一致。",
+          comment: "判断正确，概念掌握准确。",
+        },
+        {
+          id: "q8",
+          number: 2,
+          title: "求函数图像的对称轴",
+          prompt: "求 y = x² - 4x + 3 的对称轴。",
+          answer: "x = 2",
+          maxScore: 4,
+          score: 3,
+          judgment: "部分正确",
+          aiBasis: "对称轴结论正确，但配方过程缺少等式变形。",
+          comment: "答案正确，建议补充配方步骤。",
+        },
+        {
+          id: "q18",
+          number: 3,
+          title: "顶点式与图像性质",
+          prompt: "将 y = x² - 4x + 3 化为顶点式，并说明顶点与开口方向。",
+          answer: "y = (x - 2)² - 1；顶点（2，-1），开口向下。",
+          maxScore: 6,
+          score: 4,
+          judgment: "部分正确",
+          aiBasis: "顶点式和顶点坐标正确；二次项系数为正，开口方向应为向上。",
+          comment: "顶点判断正确；开口方向错误，扣 2 分。",
+        },
+      ];
+
+      function ensureStudentGrades(task, student) {
+        if (!student.gradeDetails) {
+          const studentIndex = task.studentRows.findIndex((item) => item.id === student.id);
+          student.gradeDetails = questionTemplates.map((template, index) => {
+            const scoreAdjustment = (studentIndex + index) % 4 === 0 && template.score > 1 ? -1 : 0;
+            const score = Math.max(0, template.score + scoreAdjustment);
+            return {
+              ...template,
+              score,
+              judgment: score === template.maxScore ? "正确" : score === 0 ? "错误" : "部分正确",
+              teacherModified: false,
+              teacherConfirmed: false,
+              uncertain: template.id === "q18" && studentIndex !== task.studentRows.length - 1,
+              confidence: template.id === "q18" ? 68 : 96,
+            };
+          });
+        }
+        return student.gradeDetails;
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        })[character]);
+      }
+
+      function taskRow(task) {
+        return `
+          <button class="task-row" type="button" data-action="open-task" data-task-id="${task.id}">
+            <span class="task-main">
+              <span class="task-icon" aria-hidden="true">${task.kind === "作业" ? "页" : "卷"}</span>
+              <span><strong>${task.title}</strong><small>${task.kind} · ${task.className} · ${task.students} 人 / ${task.pages} 页</small></span>
+            </span>
+            <span class="task-meta">
+              <span class="${statusClass(task)}">${task.status}${task.anomalyCount ? ` · ${task.anomalyCount}` : ""}</span>
+              <span>${task.updated}</span>
+              <span aria-hidden="true">→</span>
+            </span>
+          </button>`;
+      }
+
+      function renderHome() {
+        return `
+          <div class="page-stack">
+            <section class="hero panel">
+              <div class="hero-copy">
+                <p class="eyebrow">今日 · 7 月 30 日 星期四</p>
+                <h1>下午好，林老师</h1>
+                <p>AI 已完成 156 份作业与试卷的识别批改，可直接查看结果、原卷留痕和班级学情。</p>
+              </div>
+            </section>
+            <section class="metric-strip" aria-label="今日批改摘要">
+              <article class="metric"><strong>156 份</strong><span>AI 已完成识别批改</span></article>
+              <article class="metric"><strong>97%</strong><span>AI 直接完成率</span></article>
+              <article class="metric"><strong>86 分钟</strong><span>预计节省整理时间</span></article>
+            </section>
+            <section class="panel processing-card">
+              <div class="processing-card__head">
+                <div class="processing-title"><span>卷</span><div><p class="eyebrow">正在处理</p><h2>数学期中质量检测</h2><p>考试任务 · 八年级 5 班</p></div></div>
+                <button class="text-button" type="button" data-action="open-processing-task" data-task-id="exam">查看识别任务 →</button>
+              </div>
+              <div class="processing-progress"><strong><span>AI 批改完成度</span><span>95%</span></strong><span class="processing-progress__track"><i style="width:95%"></i></span></div>
+              <div class="processing-meta"><span>♙ 40 名学生</span><span>◇ 8 项待复核</span><span>◷ 预计 3 分钟</span><span>✣ 无二维码 · 版面与笔迹匹配 · 已匹配 40 人</span></div>
+            </section>
+            <div class="content-grid">
+              <section class="panel section-panel">
+                <div class="panel-heading">
+                  <div><p class="eyebrow">最近任务</p><h2>继续今天的批改</h2></div>
+                  <button class="text-button" type="button" data-action="show-all-tasks">查看全部 →</button>
+                </div>
+                <div class="task-list">${tasks.slice(0, 4).map(taskRow).join("")}</div>
+              </section>
+            </div>
+          </div>`;
+      }
+
+      function renderAllTasks() {
+        return `
+          <div class="page-stack">
+            <div class="back-row"><button class="button-ghost" type="button" data-action="show-grading-home">← 返回批改首页</button></div>
+            <header class="page-heading">
+              <div><p class="eyebrow">批改任务</p><h1>全部批改任务</h1><p>按状态查找作业与考试，进入任务后完成全部处理。</p></div>
+            </header>
+            <div class="filter-row" aria-label="任务筛选">
+              <button class="filter-chip" type="button" aria-pressed="true">全部 4</button>
+              <button class="filter-chip" type="button" aria-pressed="false">处理中 1</button>
+              <button class="filter-chip" type="button" aria-pressed="false">待处理异常 2</button>
+              <button class="filter-chip" type="button" aria-pressed="false">已完成 1</button>
+            </div>
+            <section class="panel section-panel"><div class="task-list">${tasks.map(taskRow).join("")}</div></section>
+          </div>`;
+      }
+
+      function renderAnomalyCenter() {
+        const groups = tasks.filter((task) => task.anomalyCount);
+        return `
+          <div class="page-stack">
+            <div class="back-row"><button class="button-ghost" type="button" data-action="show-grading-home">← 返回批改首页</button></div>
+            <header class="page-heading">
+              <div><p class="eyebrow">扫描任务</p><h1>扫描任务与待处理提醒</h1><p>AI 已自动完成大部分页面归集，仅呈现需要教师确认的少量任务。</p></div>
+              <span class="status-badge warning">${groups.reduce((sum, task) => sum + task.anomalyCount, 0)} 项待处理</span>
+            </header>
+            <div>
+              ${groups.map((task) => `
+                <section class="panel exception-group">
+                  <div class="exception-group__title"><div><h2>${task.title}</h2><p>${task.kind} · ${task.className}</p></div><span>${task.anomalyCount} 项异常</span></div>
+                  <div class="exception-list">
+                    ${task.anomalies.map((anomaly) => `
+                      <div class="exception-row">
+                        <span class="task-main"><span class="exception-icon" aria-hidden="true">!</span><span><strong>${anomaly.type}</strong><small>${anomaly.student} · ${anomaly.detail}</small></span></span>
+                        <button class="button-secondary" type="button" data-action="open-task-anomaly" data-task-id="${task.id}" data-anomaly-id="${anomaly.id}">进入处理</button>
+                      </div>`).join("")}
+                  </div>
+                </section>`).join("")}
+            </div>
+          </div>`;
+      }
+
+      function renderGrading() {
+        if (state.gradingMode === "task") return renderTask();
+        if (state.gradingMode === "all") return renderAllTasks();
+        if (state.gradingMode === "anomaly-center") return renderAnomalyCenter();
+        return renderHome();
+      }
+
+      function depositedSources() {
+        const sources = [];
+        tasks.forEach((task) => {
+          const ids = state.resourceDeposited[task.id] || [];
+          resourceOptions(task).forEach((resource) => {
+            if (ids.includes(resource.id)) sources.push({ ...resource, task });
+          });
+        });
+        return sources;
+      }
+
+      function renderSources() {
+        const sources = depositedSources();
+        return `
+          <div class="page-stack">
+            <header class="page-heading">
+              <div><p class="eyebrow">校本题库 · 仅演示入口</p><h1>学校确认过的教学资源</h1><p>只展示教师主动沉淀的整卷、题目、答案、评分标准和典型作答。</p></div>
+              <span class="status-badge">${sources.length} 项资源</span>
+            </header>
+            <div class="source-toolbar">
+              <div class="filter-row"><button class="filter-chip" aria-pressed="true">全部</button><button class="filter-chip" aria-pressed="false">整卷</button><button class="filter-chip" aria-pressed="false">易错题</button><button class="filter-chip" aria-pressed="false">评分标准</button></div>
+              <button class="button-secondary" type="button">按最近沉淀排序</button>
+            </div>
+            <div class="source-grid">
+              ${sources.length ? sources.map((source, index) => `
+                <article class="panel source-card">
+                  <div class="source-card__type"><span class="status-badge">${source.title.includes("题") ? "题目资源" : "整卷资源"}</span><span>···</span></div>
+                  <h2>${source.title}</h2><p>${source.meta}</p>
+                  <dl><div><dt>来源任务</dt><dd>${source.task.title}</dd></div><div><dt>确认教师</dt><dd>林老师</dd></div><div><dt>沉淀时间</dt><dd>${index ? "昨天" : "今天 13:45"}</dd></div><div><dt>使用次数</dt><dd>${index + 3} 次</dd></div></dl>
+                </article>`).join("") : `<section class="panel placeholder"><h2>暂时没有校本资源</h2><p>请先在任务的“资源沉淀”中主动选择需要入库的内容。</p></section>`}
+            </div>
+          </div>`;
+      }
+
+      function scannerTask() {
+        return tasks.find((task) => task.id === state.scannerTaskId) || tasks[0];
+      }
+
+      function renderScanner() {
+        const task = scannerTask();
+        if (state.scannerStep === "home") {
+          return `
+            <section class="scanner-stage">
+              <div class="scanner-card">
+                <h1>今天要处理什么？</h1>
+                <p>扫描采集用于创建新的纸笔任务；原卷留痕可直接放入已批改的任意作业或试卷，由 AI 自动匹配并输出。</p>
+                <div class="device-actions">
+                  <button class="device-action-card device-action-card--scan" type="button" data-action="scanner-scan-mode">
+                    <span><strong>扫描采集</strong><small>选择年级、班级后采集新作业或考试，AI 自动识别材料类型。</small></span>
+                    <span>开始扫描 →</span>
+                  </button>
+                  <button class="device-action-card device-action-card--trace" type="button" data-action="scanner-trace-mode">
+                    <span><strong>原卷留痕</strong><small>无需选择任务，放入原卷后自动匹配学生、页码与最终批改结果。</small></span>
+                    <span>开始留痕 →</span>
+                  </button>
+                </div>
+              </div>
+            </section>`;
+        }
+        if (state.scannerStep === "trace-ready") {
+          return `
+            <section class="scanner-stage">
+              <div class="scanner-card">
+                <p class="eyebrow">原卷留痕 · 无需选择任务</p>
+                <h1>放入原作业或试卷</h1>
+                <p>AI 将通过试卷内容指纹、学生作答指纹和纸面身份信息，自动匹配对应任务、学生、页码与最终批改结果。</p>
+                <div class="scanner-visual"><div class="scanner-paper"></div><div class="scan-line"></div></div>
+                <div class="button-row"><button class="button-secondary" type="button" data-action="scanner-device-home">返回</button><button class="button-primary" type="button" data-action="scanner-start-trace">开始留痕</button></div>
+              </div>
+            </section>`;
+        }
+        if (state.scannerStep === "trace-output") {
+          return `
+            <section class="scanner-stage">
+              <div class="scanner-card">
+                <p class="eyebrow">AI 自动识别与留痕完成</p>
+                <h1>84 页原卷已完成留痕</h1>
+                <p>AI 已自动匹配“二次函数单元作业”、九年级 2 班与 42 名学生；老师全程无需选择任务。</p>
+                <div class="trace-output-layout">
+                  <div class="trace-output-summary">
+                    <div class="panel-heading"><div><p class="eyebrow">任务、学生与页码自动匹配</p><h2 style="margin:6px 0">留痕结果统计</h2></div><span class="status-badge">已完成</span></div>
+                    <div class="trace-detail-list">
+                      <div><strong>对错痕迹</strong><span>84 页已输出</span></div>
+                      <div><strong>过程批改</strong><span>19 处步骤定位</span></div>
+                      <div><strong>错因分析</strong><span>14 名学生</span></div>
+                      <div><strong>订正指导</strong><span>14 名学生</span></div>
+                    </div>
+                    <div class="match-card">
+                      <div><strong>99.97%</strong><span>内容指纹 + 学生作答指纹</span></div>
+                      <div><strong>2 页暂停</strong><span>匹配不唯一，未输出任何痕迹</span></div>
+                    </div>
+                    <button class="button-primary" type="button" data-action="scanner-device-home" style="margin-top:16px;width:100%">完成并返回</button>
+                  </div>
+                </div>
+              </div>
+            </section>`;
+        }
+        if (state.scannerStep === "ready") {
+          return `<section class="scanner-stage"><div class="scanner-card"><p class="eyebrow">高扫采集 · ${task.className}</p><h1>放入纸张，开始扫描</h1><p>无需提前选择作业或考试。系统会从版面、题目内容和学生纸面信息中自动识别任务。</p><div class="scanner-visual"><div class="scanner-paper"></div><div class="scan-line"></div></div><div class="button-row"><button class="button-secondary" type="button" data-action="scanner-back">返回选班</button><button class="button-primary" type="button" data-action="scanner-start">开始扫描</button></div></div></section>`;
+        }
+        if (state.scannerStep === "scanning") {
+          return `<section class="scanner-stage"><div class="scanner-card"><p class="eyebrow">高扫采集</p><h1>正在扫描 ${task.className}</h1><p>已扫描 ${task.id === "exam" ? 163 : 57} / ${task.pages} 页；正在同步检测缺页、重页与图像质量。</p><div class="scanner-visual is-scanning"><div class="scanner-paper"></div><div class="scan-line"></div></div><div class="scanner-progress" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"><span></span></div><button class="button-primary" type="button" data-action="scanner-quality">完成扫描并检查质量</button></div></section>`;
+        }
+        if (state.scannerStep === "handoff" || state.scannerStep === "saved") {
+          return `<section class="scanner-stage"><div class="scanner-card"><p class="eyebrow">识别与质量检查完成</p><h1>扫描完成</h1><p>${state.scannerStep === "saved" ? "任务已保存，老师可稍后在电脑端继续处理。" : `系统识别为${task.kind}，已归属 ${task.className}。无二维码材料通过内容和作答指纹完成归集。`}</p><div class="handoff-stats"><div><strong>${task.kind}</strong><span>自动识别类型</span></div><div><strong>${task.students}</strong><span>学生人数</span></div><div><strong>${task.pages}</strong><span>采集页数</span></div><div><strong>${task.anomalyCount}</strong><span>扫描异常</span></div></div><div class="notice"><strong>✓</strong><span>${task.title} 已创建；异常不会混入其他班级，未处理页面暂不进入学生留痕。</span></div><div class="button-row" style="margin-top:22px"><button class="button-primary" type="button" data-action="scanner-open-task">在此设备查看</button><button class="button-secondary" type="button" data-action="scanner-save">稍后在电脑处理</button></div></div></section>`;
+        }
+        return `<section class="scanner-stage"><div class="scanner-card"><p class="eyebrow">扫描采集</p><h1>今天扫描哪个班？</h1><p>高扫只需要老师选择年级和班级，作业/考试、资源来源和批改状态由系统自动识别。</p><div class="class-picks">${tasks.slice(0, 2).map((item) => `<button type="button" data-action="scanner-select-class" data-task-id="${item.id}" aria-pressed="${item.id === task.id}"><strong>${item.className}</strong><span>${item.kind}演示数据 · ${item.students} 名学生</span></button>`).join("")}</div><div class="button-row"><button class="button-secondary" type="button" data-action="scanner-device-home">返回设备首页</button><button class="button-primary" type="button" data-action="scanner-next">下一步：放入纸张</button></div></div></section>`;
+      }
+
+      const taskTabLabels = {
+        submissions: "学生作业",
+        insights: "学情分析",
+        resources: "资源沉淀",
+      };
+
+      function activeTask() {
+        return tasks.find((task) => task.id === state.activeTaskId) || tasks[0];
+      }
+
+      function renderTaskHeader(task) {
+        return `
+          <div class="back-row"><button class="button-ghost" type="button" data-action="show-grading-home">← 返回批改首页</button></div>
+          <section class="panel task-header">
+            <div><p class="eyebrow">${task.kind} · ${task.className}</p><h1>${task.title}</h1><p>${task.students} 名学生 · ${task.pages} 页 · 更新于 ${task.updated}</p></div>
+            <div class="task-header__stats"><span class="status-badge">${task.progress}% AI 已完成</span><span class="${statusClass(task)}">${task.anomalyCount} 项扫描异常</span></div>
+          </section>
+          <nav class="task-tabs" aria-label="任务详情">
+            ${Object.entries(taskTabLabels).map(([tab, label]) => `<button type="button" data-action="task-tab" data-tab="${tab}" role="tab" aria-selected="${state.taskTab === tab}">${label}</button>`).join("")}
+          </nav>`;
+      }
+
+      function renderOverview(task) {
+        return `
+          <div class="overview-grid">
+            <section class="panel">
+              <div class="panel-heading"><div><p class="eyebrow">处理进度</p><h2>从提交到教学闭环</h2></div><span class="${statusClass(task)}">${task.status}</span></div>
+              <div class="stage-list">
+                <div class="stage" data-state="complete"><strong>扫描采集</strong><small>${task.pages} 页已完成</small></div>
+                <div class="stage" data-state="complete"><strong>识别批改</strong><small>AI 完成 ${task.progress}%</small></div>
+                <div class="stage" data-state="${task.anomalyCount ? "current" : "complete"}"><strong>异常处理</strong><small>${task.anomalyCount} 项待处理</small></div>
+                <div class="stage" data-state="current"><strong>留痕输出</strong><small>可预览</small></div>
+                <div class="stage"><strong>资源沉淀</strong><small>待教师选择</small></div>
+              </div>
+            </section>
+            <section class="panel">
+              <p class="eyebrow">任务摘要</p><h2>本次处理</h2>
+              <div class="summary-list">
+                <div><span>已提交</span><strong>${task.students} / ${task.students} 人</strong></div>
+                <div><span>学生已匹配</span><strong>${task.students - 1} 人</strong></div>
+                <div><span>扫描异常</span><strong>${task.anomalyCount} 项</strong></div>
+                <div><span>待教师复核</span><strong>${task.id === "homework" ? 5 : 8} 项</strong></div>
+              </div>
+              <button class="button-primary" type="button" data-action="task-tab" data-tab="anomalies">处理扫描异常</button>
+            </section>
+          </div>`;
+      }
+
+      function renderSubmissions(task) {
+        return `
+          <section class="panel section-panel">
+            <div class="submission-toolbar">
+              <div><p class="eyebrow">学生作业</p><h2>全部已提交${task.kind === "作业" ? "作业" : "试卷"}</h2></div>
+              <div class="filter-row"><button class="filter-chip" aria-pressed="true">全部 ${task.students}</button><button class="filter-chip" aria-pressed="false">有异常 ${task.anomalyCount}</button><button class="filter-chip" aria-pressed="false">已完成 ${task.students - task.anomalyCount}</button></div>
+            </div>
+            <div class="table-scroll">
+              <table class="submission-table">
+                <thead><tr><th>学生</th><th>提交页面</th><th>身份匹配</th><th>批改状态</th><th>扫描异常</th><th>${task.kind === "考试" ? "得分" : "完成情况"}</th><th></th></tr></thead>
+                <tbody>
+                  ${task.studentRows.map((student) => `
+                    <tr data-student-id="${student.id}">
+                      <td><span class="student-cell"><span class="student-avatar">${student.name.slice(-1)}</span><strong>${student.name}</strong></span></td>
+                      <td>${student.pages}</td>
+                      <td class="${student.match === "已匹配" ? "state-ok" : "state-warning"}">${student.match}</td>
+                      <td>${student.grading}</td>
+                      <td class="${student.anomaly === "无" ? "state-ok" : "state-warning"}">${student.anomaly}</td>
+                      <td>${student.score}</td>
+                      <td><button class="row-action" type="button" data-action="${student.anomaly === "无" ? "open-student-detail" : "open-student"}" data-student-id="${student.id}">${student.anomaly === "无" ? "查看" : "处理异常"} →</button></td>
+                    </tr>`).join("")}
+                </tbody>
+              </table>
+            </div>
+          </section>`;
+      }
+
+      function renderStudentWorkList(task) {
+        const pendingReviews = task.studentRows.flatMap((item) => ensureStudentGrades(task, item).filter((record) => record.uncertain && !record.teacherConfirmed));
+        const rates = task.kind === "考试" ? [72, 78, 81, 94, 86, 90] : [71, 78, 83, 92, 88, 95];
+        return `
+          <section class="panel section-panel student-work-list">
+            <div class="panel-heading">
+              <div><p class="eyebrow">${task.className} · ${task.title}</p><h2>学生明细</h2><p>查看全班批改、错题与订正状态，点击学生进入原始扫描作答。</p></div>
+              ${pendingReviews.length ? `<button class="button-secondary ai-review-entry" type="button" data-action="show-ai-review-queue">统一处理待确认<span class="notification-bubble">${pendingReviews.length}</span></button>` : ""}
+            </div>
+            <div class="table-scroll"><table class="diagnosis-student-table"><thead><tr><th>学生</th><th>批改状态</th><th>正确率</th><th>主要错题</th><th>订正状态</th><th></th></tr></thead><tbody>
+              ${task.studentRows.map((student, index) => `<tr><td><strong>${student.name}</strong></td><td>${student.grading}</td><td>${rates[index] || 86}%</td><td>${index < 3 ? "第 2、3 题" : "第 2 题"}</td><td>${index < 2 ? "待订正" : "已订正"}</td><td><button class="row-action" type="button" data-action="open-student-submission" data-student-id="${student.id}">查看作答 →</button></td></tr>`).join("")}
+            </tbody></table></div>
+          </section>`;
+      }
+
+      function renderStudentDetail(task) {
+        const student = task.studentRows.find((item) => item.id === state.detailStudentId) || task.studentRows.find((item) => item.anomaly === "无") || task.studentRows[0];
+        state.detailStudentId = student.id;
+        const questions = ensureStudentGrades(task, student);
+        const pendingReviews = task.studentRows.flatMap((item) => ensureStudentGrades(task, item).filter((record) => record.uncertain && !record.teacherConfirmed));
+        const visibleScore = student.score === "—" ? `${questions.reduce((total, item) => total + item.score, 0)} / ${questions.reduce((total, item) => total + item.maxScore, 0)}` : student.score;
+        const paperQuestion = (item) => {
+          const mark = item.uncertain && !item.teacherConfirmed ? `AI 建议 △ ${item.score}/${item.maxScore}` : `${item.judgment === "正确" ? "✓" : item.judgment === "错误" ? "×" : "△"} ${item.score}/${item.maxScore}`;
+          const answer = item.id === "q18"
+            ? `y = (x - 2)² - 1；顶点（2，-1），<span class="step-error-circle">开口向下</span><span class="step-error-label">步骤错误已圈出</span>`
+            : escapeHtml(item.answer);
+          return `<div class="scan-question"><strong>${item.number}．${item.prompt}</strong><span class="scan-question__answer">学生作答：${answer}</span><i class="scan-mark ${item.judgment === "正确" ? "is-correct" : ""}">${mark}</i>${item.id === "q18" ? `<div class="trace-guidance"><strong>错因：二次项系数符号与开口方向混淆</strong><span>学习建议：先圈出二次项系数，判断正负后再确定开口方向，并完成一道变式订正。</span></div>` : item.id === "q8" ? `<div class="trace-guidance"><strong>错因：过程表达不完整</strong><span>学习建议：补写配方过程，说明对称轴的来源。</span></div>` : ""}</div>`;
+        };
+        const gradingCard = (item) => {
+          const needsReview = item.uncertain && !item.teacherConfirmed;
+          const isEditing = state.showGradeEditor && state.detailQuestionId === item.id;
+          return `<article class="grading-question-card" data-question-id="${item.id}">
+            <div class="grading-question-card__head"><div><p class="eyebrow">第 ${item.number} 题</p><h3>${item.title}</h3></div><span class="grading-question-card__score">${item.score}/${item.maxScore}</span></div>
+            ${item.teacherConfirmed ? `<div class="grade-saved">✓ 教师已确认 · 当前结果已保存</div>` : item.teacherModified ? `<div class="grade-saved">✓ 教师已修改 · 当前结果已保存</div>` : ""}
+            ${needsReview ? `<div class="ai-suggestion-card"><span>AI 批改建议 · 置信度 ${item.confidence}%</span><h3>建议：${item.judgment}，${item.score} / ${item.maxScore} 分</h3><p><strong>建议依据：</strong>${item.aiBasis}</p><div class="suggestion-actions"><button class="button-primary" type="button" data-action="accept-ai-suggestion" data-question-id="${item.id}">采纳 AI 建议</button><button class="button-secondary" type="button" data-action="adjust-ai-suggestion" data-question-id="${item.id}">调整建议后确认</button></div></div>` : `<div class="ai-review"><strong>AI 批改依据</strong><span>${item.aiBasis}</span></div>${!isEditing ? `<button class="button-secondary" type="button" data-action="edit-question-grade" data-question-id="${item.id}">修改本题批改</button>` : ""}`}
+            ${isEditing ? `<div class="grade-form"><label class="grade-field">最终判断<select name="detail-judgment">${["正确", "部分正确", "错误"].map((value) => `<option value="${value}" ${item.judgment === value ? "selected" : ""}>${value}</option>`).join("")}</select></label><label class="grade-field">本题得分（满分 ${item.maxScore} 分）<input name="detail-score" type="number" min="0" max="${item.maxScore}" step="1" value="${item.score}"></label><label class="grade-field">批改评语<textarea name="detail-comment">${escapeHtml(item.comment)}</textarea></label><button class="button-primary" type="button" data-action="save-detail-grade" data-question-id="${item.id}">保存本题修改</button></div>` : ""}
+          </article>`;
+        };
+        return `
+          <div class="student-detail-page">
+            <div class="back-row"><button class="button-ghost" type="button" data-action="back-to-student-list">← 返回学生明细</button></div>
+            ${student.anomaly !== "无" ? `<div class="notice"><strong>!</strong><span>该生仍有扫描异常：${student.anomaly}。当前可查看 AI 已识别内容，相关页面在异常确认前不会输出留痕。 <button class="text-button" type="button" data-action="go-detail-student-anomaly">处理扫描异常 →</button></span></div>` : ""}
+            <div class="student-workspace">
+              <aside class="panel student-name-nav" aria-label="学生导航">
+                <p class="eyebrow">学生导航</p><h2>全班提交</h2>
+                <div class="student-name-list">${task.studentRows.map((item) => `<button type="button" data-action="switch-detail-student" data-student-id="${item.id}" aria-current="${item.id === student.id}"><span><strong>${item.name}</strong><small>${item.grading}${item.anomaly !== "无" ? " · 有扫描异常" : ""}</small></span><b>${item.score}</b></button>`).join("")}</div>
+              </aside>
+              <section class="panel scan-view">
+                <div class="scan-view-toolbar"><div><p class="eyebrow">原始扫描件 · ${student.name}</p><p>${student.pages} · ${student.grading}</p></div><div class="scan-view-actions"><span class="status-badge">当前得分 ${visibleScore}</span>${student.teacherModified ? `<span class="status-badge">教师已修改</span>` : `<span class="status-badge">AI 批改结果</span>`}${pendingReviews.length ? `<button class="button-secondary ai-review-entry" type="button" data-action="show-ai-review-queue">统一处理待确认<span class="notification-bubble">${pendingReviews.length}</span></button>` : ""}</div></div>
+                <div class="scan-paper"><header class="scan-paper__head"><p><span>${task.className}</span><span>${task.kind === "考试" ? "试卷" : "作业"}第 1 页</span></p><h2>${task.title}</h2><p><span>姓名：${student.name}</span><span>原始扫描 · AI 红色留痕</span></p></header>${questions.map(paperQuestion).join("")}${student.name === "赵子轩" ? `<button class="video-qr-trace" type="button" data-action="open-video-explanation" aria-label="扫码查看第 3 题讲解视频"><span class="qr-code-demo" aria-hidden="true"></span><span><strong>扫码查看讲解视频</strong><small>第 3 题 · 开口方向与图像性质 · 3 分钟</small></span></button>` : ""}</div>
+              </section>
+              <aside class="grading-rail"><header><p class="eyebrow">随卷批改</p><h2>每道题批改结果</h2></header>${questions.map(gradingCard).join("")}</aside>
+            </div>
+          </div>`;
+      }
+
+      function renderAIReviewQueue(task) {
+        const pending = task.studentRows.flatMap((student) => ensureStudentGrades(task, student)
+          .filter((question) => question.uncertain && !question.teacherConfirmed)
+          .map((question) => ({ student, question })));
+        const q18 = pending.filter((item) => item.question.id === "q18");
+        return `
+          <div class="page-stack review-queue">
+            <div class="back-row"><button class="button-ghost" type="button" data-action="back-to-student-work">← 返回学生作业</button></div>
+            <header class="panel review-queue-hero">
+              <div><p class="eyebrow">AI 待确认题目 · 按同类作答统一处理</p><h1>AI 已完成主要批改，<br>只剩 ${pending.length} 个专业判断</h1><p>拿不准的内容已被系统主动收口；看证据、做一次判断，同类作答同步更新。</p></div>
+              <div class="review-hero-metric"><strong>${task.progress}%</strong><span>AI 已完成</span></div>
+              <div class="review-hero-metric"><strong>2 分钟</strong><span>预计处理时间</span></div>
+              <div class="review-hero-metric"><strong>31 人</strong><span>处理后同步完成</span></div>
+              <div class="review-progress"><strong><span>当前任务完成度</span><span>${task.progress}%</span></strong><span class="review-progress__track"><i style="width:${task.progress}%"></i></span></div>
+            </header>
+            ${q18.length ? `
+              <div class="review-workbench">
+                <aside class="panel review-sidebar">
+                  <p class="eyebrow">疑难分类</p><h2>按判断类型查看</h2>
+                  <div class="review-category-list">
+                    <button class="review-category" type="button"><span>识</span><span><strong>作答识别</strong><small>字迹或符号待确认</small></span><b>1</b></button>
+                    <button class="review-category" type="button"><span>≈</span><span><strong>等价答案</strong><small>解法或表达待判断</small></span><b>1</b></button>
+                    <button class="review-category" type="button" aria-current="true"><span>分</span><span><strong>评分类度</strong><small>步骤分存在多种方式</small></span><b>1</b></button>
+                    <button class="review-category" type="button"><span>冲</span><span><strong>教师结果冲突</strong><small>教师批注与 AI 不一致</small></span><b>1</b></button>
+                    <button class="review-category" type="button"><span>页</span><span><strong>页面匹配</strong><small>学生或页码待确认</small></span><b>1</b></button>
+                  </div>
+                </aside>
+                <main class="panel review-main">
+                  <div class="review-queue-card__head"><div><p class="eyebrow">重点疑难 · 第 3 题</p><h2>方法正确，结论局部错误，步骤分怎么给？</h2></div><span class="status-badge warning">待判断</span></div>
+                  <p style="color:var(--muted);line-height:1.65">AI 已分析原始作答、当前评分标准与同类学生证据，先给出推荐结果，再由老师作最终裁决。</p>
+                  <h3>原题与学生原始作答</h3>
+                  <div class="review-source-grid">
+                    <div class="review-source-card"><small>原题</small><p>将 y = x² - 4x + 3 化为顶点式，并说明顶点与开口方向。</p></div>
+                    <div class="review-source-card"><small>${q18[0].student.name} · 原始作答</small><p>y = (x - 2)² - 1；顶点（2，-1），开口向下。</p></div>
+                  </div>
+                  <h3>当前评分标准</h3>
+                  <div class="review-source-card">
+                    <div class="scoring-points">
+                      <div class="scoring-point"><i>✓</i><span><strong>方法选择</strong><small>正确使用配方法</small></span><b>2 分</b></div>
+                      <div class="scoring-point"><i>✓</i><span><strong>顶点式与顶点</strong><small>等式变形和坐标正确</small></span><b>2 分</b></div>
+                      <div class="scoring-point is-missed"><i>×</i><span><strong>开口方向</strong><small>二次项系数为正，应开口向上</small></span><b>0 分</b></div>
+                    </div>
+                  </div>
+                  <div class="panel-heading" style="margin-top:18px"><div><p class="eyebrow">AI 已分析证据并给出建议</p><h3 style="margin:5px 0 0">AI 建议：部分正确，4 / 6 分</h3></div><span class="status-badge">AI 推荐</span></div>
+                  <div class="review-options">
+                    <div class="review-option is-recommended"><span></span><div><strong>推荐：得 4 分</strong><small>顶点式和顶点坐标正确；开口方向错误扣 2 分。</small></div></div>
+                    <div class="review-option"><span></span><div><strong>得 6 分</strong><small>只考查配方法，不扣开口方向分。</small></div></div>
+                    <div class="review-option"><span></span><div><strong>得 2 分</strong><small>只认可方法选择，不认可后续结论。</small></div></div>
+                  </div>
+                  <div class="tag-cloud" style="margin-top:15px">${q18.map((item) => `<span>${item.student.name}</span>`).join("")}</div>
+                  <div class="button-row" style="margin-top:17px"><button class="button-primary" type="button" data-action="accept-review-group" data-question-id="q18">采纳推荐并应用到 ${q18.length} 份同类作答</button><button class="button-secondary" type="button" data-action="review-one-student" data-student-id="${q18[0].student.id}">查看单个学生</button></div>
+                </main>
+                <aside class="panel impact-preview">
+                  <p class="eyebrow">Impact preview</p><h2>应用前影响预览</h2>
+                  <div class="impact-highlight"><small>同类高相似作答 · 影响 ${q18.length} 名学生</small><strong>${q18.length} 份</strong><span>处理一次，同步更新一批</span></div>
+                  <div class="impact-lines">
+                    <div><span>学生分数</span><strong>${q18.length} 人更新</strong></div>
+                    <div><span>班级平均分</span><strong>83.6 → 84.1</strong></div>
+                    <div><span>原卷留痕</span><strong>更新 ${q18.length} 份</strong></div>
+                    <div><span>学情结论</span><strong>更新 1 条</strong></div>
+                  </div>
+                  <div class="notice" style="margin-top:15px"><strong>!</strong><span>相似度不足的 1 份作答不会自动更新，仍保留待确认。</span></div>
+                </aside>
+              </div>
+              <footer class="panel review-footer"><div><strong>还有 ${pending.length} 项疑难待确认</strong><p>可先完成任务；未复核题目暂不生成学生侧批改痕迹。</p></div><button class="button-secondary" type="button" data-action="skip-ai-review">暂不复核并完成</button></footer>` : `<section class="panel placeholder"><h2>AI 待确认题目已处理完成</h2><p>所有影响得分的建议均已由老师确认。</p></section>`}
+          </div>`;
+      }
+
+      function renderAnomalies(task) {
+        const selected = task.anomalies.find((item) => item.id === state.selectedAnomalyId) || task.anomalies[task.anomalies.length - 1];
+        if (!selected) return `<section class="panel placeholder"><h2>扫描异常已处理完成</h2><p>可以继续预览留痕、查看学情并选择资源沉淀。</p></section>`;
+        return `
+          <div class="anomaly-layout">
+            <aside class="panel">
+              <p class="eyebrow">异常队列</p><h2>${task.anomalyCount} 项待处理</h2>
+              <div class="anomaly-nav">${task.anomalies.map((item) => `<button type="button" data-action="select-anomaly" data-anomaly-id="${item.id}" aria-current="${selected.id === item.id}"><strong>${item.type}</strong><br><small>${item.student}</small></button>`).join("")}</div>
+            </aside>
+            <section class="panel">
+              <p class="eyebrow">${selected.type}</p><h2>${selected.student}</h2><p>${selected.detail}</p>
+              <div class="paper-preview">
+                <strong>${task.title}</strong><br>姓名：${selected.student.replace(/等.*$/, "")}<br><br>
+                3．已知二次函数 y = x² - 4x + 3，求其顶点坐标。
+                <div class="problem-zone">AI 检测：${selected.detail}<br>建议：${selected.type === "图像质量异常" ? "增强对比度后继续识别" : "请教师确认页面归属"}</div>
+              </div>
+            </section>
+            <aside class="panel">
+              <p class="eyebrow">处理建议</p><h2>${selected.type === "图像质量异常" ? "可批量自动修复" : "需要确认"}</h2>
+              <div class="impact-list"><span>影响学生<strong>${selected.count} 人</strong></span><span>影响页面<strong>${selected.count} 页</strong></span><span>后续留痕<strong>暂不输出</strong></span></div>
+              <div class="action-stack">
+                <button class="button-primary" type="button" data-action="resolve-current">仅处理当前学生</button>
+                ${selected.count > 1 ? `<button class="button-secondary" type="button" data-action="resolve-similar">应用到 ${selected.count} 份同类异常</button>` : ""}
+                <button class="button-secondary" type="button" data-action="resolve-auto">处理全部可自动确认异常</button>
+              </div>
+            </aside>
+          </div>`;
+      }
+
+      function renderPendingTaskPanel(label) {
+        return `<section class="panel placeholder"><h2>${label}</h2><p>该任务页面将在后续步骤完成。</p></section>`;
+      }
+
+      function renderTrace(task) {
+        const selectedId = state.traceStudentId || task.studentRows[0].id;
+        const selected = task.studentRows.find((student) => student.id === selectedId) || task.studentRows[0];
+        const unresolved = task.anomalyCount > 0;
+        return `
+          <div class="page-stack">
+            ${unresolved ? `<div class="notice" role="status"><strong>!</strong><span>仍有 ${task.anomalyCount} 项扫描异常或未确认题目；未确认题目不会打印批改痕迹，其余页面可继续预览。</span></div>` : ""}
+            <div class="trace-layout">
+              <aside class="panel">
+                <p class="eyebrow">选择学生</p><h2>个性化留痕</h2>
+                <div class="student-switch">${task.studentRows.slice(0, 5).map((student) => `<button type="button" data-action="select-trace-student" data-student-id="${student.id}" aria-current="${selected.id === student.id}"><span><strong>${student.name}</strong><br><small>${student.anomaly}</small></span><span>→</span></button>`).join("")}</div>
+              </aside>
+              <section class="panel">
+                <div class="panel-heading"><div><p class="eyebrow">${state.traceAfter ? "留痕效果" : "原始页面"}</p><h2>${selected.name} · 第 1 页</h2></div><button class="button-secondary" type="button" data-action="toggle-trace">${state.traceAfter ? "查看原卷" : "查看留痕后"}</button></div>
+                <div class="paper-preview trace-paper">
+                  <strong>${task.title}</strong><br>姓名：${selected.name}　班级：${task.className}<br><br>
+                  2．已知二次函数 y = x² - 4x + 3。<br>
+                  解：y = (x - 2)² - 1，所以顶点坐标为（2，-1）。<br><br>
+                  3．在平面直角坐标系中画出函数图像，并说明开口方向。<br>
+                  学生作答：开口向下，对称轴 x = 2。
+                  ${state.traceAfter ? `<span class="red-mark one">✓ 顶点式正确 + 4 分</span><span class="red-mark two">× 首个错误：开口方向</span><span class="red-mark three">错因：混淆二次项系数符号。a＞0 时抛物线开口向上，请据此订正图像。</span>` : ""}
+                </div>
+              </section>
+              <aside class="panel">
+                <p class="eyebrow">设备留痕结果</p><h2>详细版 · 默认版本</h2>
+                <p style="color:var(--muted);line-height:1.6">由扫大一体机自动匹配并输出，任务内仅用于查看最终效果。</p>
+                <div class="trace-detail-list"><div><strong>对错痕迹</strong><span>已生成</span></div><div><strong>过程批改</strong><span>已定位</span></div><div><strong>错因分析</strong><span>已生成</span></div><div><strong>订正指导</strong><span>已生成</span></div></div>
+                <div class="match-card">
+                  <div><strong>99.97%</strong><span>任务、学生与页码匹配</span></div>
+                  <div><strong>无二维码</strong><span>内容指纹 + 学生作答指纹</span></div>
+                  <div><strong>已完成避让</strong><span>批注位于纸面安全空白区</span></div>
+                </div>
+              </aside>
+            </div>
+          </div>`;
+      }
+
+      function renderInsights(task) {
+        const isExam = task.kind === "考试";
+        const profile = isExam ? {
+          summary: "第 3 题对中高分段区分明显，但单位与表达疏漏造成的失分可通过规范训练快速改善。",
+          conclusion: "本班的主要问题集中在方法完整性与规范表达。12 名学生遗漏分类讨论的一种情况，10 名学生在面积建模中缺失单位，7 名学生未能稳定完成条件转化。建议先用第 2 题复盘分类边界，再用第 3 题训练“计算—单位—结论”的完整表达链。",
+          mastery: [["函数图像与性质", 84], ["分类讨论", 63], ["几何面积建模", 58]],
+          causes: [["分类不完整", 12, "第 2 题"], ["单位与表达疏漏", 10, "第 3 题"], ["条件转化错误", 7, "第 1 题"]],
+          questions: [
+            ["1", "配方法关键步骤", 82, "5 名学生使用了与标准答案不同但等价的配方法表达，适合作为规范示例。", "对照两种等价写法，强调关键步骤与得分点，而非限制表达形式。"],
+            ["2", "分类讨论完整性", 63, "12 名学生只完成一种情况，没有根据边界条件枚举完整，属于方法结构缺口。", "用条件树带领全班补齐分类边界，并保留已有步骤分。"],
+            ["3", "面积建模与单位表达", 58, "10 名学生计算过程正确但单位缺失，反映出作答结束前缺少结果完整性检查。", "先展示一份“数值正确但单位缺失”的典型作答，再要求全班用三步检查表完成订正。"],
+          ],
+          commentary: [
+            ["3", "面积建模与单位表达", 10, "得分率最低且区分度最高，应作为第一道重点讲评题。"],
+            ["2", "分类讨论完整性", 12, "基础方法缺口影响人数最多，建议用边界条件带领全班复盘。"],
+            ["1", "配方法关键步骤", 5, "典型正确作答可作为第二层次学生的规范示例。"],
+          ],
+          teaching: ["先纠正第 2 题的分类边界，再处理第 3 题的单位表达。", "将 12 名同类错误学生分成两组，分别追加基础补全与迁移练习。", "讲评后用 1 道即时变式验证方法是否稳定。"],
+        } : {
+          summary: "图像性质是本次最需要优先补强的知识点，11 名学生混淆开口方向与最值。",
+          conclusion: "本班的主要问题不是“不会做二次函数”，而是条件进入解题链路后没有持续生效。高频错因集中在“二次项系数符号与开口方向混淆”（11 人）、“过程符号疏漏”（8 人）和“结论表达不完整”（6 人）。建议先用第 1 题统一修正符号判断，再用第 3 题展示等价写法。",
+          mastery: [["顶点式转换", 82], ["最值问题", 76], ["图像性质", 68]],
+          causes: [["概念理解偏差", 11, "第 1、3 题"], ["过程符号疏漏", 8, "第 2 题"], ["结论表达不完整", 6, "第 3 题"]],
+          questions: [
+            ["1", "判断函数开口方向", 68, "学生能读取二次项系数，但将系数符号与开口方向错误关联，属于概念理解偏差。", "并排展示典型错答与正确图像，引导学生从系数符号重新建立方向判断。"],
+            ["2", "对称轴与过程表达", 76, "8 名学生结论正确，但配方过程缺少等式变形，过程表达不完整。", "保留正确结论，引导学生补齐配方步骤和对称轴来源。"],
+            ["3", "顶点式与图像性质", 74, "9 名学生能写出顶点式，但部分学生混淆二次项系数与开口方向。", "先肯定等价写法，再统一顶点、对称轴和开口方向的完整表达。"],
+          ],
+          commentary: [
+            ["1", "判断函数开口方向", 11, "错误人数最多且错因集中，建议作为第一道讲评题。"],
+            ["2", "对称轴与过程表达", 8, "结论正确但步骤缺失，适合用于讲解过程分与规范表达。"],
+            ["3", "顶点式与图像性质", 9, "等价解法集中，适合先肯定方法，再统一完整结论。"],
+          ],
+          teaching: ["先纠正开口方向与最值的共性概念，再安排配方法的分层练习。", "对 9 名等价解法学生保留正确判断，并统一规范表达。", "课前安排 8 分钟集中订正，优先覆盖尚未完成订正的 11 人。"],
+        };
+        const examOnly = task.kind === "考试" ? `
+          <section class="panel exam-overview">
+            <p class="eyebrow">考试基本学情</p>
+            <div class="panel-heading"><div><h3 style="margin:6px 0 0">一分四率</h3><p>基于 ${task.students} 名学生当前已确认成绩统计</p></div><span class="status-badge">总分 100 分</span></div>
+            <div class="exam-kpi-grid">
+              <div class="exam-kpi"><span>平均分</span><strong>82.6</strong><small>班级整体水平</small></div>
+              <div class="exam-kpi"><span>优秀率</span><strong>20.0%</strong><small>90 分及以上 · 8 人</small></div>
+              <div class="exam-kpi"><span>良好率</span><strong>57.5%</strong><small>80 分及以上 · 23 人</small></div>
+              <div class="exam-kpi"><span>及格率</span><strong>92.5%</strong><small>60 分及以上 · 37 人</small></div>
+              <div class="exam-kpi"><span>低分率</span><strong>2.5%</strong><small>40 分以下 · 1 人</small></div>
+            </div>
+            <div class="exam-basics"><span>最高分 98</span><span>最低分 46</span><span>中位数 84</span><span>标准差 11.8</span><span>参考人数 ${task.students}</span></div>
+            <div class="mini-bars" style="margin-top:16px"><div class="mini-bar"><span>90–100</span><span class="mini-bar__track"><i style="width:38%"></i></span><strong>8 人</strong></div><div class="mini-bar"><span>80–89</span><span class="mini-bar__track"><i style="width:72%"></i></span><strong>15 人</strong></div><div class="mini-bar"><span>70–79</span><span class="mini-bar__track"><i style="width:55%"></i></span><strong>11 人</strong></div></div>
+            <div class="exam-basics"><span>成绩分布已生成</span><span>区分度 0.42</span><span>第 2 题得分率 46%</span></div>
+          </section>` : "";
+        return `
+          <div class="diagnosis-report">
+            <div class="ai-summary-grid">
+              <section class="panel ai-diagnosis-summary"><p class="eyebrow">AI 已分析全班原始作答</p><h2>AI 班级诊断结论</h2><p><strong>本次优先处理：</strong>${profile.conclusion}</p></section>
+              <section class="panel ai-teaching-summary"><p class="eyebrow">下一步怎么教</p><h2>AI 教学建议</h2><ol>${profile.teaching.map((item) => `<li>${item}</li>`).join("")}</ol></section>
+            </div>
+            ${examOnly}
+            <section class="panel">
+              <h2 class="report-section-title">逐题分析</h2>
+              <div class="report-question-list">
+                ${profile.questions.map(([number, title, rate, cause, advice]) => `<article class="report-question-card"><div class="report-question-head"><div><p class="eyebrow">第 ${number} 题 · 共性问题</p><h3>${title}</h3></div><span class="status-badge ${rate < 70 ? "warning" : ""}">正确率 ${rate}%</span></div><p class="typical-cause"><strong>典型错因：</strong>${cause}</p><div class="answer-distribution"><span>完全正确 ${Math.round(task.students * rate / 100)} 人</span><span>部分正确 ${Math.max(3, Math.round(task.students * (100-rate) / 140))} 人</span><span>错误/未答 ${Math.max(2, Math.round(task.students * (100-rate) / 260))} 人</span></div><div class="teaching-advice"><strong>讲评建议：</strong>${advice}</div></article>`).join("")}
+              </div>
+            </section>
+            <section class="panel commentary-panel">
+              <div class="panel-heading"><div><p class="eyebrow">下一步怎么教</p><h2 class="report-section-title">重点讲评</h2></div><span class="status-badge">按影响人数与总分影响排序</span></div>
+              <div class="commentary-cards">${profile.commentary.map(([number, title, count, reason], index) => `<article class="commentary-card"><span class="commentary-rank">0${index + 1}</span><div><small>第 ${number} 题 · 影响 ${count} 人</small><strong>${title}</strong><p>${reason}</p></div><button class="row-action" type="button" data-action="open-evidence">查看典型作答 →</button></article>`).join("")}</div>
+            </section>
+          </div>`;
+      }
+
+      function resourceOptions(task) {
+        const prefix = task.id;
+        return task.kind === "考试" ? [
+          { id: `${prefix}-paper`, label: "完整试卷", title: "数学期中质量检测 · A/B 卷", summary: "40 人完成真实考试验证，包含题目、答案与答题卡映射。", meta: `${task.title} · 第三方试卷`, evidence: ["40 人完成", "A/B 卷", "240 页答卷"], icon: "卷" },
+          { id: `${prefix}-error`, label: "班级易错题", title: "第 3 题 · 面积建模", summary: "低得分率、高区分度，具备典型讲评与分层练习价值。", meta: `${task.title} · 第 3 题`, evidence: ["得分率 58%", "区分度 0.46", "10 人表达疏漏"], icon: "错" },
+          { id: `${prefix}-rubric`, label: "答案与评分标准", title: "第 2 题 · 分类讨论步骤分", summary: "本次步骤分与扣分点，可随套卷一并沉淀。", meta: `${task.title} · 评分标准 v1.2`, evidence: ["3 个得分点", "影响 7 人", "教师已确认"], icon: "标" },
+        ] : [
+          { id: `${prefix}-paper`, label: "完整套题", title: "本次作业题单", summary: "42 人真实作答验证，可作为九年级二次函数单元巩固材料。", meta: `${task.title} · 林老师自编`, evidence: ["42 人完成", "84 页作答", "批改完成度 97%"], icon: "题" },
+          { id: `${prefix}-error`, label: "班级易错题", title: "第 1 题 · 开口方向判断", summary: "错误人数多、错因高度集中，适合沉淀为易错题。", meta: `${task.title} · 第 1 题`, evidence: ["11 人同类错误", "正确率 68%", "概念理解偏差"], icon: "错" },
+          { id: `${prefix}-rubric`, label: "答案与评分标准", title: "第 3 题 · 顶点式与图像性质", summary: "教师确认后的得分点与等价写法，可复用于后续同题批改。", meta: `${task.title} · 教师最终确认`, evidence: ["9 份同类作答", "3 个得分点", "教师已确认"], icon: "标" },
+        ];
+      }
+
+      function renderResources(task) {
+        const options = resourceOptions(task);
+        const selected = state.resourceSelected;
+        const deposited = state.resourceDeposited[task.id] || [];
+        const schoolResources = options;
+        const resourceCard = (resource) => {
+          const isDeposited = deposited.includes(resource.id);
+          const isSelected = selected.includes(resource.id);
+          return `
+            <label class="resource-card">
+              <input type="checkbox" data-action="toggle-resource" data-resource-id="${resource.id}" ${isSelected ? "checked" : ""} ${isDeposited ? "disabled checked" : ""} style="position:absolute;opacity:0;pointer-events:none">
+              <header><span class="resource-card__icon">${resource.icon}</span><div><small>${resource.label}</small><h4>${resource.title}${isDeposited ? " · 已沉淀" : ""}</h4></div></header>
+              <p>${resource.summary}</p>
+              <div class="resource-provenance">来源：${resource.meta}</div>
+              <div class="resource-evidence">${resource.evidence.map((item) => `<span>✓ ${item}</span>`).join("")}</div>
+              <footer><small>真实教学数据验证</small><span class="${isDeposited ? "status-badge" : isSelected ? "status-badge" : "button-secondary"}">${isDeposited ? "已加入" : isSelected ? "已选择" : "选择沉淀"}</span></footer>
+            </label>`;
+        };
+        return `
+          <div class="page-stack">
+            <section class="resource-section">
+              <header class="resource-section__heading"><div><p class="eyebrow">学校资产</p><h3>推荐进入校本题库</h3></div><span>✓ 已检查来源与学生隐私</span></header>
+              <div class="resource-grid">${schoolResources.map(resourceCard).join("")}</div>
+            </section>
+            <section class="panel section-panel">
+              <div class="panel-heading"><div><p class="eyebrow">选择沉淀到校本题库</p><h2>${selected.length ? `已选择 ${selected.length} 项资源` : "由教师确认后再入库"}</h2><p>异常和疑难结果确认后生成候选资源，默认不会自动入库。</p></div><span class="status-badge">${deposited.length} 项已沉淀</span></div>
+              <div class="resource-footer"><p>系统会自动去重；典型作答进入校本题库前完成学生信息脱敏。</p><button class="button-primary" type="button" data-action="deposit-resources">确认沉淀所选资源</button></div>
+            </section>
+          </div>`;
+      }
+
+      function renderEvidenceDialog(task) {
+        if (!state.evidenceOpen) return "";
+        return `
+          <div class="drawer-backdrop">
+            <section class="evidence-dialog" role="dialog" aria-modal="true" aria-labelledby="evidence-title">
+              <div class="drawer-heading"><div><p class="eyebrow">学情证据</p><h2 id="evidence-title">第 3 题典型作答</h2></div><button type="button" data-action="close-evidence" aria-label="关闭证据">×</button></div>
+              <div class="drawer-card"><h3>原始作答 · 王晓宇</h3><div class="paper-preview">y = (x - 2)² - 1<br>顶点（2，-1），开口向下。</div></div>
+              <div class="drawer-card"><h3>教师确认结果</h3><p>顶点判断正确；开口方向错误。得 4 / 6 分，错因标记为“符号判断”。</p></div>
+              <div class="drawer-card"><h3>影响范围</h3><p>${task.className} 共 9 名学生存在同类问题，已进入重点讲评清单。</p></div>
+            </section>
+          </div>`;
+      }
+
+      function renderStudentDrawer(task) {
+        const student = task.studentRows.find((item) => item.id === state.drawerStudentId);
+        if (!student) return "";
+        return `
+          <div class="drawer-backdrop" role="presentation">
+            <aside class="student-drawer" role="dialog" aria-modal="true" aria-labelledby="student-drawer-title">
+              <div class="drawer-heading"><div><p class="eyebrow">${task.className}</p><h2 id="student-drawer-title">${student.name}</h2></div><button type="button" data-action="close-student" aria-label="关闭学生详情">×</button></div>
+              <section class="drawer-card"><h3>提交与匹配</h3><p>${student.pages} · ${student.match} · ${student.grading}</p></section>
+              <section class="drawer-card"><h3>扫描异常</h3><p>${student.anomaly}</p>${student.anomaly !== "无" ? `<button class="button-primary" type="button" data-action="go-student-anomaly">进入异常处理</button>` : ""}</section>
+              <section class="drawer-card"><h3>原始页面</h3><div class="paper-preview">姓名：${student.name}<br><br>第 3 题作答区域<br>y = (x - 2)² - 1</div></section>
+            </aside>
+          </div>`;
+      }
+
+      function renderTask() {
+        const task = activeTask();
+        if (state.taskTab === "ai-review-queue") {
+          return `${renderAIReviewQueue(task)}${state.toast ? `<div class="toast" role="status">${state.toast}</div>` : ""}`;
+        }
+        let body = state.studentWorkMode === "detail" ? renderStudentDetail(task) : renderStudentWorkList(task);
+        if (state.taskTab === "anomalies") body = renderAnomalies(task);
+        if (state.taskTab === "trace") body = renderTrace(task);
+        if (state.taskTab === "insights") body = renderInsights(task);
+        if (state.taskTab === "resources") body = renderResources(task);
+        return `<div class="page-stack">${renderTaskHeader(task)}<div class="task-body">${body}</div></div>${renderStudentDrawer(task)}${renderEvidenceDialog(task)}${state.toast ? `<div class="toast" role="status">${state.toast}</div>` : ""}`;
+      }
+
+      function render() {
+        if (state.view === "grading") app.innerHTML = renderGrading();
+        else if (state.view === "sources") app.innerHTML = renderSources();
+        else app.innerHTML = renderScanner();
+        document.querySelectorAll("[data-primary-nav]").forEach((button) => {
+          button.setAttribute("aria-current", button.dataset.view === state.view ? "page" : "false");
+        });
+      }
+
+      document.addEventListener("click", (event) => {
+        const action = event.target.closest("[data-action]");
+        if (!action) return;
+        if (action.dataset.action === "navigate") {
+          state.view = action.dataset.view;
+          state.gradingMode = "home";
+          render();
+        }
+        if (action.dataset.action === "show-scanner") {
+          state.view = "scanner";
+          state.scannerStep = "home";
+          render();
+        }
+        if (action.dataset.action === "show-all-tasks") {
+          state.gradingMode = "all";
+          render();
+        }
+        if (action.dataset.action === "show-grading-home") {
+          state.view = "grading";
+          state.gradingMode = "home";
+          render();
+        }
+        if (action.dataset.action === "show-anomaly-center") {
+          state.gradingMode = "anomaly-center";
+          render();
+        }
+        if (action.dataset.action === "open-task" || action.dataset.action === "open-task-anomaly" || action.dataset.action === "open-processing-task") {
+          state.view = "grading";
+          state.gradingMode = "task";
+          state.activeTaskId = action.dataset.taskId;
+          state.taskTab = action.dataset.action === "open-task-anomaly" ? "anomalies" : "submissions";
+          state.studentWorkMode = "list";
+          state.selectedAnomalyId = action.dataset.anomalyId || null;
+          render();
+        }
+        if (action.dataset.action === "task-tab") {
+          state.taskTab = action.dataset.tab;
+          if (action.dataset.tab === "submissions") state.studentWorkMode = "list";
+          state.drawerStudentId = null;
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "open-student") {
+          state.drawerStudentId = action.dataset.studentId;
+          render();
+        }
+        if (action.dataset.action === "open-student-detail") {
+          state.taskTab = "submissions";
+          state.studentWorkMode = "detail";
+          state.detailStudentId = action.dataset.studentId;
+          state.detailQuestionId = "q1";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "open-student-submission") {
+          state.taskTab = "submissions";
+          state.studentWorkMode = "detail";
+          state.detailStudentId = action.dataset.studentId;
+          state.detailQuestionId = "q1";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "back-to-student-list") {
+          state.studentWorkMode = "list";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "back-to-submissions") {
+          state.taskTab = "submissions";
+          state.studentWorkMode = "list";
+          state.detailQuestionId = "q1";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "switch-detail-student") {
+          state.detailStudentId = action.dataset.studentId;
+          state.detailQuestionId = "q1";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "select-detail-question") {
+          state.detailQuestionId = action.dataset.questionId;
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "show-ai-review-queue") {
+          state.taskTab = "ai-review-queue";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "back-to-student-work") {
+          state.taskTab = "submissions";
+          state.studentWorkMode = "list";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "adjust-ai-suggestion") {
+          state.detailQuestionId = action.dataset.questionId;
+          state.showGradeEditor = true;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "edit-question-grade") {
+          state.detailQuestionId = action.dataset.questionId;
+          state.showGradeEditor = true;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "accept-ai-suggestion") {
+          const task = activeTask();
+          const student = task.studentRows.find((item) => item.id === state.detailStudentId);
+          state.detailQuestionId = action.dataset.questionId || state.detailQuestionId;
+          const question = ensureStudentGrades(task, student).find((item) => item.id === state.detailQuestionId);
+          question.teacherConfirmed = true;
+          question.uncertain = false;
+          student.grading = "教师已确认";
+          student.teacherModified = true;
+          task.updated = "刚刚";
+          state.showGradeEditor = false;
+          state.toast = "已采纳 AI 批改建议";
+          render();
+        }
+        if (action.dataset.action === "accept-review-group") {
+          const task = activeTask();
+          const questionId = action.dataset.questionId;
+          let confirmedCount = 0;
+          task.studentRows.forEach((student) => {
+            const question = ensureStudentGrades(task, student).find((item) => item.id === questionId);
+            if (!question || !question.uncertain || question.teacherConfirmed) return;
+            question.teacherConfirmed = true;
+            question.uncertain = false;
+            student.grading = "教师已确认";
+            student.teacherModified = true;
+            confirmedCount += 1;
+          });
+          task.updated = "刚刚";
+          state.toast = `已统一确认 ${confirmedCount} 份同类作答`;
+          render();
+        }
+        if (action.dataset.action === "skip-ai-review") {
+          state.taskTab = "submissions";
+          state.studentWorkMode = "list";
+          state.toast = "任务已完成；未复核题目暂不生成学生侧批改痕迹";
+          render();
+        }
+        if (action.dataset.action === "review-one-student") {
+          state.detailStudentId = action.dataset.studentId;
+          state.detailQuestionId = "q18";
+          state.taskTab = "submissions";
+          state.studentWorkMode = "detail";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "go-detail-student-anomaly") {
+          state.taskTab = "anomalies";
+          state.selectedAnomalyId = null;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "open-student-from-insight") {
+          state.detailStudentId = action.dataset.studentId;
+          state.detailQuestionId = "q18";
+          state.taskTab = "submissions";
+          state.studentWorkMode = "detail";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "generate-brief") {
+          state.toast = "已按影响人数与教学优先级生成 3 道题的讲评清单";
+          render();
+        }
+        if (action.dataset.action === "open-video-explanation") {
+          state.toast = "讲解视频演示入口：已打开第 3 题讲解";
+          render();
+        }
+        if (action.dataset.action === "save-detail-grade") {
+          const task = activeTask();
+          const student = task.studentRows.find((item) => item.id === state.detailStudentId);
+          state.detailQuestionId = action.dataset.questionId || state.detailQuestionId;
+          const question = ensureStudentGrades(task, student).find((item) => item.id === state.detailQuestionId);
+          const judgment = document.querySelector('[name="detail-judgment"]')?.value;
+          const score = Number(document.querySelector('[name="detail-score"]')?.value);
+          const comment = document.querySelector('[name="detail-comment"]')?.value.trim();
+          if (!Number.isFinite(score) || score < 0 || score > question.maxScore) {
+            state.toast = `本题得分需在 0–${question.maxScore} 分之间`;
+            render();
+          } else {
+            const previousQuestionScore = question.score;
+            question.judgment = judgment;
+            question.score = score;
+            question.comment = comment || "教师已确认本题结果。";
+            question.teacherModified = true;
+            question.teacherConfirmed = true;
+            question.uncertain = false;
+            const previousTotal = Number(student.score);
+            student.score = Number.isFinite(previousTotal)
+              ? String(Math.max(0, previousTotal + score - previousQuestionScore))
+              : String(ensureStudentGrades(task, student).reduce((total, item) => total + item.score, 0));
+            student.grading = "教师已修改";
+            student.teacherModified = true;
+            task.updated = "刚刚";
+            state.showGradeEditor = false;
+            state.toast = "已保存本题修改，并同步更新学生总分";
+            render();
+          }
+        }
+        if (action.dataset.action === "close-student") {
+          state.drawerStudentId = null;
+          render();
+        }
+        if (action.dataset.action === "go-student-anomaly") {
+          state.drawerStudentId = null;
+          state.taskTab = "anomalies";
+          render();
+        }
+        if (action.dataset.action === "select-anomaly") {
+          state.selectedAnomalyId = action.dataset.anomalyId;
+          render();
+        }
+        if (action.dataset.action === "resolve-current" || action.dataset.action === "resolve-similar" || action.dataset.action === "resolve-auto") {
+          const task = activeTask();
+          const selected = task.anomalies.find((item) => item.id === state.selectedAnomalyId) || task.anomalies[task.anomalies.length - 1];
+          const resolvedCount = action.dataset.action === "resolve-similar" ? (selected?.count || 1) : action.dataset.action === "resolve-auto" ? task.anomalyCount : 1;
+          state.toast = action.dataset.action === "resolve-similar" ? `已批量处理 ${resolvedCount} 名学生` : action.dataset.action === "resolve-auto" ? `已处理全部 ${resolvedCount} 项可自动确认异常` : "已处理当前学生异常";
+          task.anomalyCount = Math.max(0, task.anomalyCount - resolvedCount);
+          if (action.dataset.action === "resolve-auto") {
+            task.anomalies = [];
+            task.studentRows.forEach((student) => {
+              student.anomaly = "无";
+              student.grading = "AI 批改中";
+              student.match = "已匹配";
+            });
+          } else if (selected) {
+            if (action.dataset.action === "resolve-similar" || selected.count <= 1) {
+              task.anomalies = task.anomalies.filter((item) => item.id !== selected.id);
+            } else {
+              selected.count -= 1;
+              selected.student = selected.student.replace(/等.*$/, "");
+            }
+            const keyword = selected.type === "图像质量异常" ? "模糊" : selected.type === "缺页" ? "缺少" : selected.type === "学生匹配失败" ? "涂改" : selected.type;
+            task.studentRows.forEach((student) => {
+              if (student.anomaly.includes(keyword) || action.dataset.action === "resolve-similar" && selected.type === "图像质量异常") {
+                student.anomaly = "无";
+                student.grading = "AI 批改中";
+                student.match = "已匹配";
+              }
+            });
+          }
+          render();
+        }
+        if (action.dataset.action === "select-trace-student") {
+          state.traceStudentId = action.dataset.studentId;
+          render();
+        }
+        if (action.dataset.action === "toggle-trace") {
+          state.traceAfter = !state.traceAfter;
+          render();
+        }
+        if (action.dataset.action === "scanner-device-home") {
+          state.scannerStep = "home";
+          render();
+        }
+        if (action.dataset.action === "scanner-scan-mode") {
+          state.scannerStep = "class";
+          render();
+        }
+        if (action.dataset.action === "scanner-trace-mode") {
+          state.scannerStep = "trace-ready";
+          render();
+        }
+        if (action.dataset.action === "scanner-start-trace") {
+          state.scannerStep = "trace-output";
+          render();
+        }
+        if (action.dataset.action === "toggle-resource") {
+          const id = action.dataset.resourceId;
+          state.resourceSelected = state.resourceSelected.includes(id)
+            ? state.resourceSelected.filter((item) => item !== id)
+            : [...state.resourceSelected, id];
+          render();
+        }
+        if (action.dataset.action === "deposit-resources") {
+          const task = activeTask();
+          const current = state.resourceDeposited[task.id] || [];
+          state.resourceDeposited[task.id] = [...new Set([...current, ...state.resourceSelected])];
+          state.toast = state.resourceSelected.length ? `已沉淀 ${state.resourceSelected.length} 项资源到校本题库` : "请先选择需要沉淀的资源";
+          state.resourceSelected = [];
+          render();
+        }
+        if (action.dataset.action === "open-evidence") {
+          state.evidenceOpen = true;
+          render();
+        }
+        if (action.dataset.action === "close-evidence") {
+          state.evidenceOpen = false;
+          render();
+        }
+        if (action.dataset.action === "scanner-select-class") {
+          state.scannerTaskId = action.dataset.taskId;
+          render();
+        }
+        if (action.dataset.action === "scanner-next") {
+          state.scannerStep = "ready";
+          render();
+        }
+        if (action.dataset.action === "scanner-back") {
+          state.scannerStep = "class";
+          render();
+        }
+        if (action.dataset.action === "scanner-start") {
+          state.scannerStep = "scanning";
+          render();
+        }
+        if (action.dataset.action === "scanner-quality") {
+          state.scannerStep = "handoff";
+          render();
+        }
+        if (action.dataset.action === "scanner-save") {
+          state.scannerStep = "saved";
+          render();
+        }
+        if (action.dataset.action === "scanner-open-task") {
+          state.view = "grading";
+          state.gradingMode = "task";
+          state.activeTaskId = state.scannerTaskId;
+          state.taskTab = "submissions";
+          render();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        if (state.drawerStudentId) {
+          state.drawerStudentId = null;
+          render();
+          setTimeout(() => document.querySelector('[data-action="task-tab"][data-tab="submissions"]')?.focus(), 0);
+        } else if (state.evidenceOpen) {
+          state.evidenceOpen = false;
+          render();
+          setTimeout(() => document.querySelector('[data-action="open-evidence"]')?.focus(), 0);
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
