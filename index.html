@@ -1807,11 +1807,12 @@
           const studentIndex = task.studentRows.findIndex((item) => item.id === student.id);
           student.gradeDetails = questionTemplates.map((template, index) => {
             const scoreAdjustment = (studentIndex + index) % 4 === 0 && template.score > 1 ? -1 : 0;
-            const score = Math.max(0, template.score + scoreAdjustment);
+            const isFirstHomeworkStudentWrong = task.id === "homework" && studentIndex === 0 && ["q1", "q8"].includes(template.id);
+            const score = isFirstHomeworkStudentWrong ? 0 : Math.max(0, template.score + scoreAdjustment);
             return {
               ...template,
               score,
-              judgment: score === template.maxScore ? "正确" : score === 0 ? "错误" : "部分正确",
+              judgment: isFirstHomeworkStudentWrong ? "错误" : score === template.maxScore ? "正确" : score === 0 ? "错误" : "部分正确",
               teacherModified: false,
               teacherConfirmed: false,
               uncertain: template.id === "q18" && studentIndex !== task.studentRows.length - 1,
@@ -2072,7 +2073,7 @@
           const answerMark = task.kind === "作业" ? isCorrect ? `<i class="answer-mark is-correct">✓</i>` : isPartial ? `<i class="answer-mark is-partial"><img src="/Users/dengjingli_1/Downloads/半对.png" alt="半对"></i>` : `<i class="answer-mark is-incorrect">×</i>` : "";
           const scoreMark = task.kind === "作业" ? "" : `<i class="scan-mark ${isCorrect ? "is-correct" : ""}">${isCorrect ? "✓" : item.judgment === "错误" ? "×" : "△"} ${item.score}/${item.maxScore}</i>`;
           const answer = item.id === "q18"
-            ? `y = (x - 2)² - 1；顶点（2，-1），${isDetailed ? `<span class="step-error-circle">开口向下</span><span class="step-error-label">步骤错误已圈出</span>` : "开口向下"}`
+            ? `y = (x - 2)² - 1；顶点（2，-1），${isDetailed ? `<span class="step-error-circle">开口向下</span>` : "开口向下"}`
             : escapeHtml(item.answer);
           const feedbackLevel = item.id === "q18" ? "分步讲解" : item.id === "q8" ? "关键提示" : "错误位置";
           const traceDefaults = item.id === "q18" ? ["反复错误：二次项系数符号与开口方向混淆", "写出 a ＞ 0 → 开口向上，再完成该题订正。"] : item.id === "q8" ? ["步骤不完整：配方思路正确，但缺少等式变形", "补写配方的等式变形，说明对称轴来源。"] : item.id === "q1" ? ["计算失误：符号判断与标准答案不一致", "圈出二次项系数符号后，自行检查开口方向。"] : null;
@@ -2411,7 +2412,7 @@
         if (action.dataset.action === "task-tab") {
           const task = activeTask();
           if (action.dataset.tab === "insights" && task.id === "homework") {
-            window.location.href = "https://zingistop.github.io/banji-cuoyin-zhenduan-demo/#report-science";
+            window.location.href = "https://zingistop.github.io/class-error-diagnosis-flow/#generating-science";
             return;
           }
           if (action.dataset.tab === "insights" && task.id === "exam") { window.location.href = "file:///Users/dengjingli_1/Documents/GitHub/fx-ai/exam-insights.html"; return; }
@@ -2589,7 +2590,7 @@
           student.grading = "教师已修改";
           student.teacherModified = true;
           task.updated = "刚刚";
-          state.toast = `已标记第 ${question.number} 题为${question.judgment}`;
+          state.toast = "";
           render();
         }
         if (action.dataset.action === "save-detail-grade") {
