@@ -81,7 +81,7 @@
     .brand strong { font-size: 17px; letter-spacing: -.02em; }
     .brand small { margin-top: 3px; color: var(--muted); font-size: 11px; }
     .primary-nav { display: grid; gap: 8px; }
-    .primary-nav button, .return-scanner {
+    .primary-nav button {
       display: flex;
       width: 100%;
       align-items: center;
@@ -93,7 +93,7 @@
       cursor: pointer;
       text-align: left;
     }
-    .primary-nav button::before, .return-scanner::before {
+    .primary-nav button::before {
       display: grid;
       width: 28px;
       height: 28px;
@@ -103,7 +103,7 @@
       font-size: 14px;
       content: attr(data-icon);
     }
-    .primary-nav button:hover, .return-scanner:hover { background: rgba(255, 255, 255, .74); }
+    .primary-nav button:hover { background: rgba(255, 255, 255, .74); }
     .primary-nav button[aria-current="page"] {
       color: #26345f;
       background: rgba(255, 255, 255, .9);
@@ -122,10 +122,6 @@
       background: rgba(255, 255, 255, .52);
       font-size: 12px;
       line-height: 1.6;
-    }
-    .return-scanner {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .58);
     }
     .main-column { min-width: 0; }
     .workspace { padding: 30px; }
@@ -290,6 +286,10 @@
     .exception-types { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
     .exception-types span { border-radius: 999px; padding: 7px 9px; background: rgba(255, 255, 255, .68); font-size: 11px; }
     .filter-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .home-filter-bar { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px; padding: 4px 10px; border-radius: 18px; background: #fff; box-shadow: 0 7px 20px rgba(68, 83, 132, .08); }
+    .home-filter-bar::before { content: "⌕"; color: #5870dd; font-size: 20px; line-height: 1; transform: rotate(-35deg); }
+    .home-filter-bar label { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; color: #27324d; font-size: 13px; font-weight: 750; }
+    .home-filter-bar select { border: 0; outline: 0; color: #27324d; background: transparent; font: inherit; cursor: pointer; }
     .filter-chip { padding: 8px 12px; color: var(--muted); background: rgba(255, 255, 255, .56); }
     .filter-chip[aria-pressed="true"] { color: white; background: var(--navy); }
     .back-row { display: flex; align-items: center; gap: 10px; }
@@ -444,6 +444,14 @@
     .drawer-card h3 { margin: 0 0 11px; }
     .drawer-card p { color: var(--muted); line-height: 1.6; }
     .student-detail-page { display: grid; gap: 18px; animation: page-in .42s ease both; }
+    .page-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-action-bar--start { justify-content: flex-start; }
+    .page-action-bar__actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
     .student-detail-toolbar {
       display: flex;
       align-items: center;
@@ -623,6 +631,7 @@
     .student-name-list strong,
     .student-name-list small { display: block; }
     .student-name-list small { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .student-name-list .pending-review-tag { display: inline-flex; width: fit-content; margin-top: 4px; padding: 2px 6px; border-radius: 999px; color: #9a611e; background: #fff1d8; font-size: 9px; font-weight: 800; }
     .student-name-list b { align-self: center; font-size: 12px; }
     .scan-view { min-width: 0; }
     .scan-view-toolbar {
@@ -634,6 +643,7 @@
     }
     .scan-view-toolbar p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
     .scan-view-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .scan-paper-actions { display: flex; justify-content: flex-end; margin-bottom: 10px; }
     .scan-paper {
       position: relative;
       min-height: 780px;
@@ -663,6 +673,7 @@
     .scan-paper__head { padding-bottom: 18px; border-bottom: 1px solid #e3e5e9; text-align: center; }
     .scan-paper__head h2 { margin: 6px 0; font-size: 23px; }
     .scan-paper__head p { display: flex; justify-content: space-between; margin: 0; color: #646b78; font-size: 11px; }
+    .scan-paper__head .scan-paper__student { display: block; text-align: center; }
     .scan-question {
       position: relative;
       min-height: 120px;
@@ -674,6 +685,20 @@
     .scan-question strong,
     .scan-question__answer { display: block; }
     .scan-question__answer { margin-top: 9px; font-family: "Kaiti SC", cursive; font-size: 16px; }
+    .answer-mark {
+      display: inline-block;
+      margin-left: 14px;
+      font-family: "Kaiti SC", "STKaiti", cursive;
+      font-size: 27px;
+      font-weight: 800;
+      line-height: 1;
+      vertical-align: middle;
+      transform: rotate(-12deg);
+    }
+    .answer-mark.is-correct { color: #3d9b70; }
+    .answer-mark.is-incorrect { color: #e4545c; transform: rotate(9deg); }
+    .answer-mark.is-partial { width: 24px; height: 24px; transform: none; }
+    .answer-mark.is-partial img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .scan-mark {
       position: absolute;
       top: 12px;
@@ -685,6 +710,27 @@
       transform: rotate(-5deg);
     }
     .scan-mark.is-correct { font-size: 28px; }
+    .trace-mode-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.66);
+    }
+    .trace-mode-switch > span { padding: 0 5px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .trace-mode-switch button {
+      border: 0;
+      border-radius: 8px;
+      padding: 6px 9px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 760;
+    }
+    .trace-mode-switch button[aria-pressed="true"] { color: #fff; background: var(--navy); box-shadow: 0 4px 10px rgba(32,43,75,.18); }
     .step-error-circle {
       position: relative;
       display: inline-block;
@@ -708,17 +754,22 @@
       transform: rotate(-3deg);
     }
     .trace-guidance {
-      margin-top: 16px;
-      padding: 12px 14px;
-      border-left: 3px solid rgba(220,64,73,.78);
-      border-radius: 0 10px 10px 0;
+      display: inline-block;
+      margin: 10px 0 0 14px;
+      max-width: 430px;
+      padding: 0;
       color: #bd4650;
-      background: rgba(255,242,243,.72);
-      font-family: "Kaiti SC", cursive;
+      background: transparent;
+      font-family: "Kaiti SC", "STKaiti", cursive;
+      font-size: 15px;
+      font-style: normal;
+      font-weight: 600;
       line-height: 1.65;
+      transform: rotate(-1.5deg);
     }
     .trace-guidance strong,
     .trace-guidance span { display: block; }
+    .trace-guidance textarea { display: block; width: min(420px, 100%); min-height: 28px; padding: 0; border: 0; outline: 0; resize: vertical; color: inherit; background: transparent; font: inherit; line-height: inherit; }
     .video-qr-trace {
       display: flex;
       align-items: center;
@@ -780,12 +831,27 @@
       background: rgba(255,255,255,.67);
     }
     .grading-question-card__head { display: flex; justify-content: space-between; gap: 12px; }
+    .grading-question-card__controls { display: inline-flex; align-items: center; gap: 8px; }
     .grading-question-card__head h3 { margin: 3px 0 0; font-size: 15px; }
     .grading-question-card__score { color: #5569bc; font-weight: 800; }
+    .grading-question-card__result { color: #5569bc; font-size: 13px; font-weight: 800; }
+    .grading-question-card__result.is-review { color: #9a611e; background: #fff1d8; border: 1px solid #f1cf98; border-radius: 999px; padding: 5px 8px; }
     .grading-question-card .ai-review,
     .grading-question-card .ai-suggestion-card { margin: 12px 0 0; }
-    .grading-question-card .grade-form { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
-    .grading-question-card .grade-field textarea { min-height: 72px; }
+    .grading-question-card .ai-review { font-size: 11px; line-height: 1.55; }
+    .grading-question-card .ai-review strong { font-size: 12px; }
+    .judgment-tools--compact { display: inline-flex; align-items: center; gap: 5px; }
+    .judgment-tools--compact button { display: grid; width: 26px; height: 26px; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 50%; background: transparent; color: #23304f; font-size: 17px; font-weight: 800; cursor: pointer; line-height: 1; }
+    .judgment-tools--compact button:hover { background: #f0f2fb; }
+    .judgment-tools--compact button.is-selected.is-correct { color: #148657; border-color: #32c47c; background: #e9fbf1; }
+    .judgment-tools--compact button.is-selected.is-incorrect { color: #d84c56; border-color: #ff7d85; background: #fff4f4; }
+    .judgment-tools--compact button.is-selected.is-partial { color: #f04f50; border-color: #ff6868; background: #fff5f5; }
+    .subjective-score-editor { display: inline-flex; align-items: center; gap: 4px; color: #5569bc; font-size: 13px; font-weight: 800; }
+    .subjective-score-input { width: 44px; height: 28px; padding: 3px 5px; border: 1px solid #aeb9ee; border-radius: 8px; color: #2e3a6b; background: #f8f9ff; font: inherit; text-align: center; }
+    .partial-judgment-icon { position: relative; display: block; width: 18px; height: 18px; }
+    .partial-judgment-icon i { position: absolute; font-style: normal; line-height: 1; }
+    .partial-judgment-icon i:first-child { left: 0; bottom: 0; font-size: 16px; }
+    .partial-judgment-icon i:last-child { right: 0; top: 0; font-size: 13px; }
     .ai-review-entry { position: relative; padding-right: 38px; }
     .ai-suggestion-card {
       margin: 16px 0;
@@ -798,6 +864,12 @@
     .ai-suggestion-card h3 { margin: 8px 0; font-size: 18px; }
     .ai-suggestion-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
     .suggestion-actions { display: grid; gap: 8px; margin-top: 14px; }
+    .ai-review-summary { margin-top: 12px; padding: 13px; border: 1px solid rgba(91, 109, 194, .2); border-radius: 12px; background: #f6f7ff; }
+    .ai-review-summary__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #303c66; font-size: 12px; }
+    .ai-review-summary__head strong { font-size: 13px; }
+    .ai-review-summary__head span { color: var(--muted); font-size: 11px; }
+    .ai-review-summary > p { margin: 9px 0 8px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .ai-review-summary__suggestion { margin: 0; color: #344270; font-size: 13px; font-weight: 800; }
     .review-queue { display: grid; gap: 17px; }
     .review-queue-hero { display: grid; grid-template-columns: 1.3fr repeat(3, .55fr) 1fr; align-items: center; gap: 18px; padding: 22px; background: linear-gradient(120deg, rgba(244,246,255,.96), rgba(232,238,255,.84)); }
     .review-queue-hero h1 { margin: 7px 0; font-size: clamp(25px, 3.2vw, 38px); letter-spacing: -.05em; }
@@ -1323,6 +1395,9 @@
       box-shadow: 0 0 0 4px rgba(130, 228, 191, .13);
     }
     .app-shell[data-visual-theme="reference"] .workspace { padding: 30px 34px 36px; }
+    .app-shell.is-task-detail { grid-template-columns: minmax(0, 1fr); }
+    .app-shell.is-task-detail .sidebar { display: none; }
+    .app-shell.is-task-detail .workspace { padding: 30px 34px 36px; }
     .app-shell[data-visual-theme="reference"] .page-stack { gap: 18px; }
     .app-shell[data-visual-theme="reference"] .panel {
       border-color: rgba(255, 255, 255, .82);
@@ -1488,9 +1563,8 @@
       .app-shell { grid-template-columns: 1fr; margin: 0; min-height: 100vh; border-radius: 0; }
       .app-shell[data-visual-theme="reference"] { grid-template-columns: 1fr; min-height: 100vh; margin: 0; border-radius: 0; }
       .sidebar { gap: 14px; padding: 16px; border-right: 0; border-bottom: 1px solid var(--line); }
-      .primary-nav { grid-template-columns: 1fr 1fr; }
+      .primary-nav { grid-template-columns: 1fr; }
       .sidebar-note { display: none; }
-      .return-scanner { justify-content: center; }
       .workspace { padding: 18px; }
       .hero, .page-heading, .panel-heading { align-items: flex-start; flex-direction: column; }
       .hero-actions { width: 100%; flex-wrap: wrap; }
@@ -1538,10 +1612,7 @@
       </div>
       <nav class="primary-nav" aria-label="主导航">
         <button type="button" data-primary-nav data-action="navigate" data-view="grading" data-icon="✓" aria-current="page">批改</button>
-        <button type="button" data-primary-nav data-action="navigate" data-view="sources" data-icon="◇"><span class="nav-label">校本题库</span><small class="nav-demo-note">仅演示入口</small></button>
       </nav>
-      <div class="sidebar-note">演示数据涵盖普通作业与考试，可从高扫采集一路体验到留痕、学情和资源沉淀。</div>
-      <button class="return-scanner" type="button" data-action="show-scanner" data-icon="▣">高扫流程示例</button>
     </aside>
     <section class="main-column">
       <main id="app-view" class="workspace" tabindex="-1"></main>
@@ -1559,7 +1630,8 @@
           students: 42,
           pages: 84,
           anomalyCount: 5,
-          status: "待处理异常",
+          status: "待复核",
+          listTag: "待复核",
           progress: 97,
           updated: "12 分钟前",
           anomalies: [
@@ -1624,7 +1696,7 @@
           students: 36,
           pages: 72,
           anomalyCount: 2,
-          status: "待处理异常",
+          status: "待复核",
           progress: 98,
           updated: "昨天 14:05",
           anomalies: [
@@ -1636,12 +1708,33 @@
             { id: "q-s2", name: "孙欣然", pages: "2 / 2 页", match: "待确认", grading: "待处理", anomaly: "未填写姓名", score: "—" },
           ],
         },
+        {
+          id: "weekend",
+          title: "整式乘法周末作业",
+          kind: "作业",
+          className: "八年级 2 班",
+          students: 41,
+          pages: 82,
+          anomalyCount: 1,
+          status: "待复核",
+          progress: 99,
+          updated: "周一 17:30",
+          anomalies: [
+            { id: "we-a1", student: "郑雨欣", type: "图像质量异常", detail: "第 2 页答案区轻微模糊", count: 1 },
+          ],
+          studentRows: [
+            { id: "we-s1", name: "郑雨欣", pages: "2 / 2 页", match: "已匹配", grading: "待处理", anomaly: "图像轻微模糊", score: "—" },
+            { id: "we-s2", name: "何宇辰", pages: "2 / 2 页", match: "已匹配", grading: "已完成", anomaly: "无", score: "94" },
+          ],
+        },
       ];
       let tasks = JSON.parse(JSON.stringify(taskSeeds));
       const initialState = {
         view: "grading",
         gradingMode: "home",
         activeTaskId: null,
+        homeTypeFilter: "全部",
+        homeClassFilter: "全部",
         taskTab: "submissions",
         anomalyTaskId: null,
         anomalyStudentId: null,
@@ -1654,19 +1747,14 @@
         toast: "",
         traceStudentId: null,
         traceAfter: true,
-        resourceSelected: [],
-        resourceDeposited: {
-          homework: [],
-          exam: [],
-          practice: ["practice-paper"],
-          quiz: [],
-        },
+        studentTraceMode: "detailed",
         evidenceOpen: false,
         scannerStep: "home",
         scannerTaskId: "homework",
       };
       let state = JSON.parse(JSON.stringify(initialState));
       const app = document.querySelector("#app-view");
+      const appShell = document.querySelector(".app-shell");
 
       function statusClass(task) {
         return task.anomalyCount ? "status-badge warning" : "status-badge";
@@ -1679,6 +1767,7 @@
           title: "判断函数图像开口方向",
           prompt: "二次函数 y = 2x² - 4x + 1 的图像开口方向是（ ）。",
           answer: "向上",
+          gradingMode: "objective",
           maxScore: 4,
           score: 4,
           judgment: "正确",
@@ -1691,6 +1780,7 @@
           title: "求函数图像的对称轴",
           prompt: "求 y = x² - 4x + 3 的对称轴。",
           answer: "x = 2",
+          gradingMode: "objective",
           maxScore: 4,
           score: 3,
           judgment: "部分正确",
@@ -1703,6 +1793,7 @@
           title: "顶点式与图像性质",
           prompt: "将 y = x² - 4x + 3 化为顶点式，并说明顶点与开口方向。",
           answer: "y = (x - 2)² - 1；顶点（2，-1），开口向下。",
+          gradingMode: "subjective",
           maxScore: 6,
           score: 4,
           judgment: "部分正确",
@@ -1742,14 +1833,14 @@
       }
 
       function taskRow(task) {
+        const listTag = task.listTag || "";
         return `
           <button class="task-row" type="button" data-action="open-task" data-task-id="${task.id}">
             <span class="task-main">
-              <span class="task-icon" aria-hidden="true">${task.kind === "作业" ? "页" : "卷"}</span>
               <span><strong>${task.title}</strong><small>${task.kind} · ${task.className} · ${task.students} 人 / ${task.pages} 页</small></span>
             </span>
             <span class="task-meta">
-              <span class="${statusClass(task)}">${task.status}${task.anomalyCount ? ` · ${task.anomalyCount}` : ""}</span>
+              ${listTag ? `<span class="${listTag === "待复核" ? "status-badge warning" : "status-badge"}">${listTag}</span>` : ""}
               <span>${task.updated}</span>
               <span aria-hidden="true">→</span>
             </span>
@@ -1757,37 +1848,15 @@
       }
 
       function renderHome() {
+        const classes = [...new Set(tasks.map((task) => task.className))];
+        const filteredTasks = tasks.slice(0, 5).filter((task) => (state.homeTypeFilter === "全部" || task.kind === state.homeTypeFilter) && (state.homeClassFilter === "全部" || task.className === state.homeClassFilter));
         return `
           <div class="page-stack">
-            <section class="hero panel">
-              <div class="hero-copy">
-                <p class="eyebrow">今日 · 7 月 30 日 星期四</p>
-                <h1>下午好，林老师</h1>
-                <p>AI 已完成 156 份作业与试卷的识别批改，可直接查看结果、原卷留痕和班级学情。</p>
-              </div>
+            <header class="page-heading"><h1>下午好，林老师</h1></header>
+            <section class="panel section-panel">
+              <div class="home-filter-bar" aria-label="任务筛选"><label>类型<select data-action="home-type-filter" aria-label="类型"><option value="全部" ${state.homeTypeFilter === "全部" ? "selected" : ""}>全部</option><option value="作业" ${state.homeTypeFilter === "作业" ? "selected" : ""}>作业</option><option value="考试" ${state.homeTypeFilter === "考试" ? "selected" : ""}>考试</option></select></label><label>班级<select data-action="home-class-filter" aria-label="班级"><option value="全部">全部</option>${classes.map((name) => `<option value="${name}" ${state.homeClassFilter === name ? "selected" : ""}>${name}</option>`).join("")}</select></label></div>
+              <div class="task-list">${filteredTasks.map(taskRow).join("") || `<p style="color:var(--muted)">暂无符合条件的批改任务</p>`}</div>
             </section>
-            <section class="metric-strip" aria-label="今日批改摘要">
-              <article class="metric"><strong>156 份</strong><span>AI 已完成识别批改</span></article>
-              <article class="metric"><strong>97%</strong><span>AI 直接完成率</span></article>
-              <article class="metric"><strong>86 分钟</strong><span>预计节省整理时间</span></article>
-            </section>
-            <section class="panel processing-card">
-              <div class="processing-card__head">
-                <div class="processing-title"><span>卷</span><div><p class="eyebrow">正在处理</p><h2>数学期中质量检测</h2><p>考试任务 · 八年级 5 班</p></div></div>
-                <button class="text-button" type="button" data-action="open-processing-task" data-task-id="exam">查看识别任务 →</button>
-              </div>
-              <div class="processing-progress"><strong><span>AI 批改完成度</span><span>95%</span></strong><span class="processing-progress__track"><i style="width:95%"></i></span></div>
-              <div class="processing-meta"><span>♙ 40 名学生</span><span>◇ 8 项待复核</span><span>◷ 预计 3 分钟</span><span>✣ 无二维码 · 版面与笔迹匹配 · 已匹配 40 人</span></div>
-            </section>
-            <div class="content-grid">
-              <section class="panel section-panel">
-                <div class="panel-heading">
-                  <div><p class="eyebrow">最近任务</p><h2>继续今天的批改</h2></div>
-                  <button class="text-button" type="button" data-action="show-all-tasks">查看全部 →</button>
-                </div>
-                <div class="task-list">${tasks.slice(0, 4).map(taskRow).join("")}</div>
-              </section>
-            </div>
           </div>`;
       }
 
@@ -1799,9 +1868,9 @@
               <div><p class="eyebrow">批改任务</p><h1>全部批改任务</h1><p>按状态查找作业与考试，进入任务后完成全部处理。</p></div>
             </header>
             <div class="filter-row" aria-label="任务筛选">
-              <button class="filter-chip" type="button" aria-pressed="true">全部 4</button>
+              <button class="filter-chip" type="button" aria-pressed="true">全部 5</button>
               <button class="filter-chip" type="button" aria-pressed="false">处理中 1</button>
-              <button class="filter-chip" type="button" aria-pressed="false">待处理异常 2</button>
+              <button class="filter-chip" type="button" aria-pressed="false">待复核 3</button>
               <button class="filter-chip" type="button" aria-pressed="false">已完成 1</button>
             </div>
             <section class="panel section-panel"><div class="task-list">${tasks.map(taskRow).join("")}</div></section>
@@ -1838,40 +1907,6 @@
         if (state.gradingMode === "all") return renderAllTasks();
         if (state.gradingMode === "anomaly-center") return renderAnomalyCenter();
         return renderHome();
-      }
-
-      function depositedSources() {
-        const sources = [];
-        tasks.forEach((task) => {
-          const ids = state.resourceDeposited[task.id] || [];
-          resourceOptions(task).forEach((resource) => {
-            if (ids.includes(resource.id)) sources.push({ ...resource, task });
-          });
-        });
-        return sources;
-      }
-
-      function renderSources() {
-        const sources = depositedSources();
-        return `
-          <div class="page-stack">
-            <header class="page-heading">
-              <div><p class="eyebrow">校本题库 · 仅演示入口</p><h1>学校确认过的教学资源</h1><p>只展示教师主动沉淀的整卷、题目、答案、评分标准和典型作答。</p></div>
-              <span class="status-badge">${sources.length} 项资源</span>
-            </header>
-            <div class="source-toolbar">
-              <div class="filter-row"><button class="filter-chip" aria-pressed="true">全部</button><button class="filter-chip" aria-pressed="false">整卷</button><button class="filter-chip" aria-pressed="false">易错题</button><button class="filter-chip" aria-pressed="false">评分标准</button></div>
-              <button class="button-secondary" type="button">按最近沉淀排序</button>
-            </div>
-            <div class="source-grid">
-              ${sources.length ? sources.map((source, index) => `
-                <article class="panel source-card">
-                  <div class="source-card__type"><span class="status-badge">${source.title.includes("题") ? "题目资源" : "整卷资源"}</span><span>···</span></div>
-                  <h2>${source.title}</h2><p>${source.meta}</p>
-                  <dl><div><dt>来源任务</dt><dd>${source.task.title}</dd></div><div><dt>确认教师</dt><dd>林老师</dd></div><div><dt>沉淀时间</dt><dd>${index ? "昨天" : "今天 13:45"}</dd></div><div><dt>使用次数</dt><dd>${index + 3} 次</dd></div></dl>
-                </article>`).join("") : `<section class="panel placeholder"><h2>暂时没有校本资源</h2><p>请先在任务的“资源沉淀”中主动选择需要入库的内容。</p></section>`}
-            </div>
-          </div>`;
       }
 
       function scannerTask() {
@@ -1949,26 +1984,8 @@
         return `<section class="scanner-stage"><div class="scanner-card"><p class="eyebrow">扫描采集</p><h1>今天扫描哪个班？</h1><p>高扫只需要老师选择年级和班级，作业/考试、资源来源和批改状态由系统自动识别。</p><div class="class-picks">${tasks.slice(0, 2).map((item) => `<button type="button" data-action="scanner-select-class" data-task-id="${item.id}" aria-pressed="${item.id === task.id}"><strong>${item.className}</strong><span>${item.kind}演示数据 · ${item.students} 名学生</span></button>`).join("")}</div><div class="button-row"><button class="button-secondary" type="button" data-action="scanner-device-home">返回设备首页</button><button class="button-primary" type="button" data-action="scanner-next">下一步：放入纸张</button></div></div></section>`;
       }
 
-      const taskTabLabels = {
-        submissions: "学生作业",
-        insights: "学情分析",
-        resources: "资源沉淀",
-      };
-
       function activeTask() {
         return tasks.find((task) => task.id === state.activeTaskId) || tasks[0];
-      }
-
-      function renderTaskHeader(task) {
-        return `
-          <div class="back-row"><button class="button-ghost" type="button" data-action="show-grading-home">← 返回批改首页</button></div>
-          <section class="panel task-header">
-            <div><p class="eyebrow">${task.kind} · ${task.className}</p><h1>${task.title}</h1><p>${task.students} 名学生 · ${task.pages} 页 · 更新于 ${task.updated}</p></div>
-            <div class="task-header__stats"><span class="status-badge">${task.progress}% AI 已完成</span><span class="${statusClass(task)}">${task.anomalyCount} 项扫描异常</span></div>
-          </section>
-          <nav class="task-tabs" aria-label="任务详情">
-            ${Object.entries(taskTabLabels).map(([tab, label]) => `<button type="button" data-action="task-tab" data-tab="${tab}" role="tab" aria-selected="${state.taskTab === tab}">${label}</button>`).join("")}
-          </nav>`;
       }
 
       function renderOverview(task) {
@@ -1981,7 +1998,6 @@
                 <div class="stage" data-state="complete"><strong>识别批改</strong><small>AI 完成 ${task.progress}%</small></div>
                 <div class="stage" data-state="${task.anomalyCount ? "current" : "complete"}"><strong>异常处理</strong><small>${task.anomalyCount} 项待处理</small></div>
                 <div class="stage" data-state="current"><strong>留痕输出</strong><small>可预览</small></div>
-                <div class="stage"><strong>资源沉淀</strong><small>待教师选择</small></div>
               </div>
             </section>
             <section class="panel">
@@ -2016,7 +2032,7 @@
                       <td>${student.grading}</td>
                       <td class="${student.anomaly === "无" ? "state-ok" : "state-warning"}">${student.anomaly}</td>
                       <td>${student.score}</td>
-                      <td><button class="row-action" type="button" data-action="${student.anomaly === "无" ? "open-student-detail" : "open-student"}" data-student-id="${student.id}">${student.anomaly === "无" ? "查看" : "处理异常"} →</button></td>
+                      <td>${student.anomaly === "无" ? "" : `<button class="row-action" type="button" data-action="open-student" data-student-id="${student.id}">处理异常 →</button>`}</td>
                     </tr>`).join("")}
                 </tbody>
               </table>
@@ -2043,39 +2059,61 @@
         const student = task.studentRows.find((item) => item.id === state.detailStudentId) || task.studentRows.find((item) => item.anomaly === "无") || task.studentRows[0];
         state.detailStudentId = student.id;
         const questions = ensureStudentGrades(task, student);
-        const pendingReviews = task.studentRows.flatMap((item) => ensureStudentGrades(task, item).filter((record) => record.uncertain && !record.teacherConfirmed));
-        const visibleScore = student.score === "—" ? `${questions.reduce((total, item) => total + item.score, 0)} / ${questions.reduce((total, item) => total + item.maxScore, 0)}` : student.score;
+        const isDetailed = state.studentTraceMode === "detailed";
+        const studentCorrectRate = (item) => {
+          const grades = ensureStudentGrades(task, item);
+          const total = grades.reduce((sum, question) => sum + question.score, 0);
+          const maximum = grades.reduce((sum, question) => sum + question.maxScore, 0);
+          return Math.round(total / maximum * 100);
+        };
         const paperQuestion = (item) => {
-          const mark = item.uncertain && !item.teacherConfirmed ? `AI 建议 △ ${item.score}/${item.maxScore}` : `${item.judgment === "正确" ? "✓" : item.judgment === "错误" ? "×" : "△"} ${item.score}/${item.maxScore}`;
+          const isCorrect = item.judgment === "正确";
+          const isPartial = item.judgment === "部分正确";
+          const answerMark = task.kind === "作业" ? isCorrect ? `<i class="answer-mark is-correct">✓</i>` : isPartial ? `<i class="answer-mark is-partial"><img src="/Users/dengjingli_1/Downloads/半对.png" alt="半对"></i>` : `<i class="answer-mark is-incorrect">×</i>` : "";
+          const scoreMark = task.kind === "作业" ? "" : `<i class="scan-mark ${isCorrect ? "is-correct" : ""}">${isCorrect ? "✓" : item.judgment === "错误" ? "×" : "△"} ${item.score}/${item.maxScore}</i>`;
           const answer = item.id === "q18"
-            ? `y = (x - 2)² - 1；顶点（2，-1），<span class="step-error-circle">开口向下</span><span class="step-error-label">步骤错误已圈出</span>`
+            ? `y = (x - 2)² - 1；顶点（2，-1），${isDetailed ? `<span class="step-error-circle">开口向下</span><span class="step-error-label">步骤错误已圈出</span>` : "开口向下"}`
             : escapeHtml(item.answer);
-          return `<div class="scan-question"><strong>${item.number}．${item.prompt}</strong><span class="scan-question__answer">学生作答：${answer}</span><i class="scan-mark ${item.judgment === "正确" ? "is-correct" : ""}">${mark}</i>${item.id === "q18" ? `<div class="trace-guidance"><strong>错因：二次项系数符号与开口方向混淆</strong><span>学习建议：先圈出二次项系数，判断正负后再确定开口方向，并完成一道变式订正。</span></div>` : item.id === "q8" ? `<div class="trace-guidance"><strong>错因：过程表达不完整</strong><span>学习建议：补写配方过程，说明对称轴的来源。</span></div>` : ""}</div>`;
+          const feedbackLevel = item.id === "q18" ? "分步讲解" : item.id === "q8" ? "关键提示" : "错误位置";
+          const traceDefaults = item.id === "q18" ? ["反复错误：二次项系数符号与开口方向混淆", "写出 a ＞ 0 → 开口向上，再完成该题订正。"] : item.id === "q8" ? ["步骤不完整：配方思路正确，但缺少等式变形", "补写配方的等式变形，说明对称轴来源。"] : item.id === "q1" ? ["计算失误：符号判断与标准答案不一致", "圈出二次项系数符号后，自行检查开口方向。"] : null;
+          const guidance = !isDetailed || isCorrect || !traceDefaults ? "" : `<em class="trace-guidance" data-feedback-level="${feedbackLevel}"><strong><textarea data-action="edit-trace-cause" data-question-id="${item.id}" aria-label="错因内容">${escapeHtml(item.traceCause || traceDefaults[0])}</textarea></strong><span><textarea data-action="edit-trace-advice" data-question-id="${item.id}" aria-label="改进动作内容">${escapeHtml(item.traceAdvice || traceDefaults[1])}</textarea></span></em>`;
+          return `<div class="scan-question"><strong>${item.number}．${item.prompt}</strong><span class="scan-question__answer">学生作答：${answer}${answerMark}${guidance}</span>${scoreMark}</div>`;
         };
         const gradingCard = (item) => {
           const needsReview = item.uncertain && !item.teacherConfirmed;
-          const isEditing = state.showGradeEditor && state.detailQuestionId === item.id;
+          const resultLabel = needsReview ? "待复核" : item.judgment === "部分正确" ? "" : item.judgment;
+          const resultClass = needsReview ? "grading-question-card__result is-review" : "grading-question-card__result";
+          const isExamObjective = task.kind === "考试" && item.gradingMode === "objective";
+          const isExamSubjective = task.kind === "考试" && item.gradingMode === "subjective";
+          const resultMarkup = task.kind === "作业"
+            ? needsReview ? `<span class="${resultClass}">${resultLabel}</span>` : ""
+            : isExamObjective ? `<span class="grading-question-card__score">${item.score}/${item.maxScore}</span>` : "";
+          const judgmentTools = `<div class="judgment-tools--compact" role="group" aria-label="第 ${item.number} 题批改判断"><button class="${item.judgment === "正确" ? "is-selected is-correct" : ""}" type="button" title="正确" aria-label="正确" data-action="quick-judgment" data-question-id="${item.id}" data-judgment="正确">✓</button><button class="${item.judgment === "错误" ? "is-selected is-incorrect" : ""}" type="button" title="错误" aria-label="错误" data-action="quick-judgment" data-question-id="${item.id}" data-judgment="错误">×</button>${isExamObjective ? "" : `<button class="${item.judgment === "部分正确" ? "is-selected is-partial" : ""}" type="button" title="半对" aria-label="半对" data-action="quick-judgment" data-question-id="${item.id}" data-judgment="部分正确"><img class="partial-judgment-icon" src="/Users/dengjingli_1/Downloads/半对.png" alt=""></button>`}</div>`;
+          const subjectiveScoreEditor = `<label class="subjective-score-editor">得分<input class="subjective-score-input" type="number" min="0" max="${item.maxScore}" step="1" value="${item.score}" data-action="edit-subjective-score" data-question-id="${item.id}">/${item.maxScore}</label>`;
           return `<article class="grading-question-card" data-question-id="${item.id}">
-            <div class="grading-question-card__head"><div><p class="eyebrow">第 ${item.number} 题</p><h3>${item.title}</h3></div><span class="grading-question-card__score">${item.score}/${item.maxScore}</span></div>
+            <div class="grading-question-card__head"><div><p class="eyebrow">第 ${item.number} 题</p></div><div class="grading-question-card__controls">${isExamSubjective ? subjectiveScoreEditor : judgmentTools}${resultMarkup}</div></div>
             ${item.teacherConfirmed ? `<div class="grade-saved">✓ 教师已确认 · 当前结果已保存</div>` : item.teacherModified ? `<div class="grade-saved">✓ 教师已修改 · 当前结果已保存</div>` : ""}
-            ${needsReview ? `<div class="ai-suggestion-card"><span>AI 批改建议 · 置信度 ${item.confidence}%</span><h3>建议：${item.judgment}，${item.score} / ${item.maxScore} 分</h3><p><strong>建议依据：</strong>${item.aiBasis}</p><div class="suggestion-actions"><button class="button-primary" type="button" data-action="accept-ai-suggestion" data-question-id="${item.id}">采纳 AI 建议</button><button class="button-secondary" type="button" data-action="adjust-ai-suggestion" data-question-id="${item.id}">调整建议后确认</button></div></div>` : `<div class="ai-review"><strong>AI 批改依据</strong><span>${item.aiBasis}</span></div>${!isEditing ? `<button class="button-secondary" type="button" data-action="edit-question-grade" data-question-id="${item.id}">修改本题批改</button>` : ""}`}
-            ${isEditing ? `<div class="grade-form"><label class="grade-field">最终判断<select name="detail-judgment">${["正确", "部分正确", "错误"].map((value) => `<option value="${value}" ${item.judgment === value ? "selected" : ""}>${value}</option>`).join("")}</select></label><label class="grade-field">本题得分（满分 ${item.maxScore} 分）<input name="detail-score" type="number" min="0" max="${item.maxScore}" step="1" value="${item.score}"></label><label class="grade-field">批改评语<textarea name="detail-comment">${escapeHtml(item.comment)}</textarea></label><button class="button-primary" type="button" data-action="save-detail-grade" data-question-id="${item.id}">保存本题修改</button></div>` : ""}
+            ${needsReview ? `<div class="ai-review-summary"><div class="ai-review-summary__head"><strong>AI 批改依据</strong><span>置信度 ${item.confidence}%</span></div><p>${item.aiBasis}</p><div class="ai-review-summary__suggestion">AI 建议：${item.judgment}</div>${task.id === "exam" ? `<button class="button-secondary" type="button" data-action="open-batch-review">批量处理同类问题</button>` : ""}</div>` : `<div class="ai-review"><strong>AI 批改依据</strong><span>${item.aiBasis}</span></div>`}
           </article>`;
         };
         return `
           <div class="student-detail-page">
-            <div class="back-row"><button class="button-ghost" type="button" data-action="back-to-student-list">← 返回学生明细</button></div>
-            ${student.anomaly !== "无" ? `<div class="notice"><strong>!</strong><span>该生仍有扫描异常：${student.anomaly}。当前可查看 AI 已识别内容，相关页面在异常确认前不会输出留痕。 <button class="text-button" type="button" data-action="go-detail-student-anomaly">处理扫描异常 →</button></span></div>` : ""}
+            <div class="page-action-bar">
+              <button class="button-ghost" type="button" data-action="show-grading-home">← 返回批改首页</button>
+              <div class="page-action-bar__actions">
+                <button class="button-secondary" type="button" disabled aria-disabled="true">上传答案重批</button>
+                <button class="button-secondary" type="button" data-action="task-tab" data-tab="insights" ${["quiz", "weekend"].includes(task.id) ? "disabled aria-disabled=\"true\"" : ""}>${task.id === "homework" ? "错因诊断" : "学情分析"} →</button>
+              </div>
+            </div>
             <div class="student-workspace">
               <aside class="panel student-name-nav" aria-label="学生导航">
-                <p class="eyebrow">学生导航</p><h2>全班提交</h2>
-                <div class="student-name-list">${task.studentRows.map((item) => `<button type="button" data-action="switch-detail-student" data-student-id="${item.id}" aria-current="${item.id === student.id}"><span><strong>${item.name}</strong><small>${item.grading}${item.anomaly !== "无" ? " · 有扫描异常" : ""}</small></span><b>${item.score}</b></button>`).join("")}</div>
+                <div class="student-name-list">${task.studentRows.map((item) => { const hasPendingReview = ensureStudentGrades(task, item).some((question) => question.uncertain && !question.teacherConfirmed); return `<button type="button" data-action="switch-detail-student" data-student-id="${item.id}" aria-current="${item.id === student.id}"><span><strong>${item.name}</strong>${hasPendingReview ? `<small class="pending-review-tag">待复核</small>` : `<small>${item.grading}</small>`}</span><b>${task.kind === "作业" ? `${studentCorrectRate(item)}%` : item.score}</b></button>`; }).join("")}</div>
               </aside>
               <section class="panel scan-view">
-                <div class="scan-view-toolbar"><div><p class="eyebrow">原始扫描件 · ${student.name}</p><p>${student.pages} · ${student.grading}</p></div><div class="scan-view-actions"><span class="status-badge">当前得分 ${visibleScore}</span>${student.teacherModified ? `<span class="status-badge">教师已修改</span>` : `<span class="status-badge">AI 批改结果</span>`}${pendingReviews.length ? `<button class="button-secondary ai-review-entry" type="button" data-action="show-ai-review-queue">统一处理待确认<span class="notification-bubble">${pendingReviews.length}</span></button>` : ""}</div></div>
-                <div class="scan-paper"><header class="scan-paper__head"><p><span>${task.className}</span><span>${task.kind === "考试" ? "试卷" : "作业"}第 1 页</span></p><h2>${task.title}</h2><p><span>姓名：${student.name}</span><span>原始扫描 · AI 红色留痕</span></p></header>${questions.map(paperQuestion).join("")}${student.name === "赵子轩" ? `<button class="video-qr-trace" type="button" data-action="open-video-explanation" aria-label="扫码查看第 3 题讲解视频"><span class="qr-code-demo" aria-hidden="true"></span><span><strong>扫码查看讲解视频</strong><small>第 3 题 · 开口方向与图像性质 · 3 分钟</small></span></button>` : ""}</div>
+                <div class="scan-paper-actions"><div class="trace-mode-switch" role="group" aria-label="批改痕迹版本"><span>批改痕迹</span><button type="button" data-action="set-student-trace-mode" data-mode="basic" aria-pressed="${state.studentTraceMode === "basic"}">基础版</button><button type="button" data-action="set-student-trace-mode" data-mode="detailed" aria-pressed="${isDetailed}">详细版</button></div></div>
+                <div class="scan-paper"><header class="scan-paper__head"><p class="scan-paper__student">${task.className} · ${student.name}</p><h2>${task.title}</h2></header>${questions.map(paperQuestion).join("")}${student.name === "赵子轩" ? `<button class="video-qr-trace" type="button" data-action="open-video-explanation" aria-label="扫码查看第 3 题讲解视频"><span class="qr-code-demo" aria-hidden="true"></span><span><strong>扫码查看讲解视频</strong><small>第 3 题 · 开口方向与图像性质 · 3 分钟</small></span></button>` : ""}</div>
               </section>
-              <aside class="grading-rail"><header><p class="eyebrow">随卷批改</p><h2>每道题批改结果</h2></header>${questions.map(gradingCard).join("")}</aside>
+              <aside class="grading-rail">${questions.map(gradingCard).join("")}</aside>
             </div>
           </div>`;
       }
@@ -2129,6 +2167,7 @@
                     <div class="review-option"><span></span><div><strong>得 6 分</strong><small>只考查配方法，不扣开口方向分。</small></div></div>
                     <div class="review-option"><span></span><div><strong>得 2 分</strong><small>只认可方法选择，不认可后续结论。</small></div></div>
                   </div>
+                  <label class="subjective-score-editor" style="margin-top:14px">老师调整得分 <input class="subjective-score-input" name="batch-review-score" type="number" min="0" max="6" value="4">/6</label>
                   <div class="tag-cloud" style="margin-top:15px">${q18.map((item) => `<span>${item.student.name}</span>`).join("")}</div>
                   <div class="button-row" style="margin-top:17px"><button class="button-primary" type="button" data-action="accept-review-group" data-question-id="q18">采纳推荐并应用到 ${q18.length} 份同类作答</button><button class="button-secondary" type="button" data-action="review-one-student" data-student-id="${q18[0].student.id}">查看单个学生</button></div>
                 </main>
@@ -2150,7 +2189,7 @@
 
       function renderAnomalies(task) {
         const selected = task.anomalies.find((item) => item.id === state.selectedAnomalyId) || task.anomalies[task.anomalies.length - 1];
-        if (!selected) return `<section class="panel placeholder"><h2>扫描异常已处理完成</h2><p>可以继续预览留痕、查看学情并选择资源沉淀。</p></section>`;
+        if (!selected) return `<section class="panel placeholder"><h2>扫描异常已处理完成</h2><p>可以继续预览留痕并查看班级学情。</p></section>`;
         return `
           <div class="anomaly-layout">
             <aside class="panel">
@@ -2268,67 +2307,24 @@
             <div class="mini-bars" style="margin-top:16px"><div class="mini-bar"><span>90–100</span><span class="mini-bar__track"><i style="width:38%"></i></span><strong>8 人</strong></div><div class="mini-bar"><span>80–89</span><span class="mini-bar__track"><i style="width:72%"></i></span><strong>15 人</strong></div><div class="mini-bar"><span>70–79</span><span class="mini-bar__track"><i style="width:55%"></i></span><strong>11 人</strong></div></div>
             <div class="exam-basics"><span>成绩分布已生成</span><span>区分度 0.42</span><span>第 2 题得分率 46%</span></div>
           </section>` : "";
+        const isBasicHomework = task.kind === "作业" && task.id === "homework";
+        const isExamInsights = task.id === "exam";
+        const basicHomeworkOverview = isBasicHomework ? `<section class="panel exam-overview"><p class="eyebrow">作业基础统计</p><div class="panel-heading"><div><h2 class="report-section-title">完成与正确率</h2><p>基于 ${task.students} 名学生的作业提交与批改结果统计</p></div><span class="status-badge">${task.students} 人</span></div><div class="exam-kpi-grid"><div class="exam-kpi"><span>提交率</span><strong>100%</strong><small>${task.students}/${task.students} 人已提交</small></div><div class="exam-kpi"><span>平均正确率</span><strong>78%</strong><small>班级整体表现</small></div><div class="exam-kpi"><span>订正完成率</span><strong>64%</strong><small>已完成订正学生</small></div><div class="exam-kpi"><span>待复核</span><strong>5</strong><small>题目待教师确认</small></div></div><div class="mini-bars" style="margin-top:16px"><div class="mini-bar"><span>正确率 90% 以上</span><span class="mini-bar__track"><i style="width:34%"></i></span><strong>14 人</strong></div><div class="mini-bar"><span>正确率 70–89%</span><span class="mini-bar__track"><i style="width:62%"></i></span><strong>20 人</strong></div><div class="mini-bar"><span>正确率 70% 以下</span><span class="mini-bar__track"><i style="width:26%"></i></span><strong>8 人</strong></div></div></section>` : "";
+        const aiSummary = isBasicHomework || isExamInsights ? "" : `<div class="ai-summary-grid"><section class="panel ai-diagnosis-summary"><p class="eyebrow">AI 已分析全班原始作答</p><h2>AI 班级诊断结论</h2><p><strong>本次优先处理：</strong>${profile.conclusion}</p></section><section class="panel ai-teaching-summary"><p class="eyebrow">下一步怎么教</p><h2>AI 教学建议</h2><ol>${profile.teaching.map((item) => `<li>${item}</li>`).join("")}</ol></section></div>`;
+        const questionAnalysis = isExamInsights ? `<section class="panel"><h2 class="report-section-title">单题得分统计</h2><div class="report-question-list">${profile.questions.map(([number, title, rate]) => `<article class="report-question-card"><div class="report-question-head"><div><p class="eyebrow">第 ${number} 题</p><h3>${title}</h3></div><span class="status-badge ${rate < 70 ? "warning" : ""}">得分率 ${rate}%</span></div><div class="answer-distribution"><span>平均得分 ${(rate / 100 * (Number(number) === 3 ? 6 : 4)).toFixed(1)} 分</span><span>满分人数 ${Math.round(task.students * rate / 100)} 人</span><span>满分 ${Number(number) === 3 ? 6 : 4} 分</span></div></article>`).join("")}</div></section>` : isBasicHomework ? `<section class="panel"><h2 class="report-section-title">单题正确率</h2><div class="report-question-list">${profile.questions.map(([number, title, rate]) => `<article class="report-question-card"><div class="report-question-head"><div><p class="eyebrow">第 ${number} 题</p><h3>${title}</h3></div><span class="status-badge ${rate < 70 ? "warning" : ""}">正确率 ${rate}%</span></div><div class="answer-distribution"><span>完全正确 ${Math.round(task.students * rate / 100)} 人</span><span>部分正确 ${Math.max(3, Math.round(task.students * (100-rate) / 140))} 人</span><span>错误/未答 ${Math.max(2, Math.round(task.students * (100-rate) / 260))} 人</span></div></article>`).join("")}</div></section>` : `<section class="panel"><h2 class="report-section-title">逐题分析</h2><div class="report-question-list">${profile.questions.map(([number, title, rate, cause, advice]) => `<article class="report-question-card"><div class="report-question-head"><div><p class="eyebrow">第 ${number} 题 · 共性问题</p><h3>${title}</h3></div><span class="status-badge ${rate < 70 ? "warning" : ""}">正确率 ${rate}%</span></div><p class="typical-cause"><strong>典型错因：</strong>${cause}</p><div class="answer-distribution"><span>完全正确 ${Math.round(task.students * rate / 100)} 人</span><span>部分正确 ${Math.max(3, Math.round(task.students * (100-rate) / 140))} 人</span><span>错误/未答 ${Math.max(2, Math.round(task.students * (100-rate) / 260))} 人</span></div><div class="teaching-advice"><strong>讲评建议：</strong>${advice}</div></article>`).join("")}</div></section>`;
+        const examKnowledgeMastery = isExamInsights ? `<section class="panel"><h2 class="report-section-title">知识点掌握分析</h2><div class="report-question-list">${profile.mastery.map(([name, rate]) => `<article class="report-question-card"><div class="report-question-head"><h3>${name}</h3><span class="status-badge ${rate < 70 ? "warning" : ""}">掌握率 ${rate}%</span></div><div class="mini-bars"><div class="mini-bar"><span>掌握情况</span><span class="mini-bar__track"><i style="width:${rate}%"></i></span><strong>${rate}%</strong></div></div></article>`).join("")}</div></section>` : "";
+        const commentarySection = isBasicHomework || isExamInsights ? "" : `<section class="panel commentary-panel"><div class="panel-heading"><div><p class="eyebrow">下一步怎么教</p><h2 class="report-section-title">重点讲评</h2></div><span class="status-badge">按影响人数与总分影响排序</span></div><div class="commentary-cards">${profile.commentary.map(([number, title, count, reason], index) => `<article class="commentary-card"><span class="commentary-rank">0${index + 1}</span><div><small>第 ${number} 题 · 影响 ${count} 人</small><strong>${title}</strong><p>${reason}</p></div><button class="row-action" type="button" data-action="open-evidence">查看典型作答 →</button></article>`).join("")}</div></section>`;
         return `
           <div class="diagnosis-report">
-            <div class="ai-summary-grid">
-              <section class="panel ai-diagnosis-summary"><p class="eyebrow">AI 已分析全班原始作答</p><h2>AI 班级诊断结论</h2><p><strong>本次优先处理：</strong>${profile.conclusion}</p></section>
-              <section class="panel ai-teaching-summary"><p class="eyebrow">下一步怎么教</p><h2>AI 教学建议</h2><ol>${profile.teaching.map((item) => `<li>${item}</li>`).join("")}</ol></section>
+            <div class="page-action-bar page-action-bar--start">
+              <button class="button-ghost" type="button" data-action="back-to-student-detail">← 返回批改</button>
             </div>
+            ${aiSummary}
             ${examOnly}
-            <section class="panel">
-              <h2 class="report-section-title">逐题分析</h2>
-              <div class="report-question-list">
-                ${profile.questions.map(([number, title, rate, cause, advice]) => `<article class="report-question-card"><div class="report-question-head"><div><p class="eyebrow">第 ${number} 题 · 共性问题</p><h3>${title}</h3></div><span class="status-badge ${rate < 70 ? "warning" : ""}">正确率 ${rate}%</span></div><p class="typical-cause"><strong>典型错因：</strong>${cause}</p><div class="answer-distribution"><span>完全正确 ${Math.round(task.students * rate / 100)} 人</span><span>部分正确 ${Math.max(3, Math.round(task.students * (100-rate) / 140))} 人</span><span>错误/未答 ${Math.max(2, Math.round(task.students * (100-rate) / 260))} 人</span></div><div class="teaching-advice"><strong>讲评建议：</strong>${advice}</div></article>`).join("")}
-              </div>
-            </section>
-            <section class="panel commentary-panel">
-              <div class="panel-heading"><div><p class="eyebrow">下一步怎么教</p><h2 class="report-section-title">重点讲评</h2></div><span class="status-badge">按影响人数与总分影响排序</span></div>
-              <div class="commentary-cards">${profile.commentary.map(([number, title, count, reason], index) => `<article class="commentary-card"><span class="commentary-rank">0${index + 1}</span><div><small>第 ${number} 题 · 影响 ${count} 人</small><strong>${title}</strong><p>${reason}</p></div><button class="row-action" type="button" data-action="open-evidence">查看典型作答 →</button></article>`).join("")}</div>
-            </section>
-          </div>`;
-      }
-
-      function resourceOptions(task) {
-        const prefix = task.id;
-        return task.kind === "考试" ? [
-          { id: `${prefix}-paper`, label: "完整试卷", title: "数学期中质量检测 · A/B 卷", summary: "40 人完成真实考试验证，包含题目、答案与答题卡映射。", meta: `${task.title} · 第三方试卷`, evidence: ["40 人完成", "A/B 卷", "240 页答卷"], icon: "卷" },
-          { id: `${prefix}-error`, label: "班级易错题", title: "第 3 题 · 面积建模", summary: "低得分率、高区分度，具备典型讲评与分层练习价值。", meta: `${task.title} · 第 3 题`, evidence: ["得分率 58%", "区分度 0.46", "10 人表达疏漏"], icon: "错" },
-          { id: `${prefix}-rubric`, label: "答案与评分标准", title: "第 2 题 · 分类讨论步骤分", summary: "本次步骤分与扣分点，可随套卷一并沉淀。", meta: `${task.title} · 评分标准 v1.2`, evidence: ["3 个得分点", "影响 7 人", "教师已确认"], icon: "标" },
-        ] : [
-          { id: `${prefix}-paper`, label: "完整套题", title: "本次作业题单", summary: "42 人真实作答验证，可作为九年级二次函数单元巩固材料。", meta: `${task.title} · 林老师自编`, evidence: ["42 人完成", "84 页作答", "批改完成度 97%"], icon: "题" },
-          { id: `${prefix}-error`, label: "班级易错题", title: "第 1 题 · 开口方向判断", summary: "错误人数多、错因高度集中，适合沉淀为易错题。", meta: `${task.title} · 第 1 题`, evidence: ["11 人同类错误", "正确率 68%", "概念理解偏差"], icon: "错" },
-          { id: `${prefix}-rubric`, label: "答案与评分标准", title: "第 3 题 · 顶点式与图像性质", summary: "教师确认后的得分点与等价写法，可复用于后续同题批改。", meta: `${task.title} · 教师最终确认`, evidence: ["9 份同类作答", "3 个得分点", "教师已确认"], icon: "标" },
-        ];
-      }
-
-      function renderResources(task) {
-        const options = resourceOptions(task);
-        const selected = state.resourceSelected;
-        const deposited = state.resourceDeposited[task.id] || [];
-        const schoolResources = options;
-        const resourceCard = (resource) => {
-          const isDeposited = deposited.includes(resource.id);
-          const isSelected = selected.includes(resource.id);
-          return `
-            <label class="resource-card">
-              <input type="checkbox" data-action="toggle-resource" data-resource-id="${resource.id}" ${isSelected ? "checked" : ""} ${isDeposited ? "disabled checked" : ""} style="position:absolute;opacity:0;pointer-events:none">
-              <header><span class="resource-card__icon">${resource.icon}</span><div><small>${resource.label}</small><h4>${resource.title}${isDeposited ? " · 已沉淀" : ""}</h4></div></header>
-              <p>${resource.summary}</p>
-              <div class="resource-provenance">来源：${resource.meta}</div>
-              <div class="resource-evidence">${resource.evidence.map((item) => `<span>✓ ${item}</span>`).join("")}</div>
-              <footer><small>真实教学数据验证</small><span class="${isDeposited ? "status-badge" : isSelected ? "status-badge" : "button-secondary"}">${isDeposited ? "已加入" : isSelected ? "已选择" : "选择沉淀"}</span></footer>
-            </label>`;
-        };
-        return `
-          <div class="page-stack">
-            <section class="resource-section">
-              <header class="resource-section__heading"><div><p class="eyebrow">学校资产</p><h3>推荐进入校本题库</h3></div><span>✓ 已检查来源与学生隐私</span></header>
-              <div class="resource-grid">${schoolResources.map(resourceCard).join("")}</div>
-            </section>
-            <section class="panel section-panel">
-              <div class="panel-heading"><div><p class="eyebrow">选择沉淀到校本题库</p><h2>${selected.length ? `已选择 ${selected.length} 项资源` : "由教师确认后再入库"}</h2><p>异常和疑难结果确认后生成候选资源，默认不会自动入库。</p></div><span class="status-badge">${deposited.length} 项已沉淀</span></div>
-              <div class="resource-footer"><p>系统会自动去重；典型作答进入校本题库前完成学生信息脱敏。</p><button class="button-primary" type="button" data-action="deposit-resources">确认沉淀所选资源</button></div>
-            </section>
+            ${basicHomeworkOverview}
+            ${questionAnalysis}
+            ${examKnowledgeMastery}
+            ${commentarySection}
           </div>`;
       }
 
@@ -2368,14 +2364,13 @@
         if (state.taskTab === "anomalies") body = renderAnomalies(task);
         if (state.taskTab === "trace") body = renderTrace(task);
         if (state.taskTab === "insights") body = renderInsights(task);
-        if (state.taskTab === "resources") body = renderResources(task);
-        return `<div class="page-stack">${renderTaskHeader(task)}<div class="task-body">${body}</div></div>${renderStudentDrawer(task)}${renderEvidenceDialog(task)}${state.toast ? `<div class="toast" role="status">${state.toast}</div>` : ""}`;
+        return `<div class="page-stack"><div class="task-body">${body}</div></div>${renderStudentDrawer(task)}${renderEvidenceDialog(task)}${state.toast ? `<div class="toast" role="status">${state.toast}</div>` : ""}`;
       }
 
       function render() {
         if (state.view === "grading") app.innerHTML = renderGrading();
-        else if (state.view === "sources") app.innerHTML = renderSources();
         else app.innerHTML = renderScanner();
+        appShell.classList.toggle("is-task-detail", state.view === "grading" && state.gradingMode === "task");
         document.querySelectorAll("[data-primary-nav]").forEach((button) => {
           button.setAttribute("aria-current", button.dataset.view === state.view ? "page" : "false");
         });
@@ -2387,11 +2382,6 @@
         if (action.dataset.action === "navigate") {
           state.view = action.dataset.view;
           state.gradingMode = "home";
-          render();
-        }
-        if (action.dataset.action === "show-scanner") {
-          state.view = "scanner";
-          state.scannerStep = "home";
           render();
         }
         if (action.dataset.action === "show-all-tasks") {
@@ -2411,12 +2401,21 @@
           state.view = "grading";
           state.gradingMode = "task";
           state.activeTaskId = action.dataset.taskId;
-          state.taskTab = action.dataset.action === "open-task-anomaly" ? "anomalies" : "submissions";
-          state.studentWorkMode = "list";
+          const opensAnomaly = action.dataset.action === "open-task-anomaly";
+          state.taskTab = opensAnomaly ? "anomalies" : "submissions";
+          state.studentWorkMode = opensAnomaly ? "list" : "detail";
+          state.detailStudentId = opensAnomaly ? null : activeTask().studentRows[0]?.id || null;
           state.selectedAnomalyId = action.dataset.anomalyId || null;
           render();
         }
         if (action.dataset.action === "task-tab") {
+          const task = activeTask();
+          if (action.dataset.tab === "insights" && task.id === "homework") {
+            window.location.href = "https://zingistop.github.io/banji-cuoyin-zhenduan-demo/#report-science";
+            return;
+          }
+          if (action.dataset.tab === "insights" && task.id === "exam") { window.location.href = "file:///Users/dengjingli_1/Documents/GitHub/fx-ai/exam-insights.html"; return; }
+          if (action.dataset.tab === "insights" && task.id === "practice") { window.location.href = "file:///Users/dengjingli_1/Documents/GitHub/fx-ai/homework-insights.html"; return; }
           state.taskTab = action.dataset.tab;
           if (action.dataset.tab === "submissions") state.studentWorkMode = "list";
           state.drawerStudentId = null;
@@ -2446,16 +2445,17 @@
           state.toast = "";
           render();
         }
-        if (action.dataset.action === "back-to-student-list") {
-          state.studentWorkMode = "list";
-          state.showGradeEditor = false;
-          state.toast = "";
-          render();
-        }
         if (action.dataset.action === "back-to-submissions") {
           state.taskTab = "submissions";
           state.studentWorkMode = "list";
           state.detailQuestionId = "q1";
+          state.showGradeEditor = false;
+          state.toast = "";
+          render();
+        }
+        if (action.dataset.action === "back-to-student-detail") {
+          state.taskTab = "submissions";
+          state.studentWorkMode = "detail";
           state.showGradeEditor = false;
           state.toast = "";
           render();
@@ -2515,10 +2515,16 @@
         if (action.dataset.action === "accept-review-group") {
           const task = activeTask();
           const questionId = action.dataset.questionId;
+          const adjustedScore = Number(document.querySelector('[name="batch-review-score"]')?.value ?? 4);
+          if (!Number.isFinite(adjustedScore) || adjustedScore < 0 || adjustedScore > 6) { state.toast = "批量得分需在 0–6 分之间"; render(); return; }
           let confirmedCount = 0;
           task.studentRows.forEach((student) => {
             const question = ensureStudentGrades(task, student).find((item) => item.id === questionId);
             if (!question || !question.uncertain || question.teacherConfirmed) return;
+            const previousScore = question.score;
+            question.score = adjustedScore;
+            question.judgment = adjustedScore === question.maxScore ? "正确" : adjustedScore === 0 ? "错误" : "部分正确";
+            student.score = String(Math.max(0, Number(student.score || 0) + adjustedScore - previousScore));
             question.teacherConfirmed = true;
             question.uncertain = false;
             student.grading = "教师已确认";
@@ -2527,6 +2533,11 @@
           });
           task.updated = "刚刚";
           state.toast = `已统一确认 ${confirmedCount} 份同类作答`;
+          render();
+        }
+        if (action.dataset.action === "open-batch-review") {
+          state.taskTab = "ai-review-queue";
+          state.toast = "";
           render();
         }
         if (action.dataset.action === "skip-ai-review") {
@@ -2541,12 +2552,6 @@
           state.taskTab = "submissions";
           state.studentWorkMode = "detail";
           state.showGradeEditor = false;
-          state.toast = "";
-          render();
-        }
-        if (action.dataset.action === "go-detail-student-anomaly") {
-          state.taskTab = "anomalies";
-          state.selectedAnomalyId = null;
           state.toast = "";
           render();
         }
@@ -2567,13 +2572,34 @@
           state.toast = "讲解视频演示入口：已打开第 3 题讲解";
           render();
         }
+        if (action.dataset.action === "quick-judgment") {
+          const task = activeTask();
+          const student = task.studentRows.find((item) => item.id === state.detailStudentId);
+          const question = ensureStudentGrades(task, student).find((item) => item.id === action.dataset.questionId);
+          if (!question) return;
+          const previousScore = question.score;
+          question.judgment = action.dataset.judgment;
+          if (task.kind === "考试" && question.gradingMode === "objective") {
+            question.score = question.judgment === "正确" ? question.maxScore : 0;
+            student.score = String(Math.max(0, Number(student.score || 0) + question.score - previousScore));
+          }
+          question.teacherModified = true;
+          question.teacherConfirmed = true;
+          question.uncertain = false;
+          student.grading = "教师已修改";
+          student.teacherModified = true;
+          task.updated = "刚刚";
+          state.toast = `已标记第 ${question.number} 题为${question.judgment}`;
+          render();
+        }
         if (action.dataset.action === "save-detail-grade") {
           const task = activeTask();
           const student = task.studentRows.find((item) => item.id === state.detailStudentId);
           state.detailQuestionId = action.dataset.questionId || state.detailQuestionId;
           const question = ensureStudentGrades(task, student).find((item) => item.id === state.detailQuestionId);
           const judgment = document.querySelector('[name="detail-judgment"]')?.value;
-          const score = Number(document.querySelector('[name="detail-score"]')?.value);
+          const scoreInput = document.querySelector('[name="detail-score"]');
+          const score = scoreInput ? Number(scoreInput.value) : question.score;
           const comment = document.querySelector('[name="detail-comment"]')?.value.trim();
           if (!Number.isFinite(score) || score < 0 || score > question.maxScore) {
             state.toast = `本题得分需在 0–${question.maxScore} 分之间`;
@@ -2650,6 +2676,10 @@
           state.traceAfter = !state.traceAfter;
           render();
         }
+        if (action.dataset.action === "set-student-trace-mode") {
+          state.studentTraceMode = action.dataset.mode === "basic" ? "basic" : "detailed";
+          render();
+        }
         if (action.dataset.action === "scanner-device-home") {
           state.scannerStep = "home";
           render();
@@ -2664,21 +2694,6 @@
         }
         if (action.dataset.action === "scanner-start-trace") {
           state.scannerStep = "trace-output";
-          render();
-        }
-        if (action.dataset.action === "toggle-resource") {
-          const id = action.dataset.resourceId;
-          state.resourceSelected = state.resourceSelected.includes(id)
-            ? state.resourceSelected.filter((item) => item !== id)
-            : [...state.resourceSelected, id];
-          render();
-        }
-        if (action.dataset.action === "deposit-resources") {
-          const task = activeTask();
-          const current = state.resourceDeposited[task.id] || [];
-          state.resourceDeposited[task.id] = [...new Set([...current, ...state.resourceSelected])];
-          state.toast = state.resourceSelected.length ? `已沉淀 ${state.resourceSelected.length} 项资源到校本题库` : "请先选择需要沉淀的资源";
-          state.resourceSelected = [];
           render();
         }
         if (action.dataset.action === "open-evidence") {
@@ -2733,6 +2748,39 @@
           render();
           setTimeout(() => document.querySelector('[data-action="open-evidence"]')?.focus(), 0);
         }
+      });
+
+      document.addEventListener("change", (event) => {
+        const typeFilter = event.target.closest('[data-action="home-type-filter"]');
+        if (typeFilter) { state.homeTypeFilter = typeFilter.value; render(); return; }
+        const classFilter = event.target.closest('[data-action="home-class-filter"]');
+        if (classFilter) { state.homeClassFilter = classFilter.value; render(); return; }
+        const traceField = event.target.closest('[data-action="edit-trace-cause"], [data-action="edit-trace-advice"]');
+        if (traceField) {
+          const task = activeTask();
+          const student = task.studentRows.find((item) => item.id === state.detailStudentId);
+          const question = ensureStudentGrades(task, student).find((item) => item.id === traceField.dataset.questionId);
+          if (question) question[traceField.dataset.action === "edit-trace-cause" ? "traceCause" : "traceAdvice"] = traceField.value.trim();
+          return;
+        }
+        const input = event.target.closest('[data-action="edit-subjective-score"]');
+        if (!input) return;
+        const task = activeTask();
+        const student = task.studentRows.find((item) => item.id === state.detailStudentId);
+        const question = ensureStudentGrades(task, student).find((item) => item.id === input.dataset.questionId);
+        const nextScore = Number(input.value);
+        if (!question || !Number.isFinite(nextScore) || nextScore < 0 || nextScore > question.maxScore) { state.toast = `得分需在 0–${question?.maxScore || 0} 分之间`; render(); return; }
+        const previousScore = question.score;
+        question.score = nextScore;
+        question.judgment = nextScore === question.maxScore ? "正确" : nextScore === 0 ? "错误" : "部分正确";
+        question.teacherModified = true;
+        question.teacherConfirmed = true;
+        question.uncertain = false;
+        student.score = String(Math.max(0, Number(student.score || 0) + nextScore - previousScore));
+        student.grading = "教师已修改";
+        task.updated = "刚刚";
+        state.toast = `第 ${question.number} 题得分已更新为 ${nextScore} 分`;
+        render();
       });
 
       render();
