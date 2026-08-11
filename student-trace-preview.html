@@ -275,30 +275,19 @@
 
     .note {
       position: absolute;
-      width: 205px;
-      padding: 13px 15px;
-      border-radius: 14px;
+      width: 220px;
+      padding: 0;
+      border-radius: 0;
       color: #cf3444;
-      background: rgba(255,241,243,.93);
+      background: transparent;
       font-family: "Kaiti SC", "STKaiti", serif;
-      font-size: 15px;
-      line-height: 1.55;
+      font-size: 14px;
+      line-height: 1.45;
       font-weight: 800;
       opacity: 0;
       transform: translateY(6px);
       pointer-events: none;
       transition: .22s ease;
-    }
-
-    .note::before {
-      content: "";
-      position: absolute;
-      left: -72px;
-      top: 22px;
-      width: 72px;
-      height: 2px;
-      background: var(--red);
-      transform: rotate(-1deg);
     }
 
     .show-errors .note {
@@ -362,7 +351,7 @@
               2. 求函数 y = x² − 4x + 3 的对称轴。<br>
               <span class="hand">学生作答：x = 2</span>
               <span class="grade-symbol correct" style="left:240px; top:43px; transform:rotate(-8deg) scale(.48);"></span>
-              <div class="note" style="right:-10px; top:-8px;">
+              <div class="note" style="left:560px; top:34px;">
                 错因：<br>
                 对称轴表达容易漏写“x=”。重写时先判断轴线，再写完整等式。
               </div>
@@ -373,7 +362,7 @@
               <span class="hand">y = (x − 2)² − 1；顶点（2，−1），开口向下</span>
               <span class="mark-circle" style="left:412px; top:45px; width:92px; height:36px;"></span>
               <span class="grade-symbol partial" style="left:505px; top:42px; transform:rotate(-8deg) scale(.46);"></span>
-              <div class="note" style="right:0; top:55px;">
+              <div class="note" style="left:560px; top:74px;">
                 错因：<br>
                 二次项系数为正，开口应向上。写出 a &gt; 0 后再完成判断。
               </div>
@@ -390,7 +379,7 @@
               <span class="hand">最大值：1</span>
               <span class="mark-circle" style="left:105px; top:48px; width:72px; height:34px;"></span>
               <span class="grade-symbol wrong" style="left:180px; top:39px; transform:rotate(-10deg) scale(.5);"></span>
-              <div class="note" style="right:10px; top:32px;">
+              <div class="note" style="left:520px; top:38px;">
                 错因：<br>
                 顶点纵坐标计算正确；注意题目问“最大值”，不要写成横坐标。
               </div>
