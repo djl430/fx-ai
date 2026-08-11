@@ -789,6 +789,72 @@
       .groups-scroll { padding: 12px; }
       .diagnosis-grid { grid-template-columns: 1fr; }
     }
+    /* 批改符号统一使用仓库内资源，确保 GitHub 页面可正常加载 */
+    .mark-icon.correct,
+    .grade-symbol.correct {
+      background-image: url("assets/correct.png") !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: contain !important;
+      color: transparent !important;
+    }
+
+    .mark-icon.partial,
+    .mark-icon.half,
+    .grade-symbol.partial,
+    .grade-symbol.half {
+      background-image: url("assets/half-correct.png") !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: contain !important;
+      color: transparent !important;
+    }
+
+    .mark-icon.incorrect,
+    .mark-icon.wrong,
+    .grade-symbol.incorrect,
+    .grade-symbol.wrong {
+      background-image: url("assets/wrong.png") !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: contain !important;
+      color: transparent !important;
+    }
+  </style>
+  <style id="project-grading-symbol-assets">
+    .mark-icon.correct,
+    .grade-symbol.correct {
+      background-image: url("assets/correct.png") !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: contain !important;
+      color: transparent !important;
+      font-size: 0 !important;
+    }
+
+    .mark-icon.partial,
+    .mark-icon.half,
+    .grade-symbol.partial,
+    .grade-symbol.half {
+      background-image: url("assets/half-correct.png") !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: contain !important;
+      color: transparent !important;
+      font-size: 0 !important;
+    }
+
+    .mark-icon.incorrect,
+    .mark-icon.wrong,
+    .grade-symbol.incorrect,
+    .grade-symbol.wrong {
+      background-image: url("assets/wrong.png") !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: contain !important;
+      color: transparent !important;
+      font-size: 0 !important;
+    }
   </style>
 </head>
 <body>
