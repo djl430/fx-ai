@@ -1,0 +1,1459 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>飞象智批 · 按题批改 Demo</title>
+  <style>
+    :root {
+      --ink: #172341;
+      --muted: #74809a;
+      --line: #dfe6f2;
+      --panel: rgba(255, 255, 255, 0.92);
+      --canvas: #eef3fa;
+      --brand: #4f66d8;
+      --brand-dark: #30457e;
+      --brand-soft: #edf1ff;
+      --green: #23996b;
+      --green-soft: #edf9f4;
+      --amber: #d38a24;
+      --amber-soft: #fff7e8;
+      --red: #d95662;
+      --red-soft: #fff1f2;
+      --gray: #8390a9;
+      --gray-soft: #f2f5f9;
+      --shadow: 0 18px 50px rgba(39, 57, 99, 0.10);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 84% 4%, rgba(99, 121, 229, 0.18), transparent 27%),
+        radial-gradient(circle at 16% 96%, rgba(72, 157, 142, 0.10), transparent 28%),
+        var(--canvas);
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      overflow: hidden;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .app-shell {
+      height: 100vh;
+      padding: 18px;
+    }
+
+    .app {
+      height: 100%;
+      min-height: 720px;
+      display: grid;
+      grid-template-rows: 76px minmax(0, 1fr);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 26px;
+      background: rgba(249, 251, 255, 0.82);
+      box-shadow: 0 24px 70px rgba(38, 54, 92, 0.13);
+      overflow: hidden;
+      backdrop-filter: blur(24px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+    }
+
+    .title-lockup { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+    .back-link {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      text-decoration: none;
+      color: var(--brand-dark);
+      background: #f3f6fc;
+      border: 1px solid var(--line);
+      transition: .18s ease;
+      flex: none;
+    }
+
+    .back-link:hover { transform: translateX(-2px); background: #fff; }
+
+    .eyebrow {
+      margin: 0 0 3px;
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 23px;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions { display: flex; gap: 10px; flex: none; }
+
+    .button {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: white;
+      color: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: .18s ease;
+      box-shadow: 0 4px 12px rgba(45,64,104,.04);
+    }
+
+    .button:hover { transform: translateY(-1px); border-color: #c8d2e7; box-shadow: 0 7px 18px rgba(45,64,104,.08); }
+    .button:focus-visible, .question-item:focus-visible, .answer-paper:focus-visible, .density-button:focus-visible { outline: 3px solid rgba(79,102,216,.25); outline-offset: 2px; }
+    .button.primary {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, #26395f 0%, #5365b7 100%);
+      box-shadow: 0 12px 24px rgba(38, 57, 95, .22);
+    }
+    .button.primary:hover {
+      background: linear-gradient(135deg, #223555 0%, #4b5fab 100%);
+      box-shadow: 0 15px 28px rgba(38, 57, 95, .26);
+    }
+    .button.primary:disabled {
+      opacity: .78;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+    .button.ghost { color: var(--brand-dark); background: rgba(255,255,255,.72); }
+    .button.is-disabled {
+      color: #9aa6bd;
+      background: rgba(255,255,255,.56);
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: .72;
+      box-shadow: none;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 190px 300px minmax(560px, 1fr);
+    }
+
+    .rail, .assistant, .answer-zone { min-height: 0; }
+
+    .rail {
+      display: grid;
+      grid-template-rows: minmax(0,1fr) auto;
+      border-right: 1px solid var(--line);
+      background: rgba(247, 249, 253, .95);
+    }
+
+    .panel-heading { padding: 20px 18px 12px; }
+    .panel-kicker { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+    .panel-heading h2 { margin: 5px 0 0; font-size: 17px; }
+
+    .question-list {
+      overflow: auto;
+      padding: 20px 12px 18px;
+      scrollbar-width: thin;
+    }
+
+    .question-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 10px;
+      margin: 4px 0;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: .18s ease;
+    }
+
+    .question-item:hover { background: #fff; border-color: var(--line); }
+    .question-item.active { background: var(--brand-soft); border-color: #cdd6ff; box-shadow: inset 3px 0 0 var(--brand); }
+
+    .q-number {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: white;
+      border: 1px solid var(--line);
+      font-weight: 800;
+      color: var(--brand-dark);
+    }
+
+    .active .q-number { color: white; background: var(--brand); border-color: var(--brand); }
+    .q-meta { min-width: 0; }
+    .q-title { display: block; font-size: 13px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q-state { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 10px; color: var(--muted); }
+    .q-state::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+    .q-state.pending { color: var(--amber); font-weight: 700; }
+    .q-state.pending::before { background: var(--amber); }
+    .q-rate { font-size: 12px; font-weight: 800; color: var(--brand-dark); }
+    .q-rate.is-high { color: var(--green); }
+    .q-rate.is-mid { color: var(--amber); }
+    .q-rate.is-low { color: var(--red); }
+    .q-rate.is-score { color: var(--brand-dark); }
+
+    .rail-footer {
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.8);
+    }
+
+    .rail-footer .button { width: 100%; min-height: 46px; padding-inline: 10px; font-size: 13px; }
+
+    .assistant {
+      overflow: auto;
+      padding: 20px;
+      border-right: 1px solid var(--line);
+      background: rgba(255,255,255,.58);
+      scrollbar-width: thin;
+    }
+
+    .metric-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 0;
+      background: linear-gradient(145deg, #fff, #f6f8ff);
+    }
+
+    .metric-value {
+      color: var(--brand-dark);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+
+    .metric-card.is-hidden { display: none; }
+
+    .assist-card {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 8px 22px rgba(45,64,104,.04);
+    }
+
+    .assist-card.answer-card { background: #fff; }
+    .assist-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+    .answer-value { margin-top: 9px; font-family: "Songti SC", "STSong", serif; font-size: 17px; line-height: 1.7; color: var(--ink); }
+    .basis-card {
+      padding: 16px 16px 18px;
+      border-color: #dce4ff;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #f3f5ff, #f9fbff);
+      box-shadow: 0 16px 38px rgba(54, 76, 146, .08);
+    }
+    .basis-card__head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+    .basis-card__icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      border-radius: 12px;
+      color: var(--brand);
+      background: #e9eeff;
+      font-size: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+    }
+    .basis-card .assist-label {
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+    .basis-list {
+      margin: 0;
+      padding-left: 20px;
+      display: grid;
+      gap: 7px;
+      color: #546079;
+      font-size: 12px;
+      line-height: 1.58;
+    }
+    .basis-list li { padding-left: 3px; }
+    .basis-list li::marker { color: #53607a; font-size: .9em; }
+    .basis-list li.is-primary {
+      color: #263454;
+      font-weight: 900;
+    }
+
+    details.assist-card { padding: 0; overflow: hidden; }
+    details.assist-card summary { list-style: none; padding: 15px 16px; cursor: pointer; font-size: 13px; font-weight: 750; display: flex; align-items: center; justify-content: space-between; }
+    details.assist-card summary::-webkit-details-marker { display: none; }
+    details.assist-card summary::after { content: "↓"; width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; background: var(--gray-soft); color: var(--muted); font-size: 15px; }
+    details.assist-card[open] summary::after { content: "↑"; }
+    .explanation { padding: 0 16px 16px; color: #53617a; font-size: 17px; line-height: 1.7; }
+    .answer-details { margin-top: 14px; border-top: 1px solid var(--line); }
+    .answer-details summary { list-style: none; padding: 13px 0 0; cursor: pointer; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; display: flex; align-items: center; justify-content: space-between; }
+    .answer-details summary::-webkit-details-marker { display: none; }
+    .answer-details summary::after { content: "↓"; width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; background: var(--gray-soft); color: var(--muted); font-size: 15px; }
+    .answer-details[open] summary::after { content: "↑"; }
+    .answer-details .explanation {
+      padding: 12px 0 0;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .answer-zone {
+      display: grid;
+      grid-template-rows: auto minmax(0,1fr) auto;
+      background: rgba(247,249,253,.72);
+    }
+
+    .answer-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.74);
+    }
+
+    .density-control { display: flex; align-items: center; gap: 8px; flex: none; }
+    .density-label { color: var(--muted); font-size: 11px; }
+    .density-switch { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: white; }
+    .density-button { width: 31px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 800; }
+    .density-button.active { color: white; background: var(--brand-dark); }
+
+    .groups-scroll {
+      overflow: auto;
+      padding: 20px;
+      scrollbar-width: thin;
+    }
+
+    .group-section {
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 10px 26px rgba(45,64,104,.045);
+      overflow: hidden;
+    }
+
+    .group-section[data-result="correct"] { border-left: 4px solid var(--green); }
+    .group-section[data-result="partial"] { border-left: 4px solid var(--amber); }
+    .group-section[data-result="wrong"] { border-left: 4px solid var(--red); }
+    .group-section[data-result="ungraded"] { border-left: 4px solid var(--gray); }
+
+    .group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .group-heading { display: flex; align-items: center; gap: 9px; }
+    .group-heading h3 { margin: 0; font-size: 14px; }
+    .group-count { color: var(--muted); font-size: 11px; }
+    .shape-group-head {
+      display: block;
+      padding: 15px 15px 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .shape-group-head__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .shape-group-title { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .shape-group-title h3 { margin: 0; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .shape-group-state {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .shape-group-count {
+      flex: none;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #f3f6ff;
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .group-section[data-result="correct"] .shape-group-count { color: var(--green); background: var(--green-soft); }
+    .group-section[data-result="partial"] .shape-group-count { color: var(--amber); background: var(--amber-soft); }
+    .group-section[data-result="wrong"] .shape-group-count { color: var(--red); background: var(--red-soft); }
+    .group-section[data-result="ungraded"] .shape-group-count { color: var(--gray); background: var(--gray-soft); }
+
+    .group-result-tools {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px;
+      border: 1px solid #dfe6f5;
+      border-radius: 999px;
+      background: rgba(255,255,255,.82);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .group-result-button {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: .16s ease;
+    }
+
+    .group-result-button:hover {
+      transform: translateY(-1px);
+      background: #f4f7ff;
+    }
+
+    .group-result-button[data-current-result="correct"] {
+      border-color: #bfe8d4;
+      background: var(--green-soft);
+    }
+
+    .group-result-button[data-current-result="partial"] {
+      border-color: #f0d6a6;
+      background: var(--amber-soft);
+    }
+
+    .group-result-button[data-current-result="wrong"] {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .group-result-button[data-current-result="ungraded"] {
+      border-color: #d4dae8;
+      background: var(--gray-soft);
+    }
+
+    .group-result-button .mark-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 22px;
+      line-height: 18px;
+    }
+
+    .shape-group-meta {
+      display: grid;
+      gap: 6px;
+      margin: 10px 0 0 17px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .shape-group-meta span { display: block; }
+
+    .shape-group-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 0 17px;
+    }
+
+    .group-action {
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255,255,255,.86);
+      color: #465578;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .16s ease;
+    }
+
+    .group-action:hover { transform: translateY(-1px); box-shadow: 0 7px 16px rgba(45,64,104,.08); }
+    .group-action[data-batch-result="correct"] { color: var(--green); border-color: #cbe9dc; background: var(--green-soft); }
+    .group-action[data-batch-result="partial"] { color: var(--amber); border-color: #f0d6a6; background: var(--amber-soft); }
+    .group-action[data-batch-result="wrong"] { color: var(--red); border-color: #f0c4c9; background: var(--red-soft); }
+    .group-action[data-confirm-group] { color: #fff; border-color: transparent; background: linear-gradient(135deg, #26395f 0%, #5365b7 100%); }
+    .group-action.is-done { color: var(--green); border-color: #cbe9dc; background: var(--green-soft); }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.correct { background: var(--green); }
+    .dot.partial { background: var(--amber); }
+    .dot.wrong { background: var(--red); }
+    .dot.ungraded { background: var(--gray); }
+
+    .student-grid {
+      --columns: 3;
+      display: grid;
+      grid-template-columns: repeat(var(--columns), minmax(0,1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .student-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+      transition: .18s ease;
+    }
+
+    .student-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(45,64,104,.10); }
+    .student-card[data-result="correct"] { border-color: #cbe9dc; }
+    .student-card[data-result="partial"] { border-color: #f0d6a6; }
+    .student-card[data-result="wrong"] { border-color: #f0c4c9; }
+
+    .student-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 11px 8px; }
+    .student-name { font-size: 12px; font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .answer-paper {
+      width: calc(100% - 20px);
+      min-height: 106px;
+      margin: 0 10px 10px;
+      padding: 20px 14px 13px;
+      border: 1px solid #eadfce;
+      border-radius: 10px;
+      background:
+        repeating-linear-gradient(to bottom, transparent 0 25px, rgba(99,113,142,.10) 25px 26px),
+        linear-gradient(90deg, transparent 0 22px, rgba(221,91,91,.12) 22px 23px, transparent 23px),
+        #fffdf8;
+      cursor: pointer;
+      text-align: left;
+      color: #28344f;
+      transition: .18s ease;
+      position: relative;
+    }
+
+    .answer-paper::after {
+      content: "点击切换结果";
+      position: absolute;
+      right: 8px;
+      bottom: 6px;
+      padding: 3px 6px;
+      border-radius: 6px;
+      color: transparent;
+      background: transparent;
+      font-family: "PingFang SC", sans-serif;
+      font-size: 9px;
+      transition: .18s ease;
+    }
+
+    .student-card:hover .answer-paper::after { color: #60709a; background: rgba(238,242,252,.94); }
+    .answer-paper:hover { border-color: #c8d2e7; }
+    .handwriting { font-family: "Kaiti SC", "STKaiti", serif; font-size: 16px; line-height: 1.7; white-space: pre-line; }
+
+    .paper-trace-mark {
+      position: absolute;
+      right: 14px;
+      top: 12px;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      transform: rotate(-8deg);
+      background: rgba(255,255,255,.72);
+    }
+
+    .paper-trace-mark.correct { color: var(--green); }
+    .paper-trace-mark.partial { color: var(--amber); }
+    .paper-trace-mark.wrong { color: var(--red); }
+    .paper-trace-mark.ungraded { display: none; }
+
+    .mark-icon {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      font-family: "Kaiti SC", "STKaiti", serif;
+      font-size: 26px;
+      line-height: 22px;
+      font-weight: 900;
+    }
+
+    .mark-icon.correct {
+      width: 34px;
+      height: 34px;
+      background: url("/Users/dengjingli_1/Downloads/正确 (1).png") center / contain no-repeat;
+      font-size: 0;
+      line-height: 1;
+    }
+    .mark-icon.correct::before { content: ""; }
+    .mark-icon.wrong::before { content: "×"; }
+    .mark-icon.partial::before { content: "✓"; }
+    .mark-icon.partial {
+      width: 34px;
+      height: 34px;
+      background: url("/Users/dengjingli_1/Downloads/半对 (1).png") center / contain no-repeat;
+      font-size: 0;
+      line-height: 1;
+    }
+    .mark-icon.partial::before { content: ""; }
+
+    .group-result-button .mark-icon,
+    .group-result-button .mark-icon.correct,
+    .group-result-button .mark-icon.partial {
+      width: 20px;
+      height: 20px;
+      font-size: 22px;
+      line-height: 20px;
+    }
+
+    .group-result-button .mark-icon.wrong::before {
+      color: var(--red);
+      font-size: 24px;
+      line-height: 20px;
+    }
+
+    .group-result-button .mark-icon.ungraded::before {
+      content: "—";
+      color: #8994aa;
+      font-size: 18px;
+      line-height: 20px;
+    }
+
+    .score-mark {
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: var(--brand);
+      background: #edf1ff;
+      font-family: "PingFang SC", sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .question-confirm-bar {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      justify-content: flex-end;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .question-confirm-bar .button {
+      min-width: 190px;
+      min-height: 46px;
+      box-shadow: 0 12px 26px rgba(79,102,216,.20);
+    }
+
+    .empty-group { padding: 20px; color: var(--muted); font-size: 12px; text-align: center; }
+
+    .toast {
+      position: fixed;
+      right: 30px;
+      bottom: 28px;
+      z-index: 50;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: white;
+      background: #243351;
+      box-shadow: 0 12px 30px rgba(20,31,56,.24);
+      font-size: 12px;
+      transform: translateY(24px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .24s ease;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background: rgba(19, 29, 53, .45);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-backdrop.open { display: grid; }
+    .modal {
+      width: min(820px, 94vw);
+      max-height: 88vh;
+      overflow: auto;
+      border-radius: 22px;
+      background: #f9fbff;
+      box-shadow: 0 26px 80px rgba(16,27,51,.30);
+      animation: modal-in .22s ease both;
+    }
+
+    @keyframes modal-in { from { transform: translateY(12px) scale(.98); opacity: 0; } }
+    .modal-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { margin: 0; font-family: "Songti SC", serif; font-size: 22px; }
+    .modal-close { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: white; cursor: pointer; }
+    .modal-body { padding: 22px; }
+
+    .preview-paper {
+      min-height: 520px;
+      padding: 30px 42px;
+      border: 1px solid #eadfce;
+      border-radius: 14px;
+      background:
+        repeating-linear-gradient(to bottom, transparent 0 31px, rgba(91,105,133,.09) 31px 32px),
+        #fffdf8;
+      box-shadow: 0 14px 35px rgba(60,67,84,.09);
+    }
+
+    .preview-paper h3 { margin: 0 0 26px; text-align: center; font-family: "Songti SC", serif; font-size: 24px; }
+    .preview-question { margin: 25px 0; font-family: "Songti SC", serif; line-height: 1.8; }
+    .teacher-mark { margin: 8px 0 0 52px; color: #db4d59; font-family: "Kaiti SC", "STKaiti", serif; font-size: 20px; transform: rotate(-1deg); }
+
+    .diagnosis-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .diagnosis-card { padding: 18px; border: 1px solid var(--line); border-radius: 15px; background: white; }
+    .diagnosis-card strong { display: block; font-size: 27px; margin-bottom: 4px; }
+    .diagnosis-card span { color: var(--muted); font-size: 11px; }
+    .diagnosis-list { margin-top: 16px; display: grid; gap: 10px; }
+    .diagnosis-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 12px; background: white; border: 1px solid var(--line); font-size: 12px; }
+    .diagnosis-row b { color: var(--brand); }
+
+    @media (max-width: 1180px) {
+      body { overflow: auto; }
+      .app-shell { height: auto; min-height: 100vh; }
+      .app { height: auto; min-height: 100vh; }
+      .workspace { grid-template-columns: 170px 270px minmax(480px,1fr); min-height: 760px; }
+    }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .app-shell { padding: 0; }
+      .app { border-radius: 0; grid-template-rows: auto auto; }
+      .topbar { padding: 14px; flex-wrap: wrap; }
+      .workspace { display: block; min-height: 0; }
+      .rail { display: block; border-right: 0; border-bottom: 1px solid var(--line); }
+      .panel-heading { padding-bottom: 8px; }
+      .question-list { display: flex; overflow-x: auto; padding: 4px 12px 12px; }
+      .question-item { min-width: 150px; }
+      .rail-footer { position: sticky; bottom: 0; z-index: 10; }
+      .assistant { border-right: 0; border-bottom: 1px solid var(--line); }
+      .answer-zone { min-height: 700px; }
+    }
+
+    @media (max-width: 620px) {
+      h1 { font-size: 18px; }
+      .top-actions { width: 100%; }
+      .top-actions .button { flex: 1; padding: 0 9px; }
+      .answer-toolbar { align-items: flex-start; }
+      .density-label { display: none; }
+      .student-grid { --columns: 2 !important; }
+      .groups-scroll { padding: 12px; }
+      .diagnosis-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <main class="app">
+      <header class="topbar">
+        <div class="title-lockup">
+          <a class="back-link" href="./index.html" aria-label="返回批改首页">←</a>
+        </div>
+        <div class="top-actions">
+          <a class="button ghost" href="./student-trace-preview.html">预览学生留痕</a>
+          <button class="button ghost" type="button">错因诊断</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="rail" aria-label="题号导航">
+          <nav class="question-list" id="questionList"></nav>
+          <div class="rail-footer">
+            <button class="button primary" type="button" id="confirmAll">确认全部题目批改</button>
+          </div>
+        </aside>
+
+        <aside class="assistant" aria-label="题目批改辅助信息">
+          <section class="assist-card metric-card is-hidden">
+            <div class="assist-label" id="metricLabel">正确率</div>
+            <div class="metric-value" id="accuracyValue"></div>
+          </section>
+
+          <section class="assist-card answer-card">
+            <div class="assist-label">答案</div>
+            <div class="answer-value" id="answerValue"></div>
+            <details class="answer-details" id="explanationDetails">
+              <summary>解析</summary>
+              <div class="explanation" id="explanationText"></div>
+            </details>
+          </section>
+
+          <section class="assist-card basis-card">
+            <div class="basis-card__head">
+              <span class="basis-card__icon" aria-hidden="true">✦</span>
+              <div class="assist-label">AI 批改依据</div>
+            </div>
+            <ul class="basis-list" id="basisList"></ul>
+          </section>
+        </aside>
+
+        <section class="answer-zone" aria-label="题目分组批改">
+          <div class="answer-toolbar">
+            <div></div>
+            <div class="density-control" aria-label="每行卡片数量">
+              <span class="density-label">每行</span>
+              <div class="density-switch">
+                <button class="density-button" type="button" data-columns="2">2</button>
+                <button class="density-button active" type="button" data-columns="3">3</button>
+                <button class="density-button" type="button" data-columns="4">4</button>
+              </div>
+            </div>
+          </div>
+          <div class="groups-scroll" id="groupsScroll"></div>
+          <div class="question-confirm-bar">
+            <button class="button primary" type="button" id="confirmQuestion">确认本题批改</button>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="previewModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+      <div class="modal-head">
+        <h2 id="previewTitle">学生留痕预览</h2>
+        <button class="modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-paper">
+          <h3>二次函数单元作业</h3>
+          <div class="preview-question">1. 二次函数 y = 2x² − 4x + 1 的图像开口方向是（　）。<br>学生作答：向上</div>
+          <div class="teacher-mark">✓　判断正确，注意结合二次项系数。</div>
+          <div class="preview-question">2. 求函数 y = x² − 4x + 3 的对称轴。<br>学生作答：x = 2</div>
+          <div class="teacher-mark">✓　配方过程完整。</div>
+          <div class="preview-question">3. 写出函数 y = x² − 4x + 3 的顶点坐标。<br>学生作答：（2，−1）</div>
+          <div class="teacher-mark">×　符号检查：常数项应为 −1。</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="diagnosisModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="diagnosisTitle">
+      <div class="modal-head">
+        <h2 id="diagnosisTitle">班级错因诊断</h2>
+        <button class="modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="diagnosis-grid">
+          <div class="diagnosis-card"><strong>78%</strong><span>班级平均正确率</span></div>
+          <div class="diagnosis-card"><strong>3 类</strong><span>高频错误模式</span></div>
+          <div class="diagnosis-card"><strong>8 人</strong><span>建议重点关注</span></div>
+        </div>
+        <div class="diagnosis-list">
+          <div class="diagnosis-row"><span>对称轴公式符号使用错误</span><b>12 人</b></div>
+          <div class="diagnosis-row"><span>配方过程缺少等式变形</span><b>9 人</b></div>
+          <div class="diagnosis-row"><span>顶点坐标横纵坐标混淆</span><b>6 人</b></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const isExam = params.get("mode") === "exam";
+      const variant = params.get("variant");
+      const isSimilarityGrouping = variant === "similar";
+      document.title = isExam ? "飞象智批 · 试卷批改 Demo" : isSimilarityGrouping ? "飞象智批 · 形似作答分组 Demo" : "飞象智批 · 按题批改 Demo";
+
+      const students = ["王晓宇", "李思雨", "陈子涵", "张可欣", "周明远", "许安然", "林嘉言", "苏雨桐", "赵亦辰", "沈乐言", "何宇辰", "宋雨桐", "顾晨然", "刘子涵", "马思源", "郑雨欣"];
+
+      let questions = [
+        {
+          id: 1, title: "图像开口方向", type: "选择题 · 二次函数图像", accuracy: 88, status: "completed", answer: "向上（选 B）",
+          explanation: "二次函数 y = ax² + bx + c 中，二次项系数 a 决定图像开口方向。当 a > 0 时图像开口向上；当 a < 0 时图像开口向下。本题 a = 2 > 0。",
+          basis: ["识别二次项系数 2，并与 0 比较。", "学生答案语义与“向上”一致即可判为正确。"],
+          responses: ["向上", "B，开口向上", "a＞0，所以向上", "向上", "开口朝上", "B", "向下", "A，向下", "向上，因为2＞0", "上", "没有写", "向上", "a=2，开口向上", "向上", "不确定", "向下"]
+        },
+        {
+          id: 2, title: "求函数对称轴", type: "填空题 · 配方法", accuracy: 76, status: "pending", answer: "x = 2",
+          explanation: "将 y = x² − 4x + 3 化为 y = (x − 2)² − 1，可知图像的对称轴为直线 x = 2。也可以使用公式 x = −b / 2a。",
+          basis: ["最终答案必须是直线 x = 2，不能只写数字 2。", "过程正确但表达缺少 x = 时，归入半对组。"],
+          responses: ["x = 2", "2", "x = −2", "x=2", "对称轴是2", "−b/2a=2", "x=4", "x = 2", "(x−2)²−1，所以x=2", "未作答", "x=2", "x = 1", "2", "x=2", "x轴", "x = 2"]
+        },
+        {
+          id: 3, title: "顶点坐标", type: "填空题 · 顶点式", accuracy: 81, status: "completed", answer: "（2，−1）",
+          explanation: "由 y = x² − 4x + 3 = (x − 2)² − 1，可直接读出顶点坐标为（2，−1）。横坐标取括号内相反数。",
+          basis: ["横坐标与纵坐标必须同时正确。", "括号或负号书写不清时，暂留未批改。"],
+          responses: ["（2，−1）", "(2,-1)", "（−2，1）", "2，−1", "（2，1）", "(2,-1)", "（2，−1）", "未写", "顶点(2,-1)", "（−1，2）", "(2,-1)", "（2，−1）", "2,-1", "（2，1）", "看不清", "（2，−1）"]
+        },
+        {
+          id: 4, title: "判断增减性", type: "解答题 · 图像性质", accuracy: 64, status: "pending", answer: "x＜2 时递减，x＞2 时递增",
+          explanation: "图像开口向上，对称轴为 x = 2，因此在对称轴左侧函数值随 x 增大而减小，在右侧随 x 增大而增大。",
+          basis: ["以对称轴 x = 2 为分界，左右区间不能写反。", "只写‘先减后增’但未写区间，归入半对组。"],
+          responses: ["x<2递减，x>2递增", "先减后增", "左增右减", "x≤2减，x≥2增", "x<2递减", "没有区间", "x>2递增", "先减后增", "未作答", "x<2增，x>2减", "左减右增", "x<2递减，x>2递增", "对称轴两侧相反", "先增后减", "x<2递减，x>2递增", "不确定"]
+        },
+        {
+          id: 5, title: "函数最值", type: "解答题 · 最值", accuracy: 91, status: "completed", answer: "最小值为 −1",
+          explanation: "函数化为顶点式 y = (x − 2)² − 1。因为平方项恒大于等于 0，所以当 x = 2 时，函数取得最小值 −1。",
+          basis: ["需明确最值类型为最小值。", "只写 −1 但没有写‘最小值’，仍可判为正确。"],
+          responses: ["最小值−1", "−1", "当x=2时最小值为−1", "最小值是1", "−1", "最小值−1", "最大值−1", "−1", "未作答", "最小值为−1", "x=2", "最小值−1", "−1", "最小值为−1", "−1", "最小值−1"]
+        },
+        {
+          id: 6, title: "综合图像判断", type: "解答题 · 性质综合", accuracy: 58, status: "pending", answer: "开口向上；对称轴 x = 2；顶点（2，−1）",
+          explanation: "先由 a = 1 判断开口方向，再配方得到 y = (x − 2)² − 1，从顶点式读取对称轴与顶点坐标。三个结论需要保持一致。",
+          basis: ["三个评分点分别核验：开口方向、对称轴、顶点。", "答对其中两个评分点归入半对；三个全错判为错误。"],
+          responses: ["向上；x=2；(2,-1)", "向上，x=2", "向下；x=2；(2,-1)", "向上；x=−2；(−2,-1)", "三个结论全对", "只写了顶点(2,-1)", "未作答", "向上；x=2；(2,-1)", "字迹模糊", "向上；x=2；(2,1)", "向下；x=−2", "向上，顶点(2,-1)", "x=2；(2,-1)", "未完成", "向上；x=2；(2,-1)", "向上；x=2"]
+        }
+      ];
+
+      if (isSimilarityGrouping && !isExam) {
+        questions = [
+          {
+            id: 1,
+            title: "小数乘法口算",
+            type: "填空题 · 小数乘法",
+            accuracy: 92,
+            status: "completed",
+            answer: "0.9",
+            explanation: "3.6 × 0.25 可以转化为 3.6 ÷ 4，结果为 0.9。也可以先算 36 × 25 = 900，再根据两位小数确定结果为 0.900，即 0.9。",
+            basis: ["答案与 0.9 等值即可判为正确。", "计算过程接近但小数点位置错误，归入半对或错误组。"],
+            groups: [
+              { id: "q1-correct", result: "correct", title: "答案完全正确", basis: "结果与标准答案一致，或写成 0.90 等等值形式。", students: [{ name: "李思雨", answer: "0.9" }, { name: "王晓宇", answer: "3.6 ÷ 4 = 0.9" }, { name: "张可欣", answer: "0.90" }, { name: "赵亦辰", answer: "0.9" }] },
+              { id: "q1-partial", result: "partial", title: "过程接近但小数点偏差", basis: "乘法拆解方向正确，但小数位数处理不稳定。", reason: "小数点位置判断错误", students: [{ name: "周明远", answer: "36×25=900，所以是 9" }, { name: "陈子涵", answer: "0.09" }] },
+              { id: "q1-wrong", result: "wrong", title: "答案数量级错误", basis: "结果与 0.9 差异较大，无法由同一过程推出。", reason: "把 0.25 当作 25 直接相乘", students: [{ name: "许安然", answer: "90" }, { name: "林嘉言", answer: "9" }] },
+              { id: "q1-ungraded", result: "ungraded", title: "未批改", basis: "作答遮挡或字迹不完整，需要老师确认。", students: [{ name: "苏雨桐", answer: "0.?" }] }
+            ]
+          },
+          {
+            id: 2,
+            title: "积的小数位数",
+            type: "填空题 · 小数位数",
+            accuracy: 86,
+            status: "completed",
+            answer: "两位小数",
+            explanation: "小数乘法先按整数乘法计算，再看两个因数一共有几位小数，积就保留几位小数。",
+            basis: ["明确写出两位小数即可判对。", "只写结果但没有说明位数时，结合题干判断。"],
+            groups: [
+              { id: "q2-correct", result: "correct", title: "规则表述完整", basis: "能说明两个因数小数位数相加。", students: [{ name: "王晓宇", answer: "一共有两位小数" }, { name: "李思雨", answer: "两位" }, { name: "赵亦辰", answer: "小数点向左数两位" }] },
+              { id: "q2-partial", result: "partial", title: "知道要数位但表达不完整", basis: "提到小数位数，但没有说明两因数相加。", reason: "规则表达不完整", students: [{ name: "马思源", answer: "看小数点" }, { name: "郑雨欣", answer: "数小数位" }] },
+              { id: "q2-wrong", result: "wrong", title: "位数判断错误", basis: "把一位小数或三位小数作为最终答案。", reason: "未合并两个因数的小数位", students: [{ name: "何宇辰", answer: "一位" }] },
+              { id: "q2-ungraded", result: "ungraded", title: "未批改", basis: "答案被涂改，无法稳定识别。", students: [{ name: "宋雨桐", answer: "两？" }] }
+            ]
+          },
+          {
+            id: 3,
+            title: "估算乘积范围",
+            type: "应用题 · 估算",
+            accuracy: 74,
+            status: "pending",
+            answer: "约 12",
+            explanation: "把 3.98 看作 4，把 2.9 看作 3，估算结果约为 12。估算题重点看取近似数是否合理、乘积数量级是否正确。",
+            basis: ["估算思路和数量级正确即可判为正确。", "写出精确计算但未回应估算要求，归入半对。"],
+            groups: [
+              { id: "q3-correct", result: "correct", title: "估算方法正确", basis: "将两个因数合理取整，乘积数量级正确。", students: [{ name: "王晓宇", answer: "4×3≈12" }, { name: "李思雨", answer: "约 12" }, { name: "陈子涵", answer: "3.98≈4，2.9≈3，所以约12" }] },
+              { id: "q3-partial", result: "partial", title: "计算正确但未体现估算", basis: "结果接近，但过程是精确计算或缺少近似说明。", reason: "估算要求回应不完整", students: [{ name: "张可欣", answer: "3.98×2.9=11.542" }, { name: "周明远", answer: "11.5" }, { name: "许安然", answer: "约 11.5" }] },
+              { id: "q3-wrong", result: "wrong", title: "数量级错误", basis: "取整或乘法结果明显偏离合理范围。", reason: "估算数量级错误", students: [{ name: "林嘉言", answer: "约 120" }, { name: "苏雨桐", answer: "约 1.2" }] },
+              { id: "q3-ungraded", result: "ungraded", title: "未批改", basis: "只写了算式，没有给出结果。", students: [{ name: "赵亦辰", answer: "4×3" }] }
+            ]
+          },
+          {
+            id: 4,
+            title: "小数乘法验算",
+            type: "解答题 · 验算",
+            accuracy: 68,
+            status: "pending",
+            answer: "用除法或交换因数验算",
+            explanation: "小数乘法可用交换因数再乘一遍，或用积除以其中一个因数，看是否等于另一个因数。",
+            basis: ["验算方法合理且结果能对应原题，判为正确。", "只写口头检查但没有具体方法，归入半对。"],
+            groups: [
+              { id: "q4-correct", result: "correct", title: "验算方法完整", basis: "说明用除法反推或交换因数验算，并写出对应结果。", students: [{ name: "王晓宇", answer: "用积÷一个因数，看是否等于另一个因数" }, { name: "李思雨", answer: "交换两个因数再乘一次" }] },
+              { id: "q4-partial", result: "partial", title: "知道要验算但步骤缺失", basis: "提到验算，但没有说明如何判断。", reason: "验算步骤不完整", students: [{ name: "陈子涵", answer: "算完后再验算" }, { name: "张可欣", answer: "检查一遍" }] },
+              { id: "q4-wrong", result: "wrong", title: "验算方式不成立", basis: "使用与乘法结果无关的方法。", reason: "验算关系错误", students: [{ name: "周明远", answer: "把两个小数相加" }] },
+              { id: "q4-ungraded", result: "ungraded", title: "未批改", basis: "空白或字迹无法识别。", students: [{ name: "许安然", answer: "未作答" }] }
+            ]
+          },
+          {
+            id: 5,
+            title: "小数点移动规律",
+            type: "填空题 · 位值",
+            accuracy: 79,
+            status: "completed",
+            answer: "扩大到原来的 100 倍",
+            explanation: "小数点向右移动两位，数就扩大到原来的 100 倍。",
+            basis: ["移动方向和位数都正确即可判为正确。", "只写‘变大’但未写倍数，归入半对。"],
+            groups: [
+              { id: "q5-correct", result: "correct", title: "规律表述准确", basis: "同时写出方向、位数与倍数。", students: [{ name: "王晓宇", answer: "扩大到原来的100倍" }, { name: "李思雨", answer: "×100" }, { name: "陈子涵", answer: "小数点右移两位，扩大100倍" }] },
+              { id: "q5-partial", result: "partial", title: "方向正确但倍数缺失", basis: "知道变大，但没有准确说明 100 倍。", reason: "倍数表达不完整", students: [{ name: "张可欣", answer: "变大" }, { name: "周明远", answer: "扩大" }] },
+              { id: "q5-wrong", result: "wrong", title: "方向或倍数错误", basis: "写成缩小或 10 倍。", reason: "位数与倍数对应错误", students: [{ name: "许安然", answer: "缩小100倍" }, { name: "林嘉言", answer: "扩大10倍" }] },
+              { id: "q5-ungraded", result: "ungraded", title: "未批改", basis: "答案修改痕迹较重。", students: [{ name: "苏雨桐", answer: "100?" }] }
+            ]
+          },
+          {
+            id: 6,
+            title: "综合小数计算",
+            type: "解答题 · 小数乘法综合",
+            accuracy: 58,
+            status: "pending",
+            answer: "12.5",
+            explanation: "先按运算顺序完成括号内计算，再进行小数乘法；保留小数点位置，最后检查结果数量级是否合理。",
+            basis: ["按“结果 + 关键过程”联合判断。", "同类作答按形似步骤聚合，错误组按主要错因拆分。"],
+            groups: [
+              { id: "q6-correct", result: "correct", title: "过程与答案正确", basis: "列式、运算顺序和最终结果均与标准答案一致。", students: [{ name: "王晓宇", answer: "2.5×5=12.5" }, { name: "李思雨", answer: "5×2.5=12.5" }, { name: "张可欣", answer: "先算括号，再得12.5" }, { name: "赵亦辰", answer: "12.5" }] },
+              { id: "q6-partial-a", result: "partial", title: "过程正确但少写单位", basis: "计算过程正确，最终结果缺少单位或表达不完整。", reason: "结果表达不完整", students: [{ name: "陈子涵", answer: "2.5×5=12.5，未写单位" }, { name: "周明远", answer: "结果是12.5" }] },
+              { id: "q6-partial-b", result: "partial", title: "关键步骤正确但结果抄写错", basis: "步骤方向正确，最后一行抄写出现偏差。", reason: "抄写或小数点位置错误", students: [{ name: "沈乐言", answer: "2.5×5=125" }] },
+              { id: "q6-wrong-a", result: "wrong", title: "运算顺序错误", basis: "未先处理括号，导致后续结果错误。", reason: "运算顺序混淆", students: [{ name: "许安然", answer: "2.5+5=7.5" }, { name: "林嘉言", answer: "先乘后加，得10" }] },
+              { id: "q6-wrong-b", result: "wrong", title: "小数点处理错误", basis: "乘法过程能看出，但积的小数位数错误。", reason: "小数点定位错误", students: [{ name: "苏雨桐", answer: "1.25" }, { name: "何宇辰", answer: "125" }] },
+              { id: "q6-ungraded", result: "ungraded", title: "未批改", basis: "作答被涂改或缺少关键步骤，需要老师判断。", students: [{ name: "宋雨桐", answer: "12 ?" }, { name: "顾晨然", answer: "字迹遮挡" }] }
+            ]
+          },
+          {
+            id: 7,
+            title: "解决问题列式",
+            type: "应用题 · 小数乘法",
+            accuracy: 61,
+            status: "pending",
+            answer: "18.4 元",
+            explanation: "先找出单价和数量，再用单价乘数量，最后带上单位。",
+            basis: ["列式正确且单位完整判为正确。", "只算出数值但缺少单位，归入半对。"],
+            groups: [
+              { id: "q7-correct", result: "correct", title: "列式与单位完整", basis: "数量关系、计算结果和单位均正确。", students: [{ name: "王晓宇", answer: "4.6×4=18.4元" }, { name: "李思雨", answer: "18.4 元" }] },
+              { id: "q7-partial", result: "partial", title: "数值正确但单位缺失", basis: "计算结果正确，但没有写单位。", reason: "缺少单位", students: [{ name: "陈子涵", answer: "18.4" }, { name: "张可欣", answer: "4.6×4=18.4" }] },
+              { id: "q7-wrong", result: "wrong", title: "数量关系错误", basis: "列式未使用单价×数量。", reason: "数量关系识别错误", students: [{ name: "周明远", answer: "4.6+4=8.6" }] },
+              { id: "q7-ungraded", result: "ungraded", title: "未批改", basis: "缺少最终答案。", students: [{ name: "许安然", answer: "4.6×4=" }] }
+            ]
+          },
+          {
+            id: 8,
+            title: "综合应用检查",
+            type: "应用题 · 综合",
+            accuracy: 83,
+            status: "completed",
+            answer: "够",
+            explanation: "先计算总价，再与已有金额比较。判断题要同时写出比较结果和结论。",
+            basis: ["计算总价正确且比较结论一致即可判为正确。", "只写结论但没有比较过程，归入半对。"],
+            groups: [
+              { id: "q8-correct", result: "correct", title: "比较过程完整", basis: "总价计算正确，比较结论明确。", students: [{ name: "王晓宇", answer: "总价 36 元，小于 40 元，够" }, { name: "李思雨", answer: "够，40>36" }, { name: "陈子涵", answer: "36元，够" }] },
+              { id: "q8-partial", result: "partial", title: "结论正确但过程缺失", basis: "结论正确，但没有展示比较依据。", reason: "缺少比较过程", students: [{ name: "张可欣", answer: "够" }] },
+              { id: "q8-wrong", result: "wrong", title: "比较方向错误", basis: "计算结果或比较符号导致结论相反。", reason: "比较大小错误", students: [{ name: "周明远", answer: "不够" }] },
+              { id: "q8-ungraded", result: "ungraded", title: "未批改", basis: "作答不完整。", students: [{ name: "许安然", answer: "36" }] }
+            ]
+          }
+        ];
+      }
+
+      const resultPattern = ["correct", "correct", "correct", "partial", "correct", "partial", "wrong", "wrong", "ungraded", "correct", "partial", "correct", "correct", "wrong", "ungraded", "correct"];
+      const shiftedPatterns = [0, 1, 0, 2, 0, 3];
+
+      questions.forEach((question, qIndex) => {
+        if (question.groups) {
+          question.students = question.groups.flatMap(group =>
+            group.students.map((student, index) => ({
+              id: `${question.id}-${group.id}-${index}`,
+              name: student.name,
+              answer: student.answer,
+              result: group.result,
+              groupId: group.id
+            }))
+          );
+          return;
+        }
+        const shift = shiftedPatterns[qIndex];
+        question.students = students.map((name, index) => ({
+          id: `${question.id}-${index}`,
+          name,
+          answer: question.responses[index],
+          result: resultPattern[(index + shift) % resultPattern.length]
+        }));
+      });
+
+      const labels = {
+        correct: { name: "正确" },
+        partial: { name: "半对" },
+        wrong: { name: "错误" },
+        ungraded: { name: "未批改" }
+      };
+
+      const order = ["correct", "partial", "wrong", "ungraded"];
+      const cycle = { correct: "wrong", wrong: "partial", partial: "correct", ungraded: "correct" };
+      let activeQuestionId = isSimilarityGrouping ? 6 : isExam ? 1 : 2;
+      let columns = 3;
+      let toastTimer;
+
+      const questionList = document.getElementById("questionList");
+      const groupsScroll = document.getElementById("groupsScroll");
+      const metricCard = document.querySelector(".metric-card");
+      const metricLabel = document.getElementById("metricLabel");
+      const accuracyValue = document.getElementById("accuracyValue");
+      const answerValue = document.getElementById("answerValue");
+      const explanationText = document.getElementById("explanationText");
+      const basisList = document.getElementById("basisList");
+      const explanationDetails = document.getElementById("explanationDetails");
+      const confirmQuestionButton = document.getElementById("confirmQuestion");
+
+      const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
+
+      function maxScore(question) {
+        return [3, 6].includes(question.id) ? 6 : 4;
+      }
+
+      function avgScore(question) {
+        return (question.accuracy / 100 * maxScore(question)).toFixed(1).replace(".0", "");
+      }
+
+      function formatScore(score) {
+        if (score === "待评") return score;
+        return Number.isInteger(score) ? `${score}` : score.toFixed(1);
+      }
+
+      function defaultScoreForResult(result, question) {
+        const max = maxScore(question);
+        if (result === "correct") return max;
+        if (result === "partial") return Math.max(1, Math.round(max * 0.65));
+        if (result === "wrong") return 0;
+        return "待评";
+      }
+
+      function studentScore(student, question) {
+        const score = typeof student.score === "number"
+          ? student.score
+          : defaultScoreForResult(student.result, question);
+        return formatScore(score);
+      }
+
+      function questionMetric(question) {
+        return isExam ? `${avgScore(question)}/${maxScore(question)}分` : `${question.accuracy}%`;
+      }
+
+      function metricClass(question) {
+        if (isExam) return "is-score";
+        if (question.accuracy >= 80) return "is-high";
+        if (question.accuracy >= 60) return "is-mid";
+        return "is-low";
+      }
+
+      function renderQuestions() {
+        questionList.innerHTML = questions.map(question => `
+          <button class="question-item ${question.id === activeQuestionId ? "active" : ""}" type="button" data-question="${question.id}">
+            <span class="q-meta">
+              <span class="q-title">第 ${question.id} 题</span>
+              <span class="q-state ${question.status === "pending" ? "pending" : ""}">${question.status === "pending" ? "待确认" : "已完成"}</span>
+            </span>
+            <span class="q-rate ${metricClass(question)}">${questionMetric(question)}</span>
+          </button>
+        `).join("");
+
+        questionList.querySelectorAll("[data-question]").forEach(button => {
+          button.addEventListener("click", () => {
+            activeQuestionId = Number(button.dataset.question);
+            explanationDetails.open = false;
+            renderAll();
+            groupsScroll.scrollTop = 0;
+          });
+        });
+      }
+
+      function renderAssistant() {
+        const question = activeQuestion();
+        metricCard.classList.add("is-hidden");
+        metricLabel.textContent = isExam ? "平均分" : "正确率";
+        accuracyValue.textContent = questionMetric(question);
+        answerValue.textContent = question.answer;
+        explanationText.textContent = question.explanation;
+        const basisItems = [`AI按“${isExam ? "得分点" : "结果"} + 关键过程”联合判断`, ...question.basis];
+        basisList.innerHTML = basisItems.map((item, index) => `<li class="${index === 0 ? "is-primary" : ""}">${item}</li>`).join("");
+        confirmQuestionButton.textContent = isExam ? "确认本题赋分" : "确认本题批改";
+      }
+
+      function renderGroups() {
+        const question = activeQuestion();
+        if (isSimilarityGrouping && question.groups) {
+          renderSimilarityGroups(question);
+          return;
+        }
+        groupsScroll.innerHTML = order.map(result => {
+          const group = question.students.filter(student => student.result === result);
+          return `
+            <section class="group-section" data-result="${result}">
+              <header class="group-head">
+                <div class="group-heading">
+                  <span class="dot ${result}"></span>
+                  <h3>${labels[result].name}</h3>
+                  <span class="group-count">${group.length} 人</span>
+                </div>
+              </header>
+              ${group.length ? `<div class="student-grid" style="--columns:${columns}">${group.map(student => studentCard(student)).join("")}</div>` : `<div class="empty-group">当前没有学生作答</div>`}
+            </section>
+          `;
+        }).join("");
+
+        bindPaperInteractions();
+      }
+
+      function renderSimilarityGroups(question) {
+        const groupResultTool = (group) => {
+          const result = labels[group.result] ? group.result : "ungraded";
+          return `
+          <button class="group-result-button" type="button" data-batch-group="${group.id}" data-current-result="${result}" aria-label="点击切换本组批改结果，当前${labels[result].name}">
+            <span class="mark-icon ${result}" aria-hidden="true"></span>
+          </button>
+        `;
+        };
+
+        groupsScroll.innerHTML = question.groups
+          .slice()
+          .sort((a, b) => order.indexOf(a.result) - order.indexOf(b.result))
+          .map(group => {
+            const studentsInGroup = question.students.filter(student => student.groupId === group.id);
+            return `
+              <section class="group-section shape-group-section" data-result="${group.result}" data-group="${group.id}">
+                <header class="shape-group-head">
+                  <div class="shape-group-head__top">
+                    <div class="shape-group-title">
+                      <span class="dot ${group.result}"></span>
+                      <h3>${group.title}</h3>
+                    </div>
+                    <div class="shape-group-state">
+                      <div class="group-result-tools" aria-label="${group.title}批改结果">
+                        ${groupResultTool(group)}
+                      </div>
+                      <span class="shape-group-count">${studentsInGroup.length} 人</span>
+                    </div>
+                  </div>
+                </header>
+                ${studentsInGroup.length ? `<div class="student-grid" style="--columns:${columns}">${studentsInGroup.map(student => studentCard(student)).join("")}</div>` : `<div class="empty-group">当前没有学生作答</div>`}
+              </section>
+            `;
+          }).join("");
+
+        bindPaperInteractions();
+        bindGroupActions();
+      }
+
+      function bindGroupActions() {
+        groupsScroll.querySelectorAll("[data-batch-group]").forEach(button => {
+          button.addEventListener("click", event => {
+            event.stopPropagation();
+            const question = activeQuestion();
+            const group = question.groups?.find(item => item.id === button.dataset.batchGroup);
+            const currentResult = group?.result || "ungraded";
+            batchUpdateGroup(button.dataset.batchGroup, cycle[currentResult] || "correct", button);
+          });
+        });
+      }
+
+      function batchUpdateGroup(groupId, result, trigger) {
+        const question = activeQuestion();
+        const group = question.groups?.find(item => item.id === groupId);
+        if (group) group.result = result;
+        const studentsInGroup = question.students.filter(student => student.groupId === groupId);
+        studentsInGroup.forEach(student => {
+          student.result = result;
+          const paper = groupsScroll.querySelector(`.answer-paper[data-student="${student.id}"]`);
+          if (paper) renderCardResult(paper.closest(".student-card"), paper, student, question);
+        });
+        const section = trigger.closest(".group-section");
+        if (section) {
+          section.dataset.result = result;
+          const dot = section.querySelector(".shape-group-title .dot");
+          if (dot) dot.className = `dot ${result}`;
+          const resultButton = section.querySelector(".group-result-button");
+          if (resultButton) {
+            resultButton.dataset.currentResult = result;
+            resultButton.setAttribute("aria-label", `点击切换本组批改结果，当前${labels[result].name}`);
+            const icon = resultButton.querySelector(".mark-icon");
+            if (icon) icon.className = `mark-icon ${result}`;
+          }
+        }
+        showToast(`已将本组 ${studentsInGroup.length} 份作答批为${labels[result].name}`);
+      }
+
+      function bindPaperInteractions() {
+        groupsScroll.querySelectorAll(".answer-paper").forEach(paper => {
+          paper.addEventListener("click", () => cycleResult(paper.dataset.student, paper));
+          paper.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              cycleResult(paper.dataset.student, paper);
+            }
+          });
+        });
+      }
+
+      function studentCard(student) {
+        const question = activeQuestion();
+        const mark = isExam
+          ? `<span class="score-mark">${studentScore(student, question)} / ${maxScore(question)} 分</span>`
+          : `<span class="paper-trace-mark ${student.result}"><span class="mark-icon ${student.result}"></span></span>`;
+        return `
+          <article class="student-card" data-result="${student.result}">
+            <header class="student-card-head">
+              <span class="student-name">${student.name}</span>
+            </header>
+            <div class="answer-paper" role="button" tabindex="0" data-student="${student.id}" aria-label="切换${student.name}的批改结果">
+              ${mark}
+              <div class="handwriting">${student.answer}</div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderCardResult(card, paper, student, question) {
+        card.dataset.result = student.result;
+        if (isExam) {
+          const scoreMark = paper.querySelector(".score-mark");
+          if (scoreMark) scoreMark.textContent = `${studentScore(student, question)} / ${maxScore(question)} 分`;
+          return;
+        }
+        const trace = paper.querySelector(".paper-trace-mark");
+        const icon = paper.querySelector(".mark-icon");
+        if (trace) trace.className = `paper-trace-mark ${student.result}`;
+        if (icon) icon.className = `mark-icon ${student.result}`;
+      }
+
+      function cycleResult(studentId, paper) {
+        const question = activeQuestion();
+        const student = question.students.find(item => item.id === studentId);
+
+        if (isExam) {
+          const max = maxScore(question);
+          const currentScore = typeof student.score === "number"
+            ? student.score
+            : defaultScoreForResult(student.result, question);
+          const numericScore = typeof currentScore === "number" ? currentScore : max;
+          const nextScore = numericScore <= 0 ? max : Math.max(0, Math.round((numericScore - 0.5) * 2) / 2);
+
+          student.score = nextScore;
+          if (nextScore === max) {
+            student.result = "correct";
+          } else if (nextScore === 0) {
+            student.result = "wrong";
+          } else {
+            student.result = "partial";
+          }
+
+          renderCardResult(paper.closest(".student-card"), paper, student, question);
+          showToast(`${student.name}：已调整为 ${formatScore(nextScore)} / ${max} 分`);
+          return;
+        }
+
+        const oldResult = student.result;
+        student.result = cycle[oldResult];
+        renderCardResult(paper.closest(".student-card"), paper, student, question);
+        showToast(`${student.name}：${labels[oldResult].name} → ${labels[student.result].name}`);
+      }
+
+      function renderAll() {
+        renderQuestions();
+        renderAssistant();
+        renderGroups();
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      document.querySelectorAll(".density-button").forEach(button => {
+        button.addEventListener("click", () => {
+          columns = Number(button.dataset.columns);
+          document.querySelectorAll(".density-button").forEach(item => item.classList.toggle("active", item === button));
+          renderGroups();
+          showToast(`已切换为每行 ${columns} 份作业`);
+        });
+      });
+
+      document.getElementById("confirmAll").addEventListener("click", event => {
+        questions.forEach(question => question.status = "completed");
+        renderQuestions();
+        event.currentTarget.textContent = "✓ 已确认全部题目批改";
+        event.currentTarget.disabled = true;
+        showToast(`已确认全部 ${questions.length} 道题的批改结果`);
+      });
+
+      confirmQuestionButton.addEventListener("click", () => {
+        const currentIndex = questions.findIndex(question => question.id === activeQuestionId);
+        questions[currentIndex].status = "completed";
+        const nextQuestion = questions[currentIndex + 1];
+        if (nextQuestion) {
+          activeQuestionId = nextQuestion.id;
+          explanationDetails.open = false;
+          renderAll();
+          groupsScroll.scrollTop = 0;
+          showToast(`已确认第 ${questions[currentIndex].id} 题，自动进入第 ${nextQuestion.id} 题`);
+          return;
+        }
+        renderAll();
+        showToast("已确认最后一题，可以发布批改结果");
+      });
+
+      const modals = {
+        preview: document.getElementById("previewModal"),
+        diagnosis: document.getElementById("diagnosisModal")
+      };
+
+      function setModal(modal, open) {
+        modal.classList.toggle("open", open);
+        modal.setAttribute("aria-hidden", String(!open));
+        if (open) modal.querySelector(".modal-close").focus();
+      }
+
+      document.querySelectorAll("[data-modal]").forEach(button => button.addEventListener("click", () => setModal(modals[button.dataset.modal], true)));
+      document.querySelectorAll(".modal-backdrop").forEach(modal => {
+        modal.querySelector(".modal-close").addEventListener("click", () => setModal(modal, false));
+        modal.addEventListener("click", event => { if (event.target === modal) setModal(modal, false); });
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") document.querySelectorAll(".modal-backdrop.open").forEach(modal => setModal(modal, false));
+      });
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
