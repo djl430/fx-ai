@@ -157,6 +157,12 @@ test('generated task timers update the existing DOM without rerendering the page
   assert.doesNotMatch(indexPage, /if \(completed\) \{[\s\S]*?render\(\);[\s\S]*?return;/);
 });
 
+test('all toast messages are positioned at the upper center of their page', () => {
+  for (const page of [indexPage, historyPage, gradingPage]) {
+    assert.match(page, /\.toast\s*\{[^}]*position:\s*fixed[^}]*left:\s*50%[^}]*top:\s*88px[^}]*translateX\(-50%\)/s);
+  }
+});
+
 test('processing generated tasks are guarded and completed tasks open grading', () => {
   assert.match(indexPage, /task\.generated\s*&&\s*task\.status\s*===\s*["']AI分析中["']/);
   assert.match(indexPage, /grading-by-question-demo\.html/);

@@ -13,7 +13,7 @@
     .task:last-child { border-bottom:0; } .task-title { font-weight:750; font-size:17px; margin-bottom:9px; } .task-sub { color:var(--muted); font-size:13px; } .num { font-weight:750; text-align:center; font-size:14px; }
     .pill { justify-self:center; padding:6px 11px; border-radius:999px; font-weight:700; font-size:12px; } .pending { color:#a46e18; background:#fff3db; } .done { color:#218264; background:#e7f7ef; } .processing { color:#405cb9; background:#e7edff; }
     button { border:0; cursor:pointer; font:inherit; font-weight:750; } .primary, .secondary { min-width:112px; padding:12px 17px; border-radius:14px; font-size:15px; } .primary { background:linear-gradient(135deg,#263b72,#596fd7); color:#fff; box-shadow:0 9px 20px rgba(56,75,145,.23); } .secondary { color:var(--ink); background:#fff; border:1px solid #dfe5f1; }
-    .toast { position:fixed; right:32px; bottom:28px; padding:14px 18px; border-radius:14px; color:#216e58; background:#eaf8f1; box-shadow:0 10px 30px rgba(36,77,66,.18); font-weight:700; opacity:0; transform:translateY(12px); transition:.25s; } .toast.show { opacity:1; transform:none; }
+    .toast { position:fixed; z-index:50; left:50%; top:88px; max-width:calc(100vw - 48px); padding:14px 18px; border-radius:14px; color:#216e58; background:#eaf8f1; box-shadow:0 10px 30px rgba(36,77,66,.18); font-weight:700; opacity:0; transform:translateX(-50%) translateY(-12px); transition:.25s; } .toast.show { opacity:1; transform:translateX(-50%); }
     @media (max-width:800px) { .shell{padding:20px}.task{grid-template-columns:1fr 70px; gap:12px}.task .num,.task .pill{justify-self:start;text-align:left}.task button{grid-column:2}.page{padding:10px}.task{min-height:150px} }
   </style>
 </head>
