@@ -148,3 +148,13 @@ test('grading completion is persisted by task id and reflected on the list', () 
   assert.match(indexPage, /applyTaskListState/);
   assert.match(indexPage, /已确认/);
 });
+
+test('grading starts pending, restores progress, and selects the first pending question', () => {
+  assert.doesNotMatch(gradingPage, /status:\s*["']completed["']/);
+  assert.match(gradingPage, /applyGradingProgress/);
+  assert.match(gradingPage, /firstPendingQuestionId/);
+  assert.match(gradingPage, /fxGradingProgress/);
+  assert.match(gradingPage, /markQuestionCompleted/);
+  assert.match(gradingPage, /localStorage\.setItem\(["']fxGradingProgress["']/);
+  assert.match(gradingPage, /find\(\(question\)\s*=>\s*question\.status\s*!==\s*["']completed["']/);
+});

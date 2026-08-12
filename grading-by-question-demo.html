@@ -995,7 +995,7 @@
 
       let questions = [
         {
-          id: 1, title: "图像开口方向", type: "选择题 · 二次函数图像", accuracy: 88, status: "completed", answer: "向上（选 B）",
+          id: 1, title: "图像开口方向", type: "选择题 · 二次函数图像", accuracy: 88, status: "pending", answer: "向上（选 B）",
           explanation: "二次函数 y = ax² + bx + c 中，二次项系数 a 决定图像开口方向。当 a > 0 时图像开口向上；当 a < 0 时图像开口向下。本题 a = 2 > 0。",
           basis: ["识别二次项系数 2，并与 0 比较。", "学生答案语义与“向上”一致即可判为正确。"],
           responses: ["向上", "B，开口向上", "a＞0，所以向上", "向上", "开口朝上", "B", "向下", "A，向下", "向上，因为2＞0", "上", "没有写", "向上", "a=2，开口向上", "向上", "不确定", "向下"]
@@ -1007,7 +1007,7 @@
           responses: ["x = 2", "2", "x = −2", "x=2", "对称轴是2", "−b/2a=2", "x=4", "x = 2", "(x−2)²−1，所以x=2", "未作答", "x=2", "x = 1", "2", "x=2", "x轴", "x = 2"]
         },
         {
-          id: 3, title: "顶点坐标", type: "填空题 · 顶点式", accuracy: 81, status: "completed", answer: "（2，−1）",
+          id: 3, title: "顶点坐标", type: "填空题 · 顶点式", accuracy: 81, status: "pending", answer: "（2，−1）",
           explanation: "由 y = x² − 4x + 3 = (x − 2)² − 1，可直接读出顶点坐标为（2，−1）。横坐标取括号内相反数。",
           basis: ["横坐标与纵坐标必须同时正确。", "括号或负号书写不清时，暂留未批改。"],
           responses: ["（2，−1）", "(2,-1)", "（−2，1）", "2，−1", "（2，1）", "(2,-1)", "（2，−1）", "未写", "顶点(2,-1)", "（−1，2）", "(2,-1)", "（2，−1）", "2,-1", "（2，1）", "看不清", "（2，−1）"]
@@ -1019,7 +1019,7 @@
           responses: ["x<2递减，x>2递增", "先减后增", "左增右减", "x≤2减，x≥2增", "x<2递减", "没有区间", "x>2递增", "先减后增", "未作答", "x<2增，x>2减", "左减右增", "x<2递减，x>2递增", "对称轴两侧相反", "先增后减", "x<2递减，x>2递增", "不确定"]
         },
         {
-          id: 5, title: "函数最值", type: "解答题 · 最值", accuracy: 91, status: "completed", answer: "最小值为 −1",
+          id: 5, title: "函数最值", type: "解答题 · 最值", accuracy: 91, status: "pending", answer: "最小值为 −1",
           explanation: "函数化为顶点式 y = (x − 2)² − 1。因为平方项恒大于等于 0，所以当 x = 2 时，函数取得最小值 −1。",
           basis: ["需明确最值类型为最小值。", "只写 −1 但没有写‘最小值’，仍可判为正确。"],
           responses: ["最小值−1", "−1", "当x=2时最小值为−1", "最小值是1", "−1", "最小值−1", "最大值−1", "−1", "未作答", "最小值为−1", "x=2", "最小值−1", "−1", "最小值为−1", "−1", "最小值−1"]
@@ -1039,7 +1039,7 @@
             title: "小数乘法口算",
             type: "填空题 · 小数乘法",
             accuracy: 92,
-            status: "completed",
+            status: "pending",
             answer: "0.9",
             explanation: "3.6 × 0.25 可以转化为 3.6 ÷ 4，结果为 0.9。也可以先算 36 × 25 = 900，再根据两位小数确定结果为 0.900，即 0.9。",
             basis: ["答案与 0.9 等值即可判为正确。", "计算过程接近但小数点位置错误，归入半对或错误组。"],
@@ -1055,7 +1055,7 @@
             title: "积的小数位数",
             type: "填空题 · 小数位数",
             accuracy: 86,
-            status: "completed",
+            status: "pending",
             answer: "两位小数",
             explanation: "小数乘法先按整数乘法计算，再看两个因数一共有几位小数，积就保留几位小数。",
             basis: ["明确写出两位小数即可判对。", "只写结果但没有说明位数时，结合题干判断。"],
@@ -1103,7 +1103,7 @@
             title: "小数点移动规律",
             type: "填空题 · 位值",
             accuracy: 79,
-            status: "completed",
+            status: "pending",
             answer: "扩大到原来的 100 倍",
             explanation: "小数点向右移动两位，数就扩大到原来的 100 倍。",
             basis: ["移动方向和位数都正确即可判为正确。", "只写‘变大’但未写倍数，归入半对。"],
@@ -1153,7 +1153,7 @@
             title: "综合应用检查",
             type: "应用题 · 综合",
             accuracy: 83,
-            status: "completed",
+            status: "pending",
             answer: "够",
             explanation: "先计算总价，再与已有金额比较。判断题要同时写出比较结果和结论。",
             basis: ["计算总价正确且比较结论一致即可判为正确。", "只写结论但没有比较过程，归入半对。"],
@@ -1201,7 +1201,13 @@
 
       const order = ["correct", "partial", "wrong", "ungraded"];
       const cycle = { correct: "wrong", wrong: "partial", partial: "correct", ungraded: "correct" };
-      let activeQuestionId = isSimilarityGrouping ? 6 : isExam ? 1 : 2;
+      const gradingProgressKey = taskId || `demo:${isExam ? "exam" : isSimilarityGrouping ? "similar" : "homework"}`;
+      let gradingProgress = FxCollectionFlow.normalizeGradingProgress(null);
+      try {
+        gradingProgress = FxCollectionFlow.normalizeGradingProgress(JSON.parse(localStorage.getItem("fxGradingProgress") || "null"));
+      } catch (_) {}
+      questions = FxCollectionFlow.applyGradingProgress(questions, gradingProgress, gradingProgressKey);
+      let activeQuestionId = FxCollectionFlow.firstPendingQuestionId(questions);
       let columns = 3;
       let toastTimer;
 
@@ -1219,6 +1225,12 @@
       confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "确认全部题目批改";
 
       const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
+
+      function saveGradingProgress() {
+        try {
+          localStorage.setItem("fxGradingProgress", JSON.stringify(gradingProgress));
+        } catch (_) {}
+      }
 
       function persistTaskCompletionIfReady() {
         if (!taskId || !questions.every((question) => question.status === "completed")) return false;
@@ -1246,6 +1258,8 @@
         confirmAllButton.textContent = isExam ? "✓ 已确认全部题目赋分" : "✓ 已确认全部题目批改";
         confirmAllButton.disabled = true;
       }
+
+      if (questions.every((question) => question.status === "completed")) showTaskCompletion();
 
       function maxScore(question) {
         return [3, 6].includes(question.id) ? 6 : 4;
@@ -1521,7 +1535,11 @@
       });
 
       confirmAllButton.addEventListener("click", () => {
-        questions.forEach(question => question.status = "completed");
+        questions.forEach((question) => {
+          question.status = "completed";
+          gradingProgress = FxCollectionFlow.markQuestionCompleted(gradingProgress, gradingProgressKey, question.id);
+        });
+        saveGradingProgress();
         renderQuestions();
         persistTaskCompletionIfReady();
         showTaskCompletion();
@@ -1531,9 +1549,15 @@
       confirmQuestionButton.addEventListener("click", () => {
         const currentIndex = questions.findIndex(question => question.id === activeQuestionId);
         questions[currentIndex].status = "completed";
+        gradingProgress = FxCollectionFlow.markQuestionCompleted(
+          gradingProgress,
+          gradingProgressKey,
+          questions[currentIndex].id,
+        );
+        saveGradingProgress();
         const allCompleted = persistTaskCompletionIfReady();
         if (allCompleted) showTaskCompletion();
-        const nextQuestion = questions[currentIndex + 1];
+        const nextQuestion = questions.find((question) => question.status !== "completed");
         if (nextQuestion) {
           activeQuestionId = nextQuestion.id;
           explanationDetails.open = false;
