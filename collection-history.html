@@ -20,22 +20,43 @@
 <body>
   <main class="shell">
     <a class="back" href="index.html">← 返回作业考试</a>
-    <section class="page" id="taskList">
-      <article class="task pending-task" data-task="today-1942">
-        <div><div class="task-title">今天 19:42 · 六年级3班 · 数学</div><div class="task-sub">高扫采集任务</div></div><div class="num">126 页</div><div class="num">2 份样卷</div><span class="pill pending">待确认</span><button class="primary" type="button">去确认</button>
-      </article>
-      <article class="task pending-task" data-task="today-1618">
-        <div><div class="task-title">今天 16:18 · 六年级1班 · 数学</div><div class="task-sub">高扫采集任务</div></div><div class="num">98 页</div><div class="num">2 份样卷</div><span class="pill pending">待确认</span><button class="primary" type="button">去确认</button>
-      </article>
-      <article class="task"><div><div class="task-title">昨天 18:35 · 八年级3班 · 数学</div><div class="task-sub">高扫采集任务</div></div><div class="num">144 页</div><div class="num">3 份样卷</div><span class="pill done">已确认</span><button class="secondary" type="button">查看结果</button></article>
-      <article class="task"><div><div class="task-title">昨天 12:06 · 六年级2班 · 数学</div><div class="task-sub">高扫采集任务</div></div><div class="num">112 页</div><div class="num">2 份样卷</div><span class="pill done">已确认</span><button class="secondary" type="button">查看结果</button></article>
-      <article class="task"><div><div class="task-title">8月9日 17:40 · 七年级4班 · 数学</div><div class="task-sub">高扫采集任务</div></div><div class="num">136 页</div><div class="num">3 份样卷</div><span class="pill done">已确认</span><button class="secondary" type="button">查看结果</button></article>
-    </section>
+    <section class="page" id="taskList"></section>
   </main>
+  <script src="collection-flow.js"></script>
   <script>
-    document.querySelectorAll('.pending-task button').forEach(button => button.addEventListener('click', () => {
-      const id=button.closest('.pending-task').dataset.task; location.href='collection-confirm.html?task='+id;
-    }));
+    (() => {
+      const taskSeeds = [
+        { id:'today-1942', title:'今天 19:42 · 六年级3班 · 数学', pages:126, samples:2 },
+        { id:'today-1618', title:'今天 16:18 · 六年级1班 · 数学', pages:98, samples:2 },
+        { id:'yesterday-1835', title:'昨天 18:35 · 八年级3班 · 数学', pages:144, samples:3, confirmed:true },
+        { id:'yesterday-1206', title:'昨天 12:06 · 六年级2班 · 数学', pages:112, samples:2, confirmed:true },
+        { id:'aug09-1740', title:'8月9日 17:40 · 七年级4班 · 数学', pages:136, samples:3, confirmed:true },
+      ];
+      let historyState = FxCollectionFlow.normalizeHistoryState(null);
+      try {
+        historyState = FxCollectionFlow.normalizeHistoryState(JSON.parse(localStorage.getItem('fxCollectionHistoryState') || 'null'));
+      } catch (_) {}
+
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = taskSeeds.map((task) => {
+        const confirmed = task.confirmed || historyState.records[task.id]?.status === '已确认';
+        const action = confirmed ? '查看结果' : '去确认';
+        return `<article class="task ${confirmed ? '' : 'pending-task'}" data-task="${task.id}">
+          <div><div class="task-title">${task.title}</div><div class="task-sub">高扫采集任务</div></div>
+          <div class="num">${task.pages} 页</div><div class="num">${task.samples} 份样卷</div>
+          <span class="pill ${confirmed ? 'done' : 'pending'}">${confirmed ? '已确认' : '待确认'}</span>
+          <button class="${confirmed ? 'secondary' : 'primary'}" type="button" data-action="open-history-task" data-confirmed="${confirmed}">${action}</button>
+        </article>`;
+      }).join('');
+
+      taskList.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-action="open-history-task"]');
+        if (!button) return;
+        const id = button.closest('.task').dataset.task;
+        const suffix = button.dataset.confirmed === 'true' ? '&mode=view' : '';
+        location.href = 'collection-confirm.html?task=' + encodeURIComponent(id) + suffix;
+      });
+    })();
   </script>
 </body>
 </html>
