@@ -100,6 +100,12 @@ test('direct home entry resets only collection demo data', () => {
   assert.match(indexPage, /delete[\s\S]*today-1942/);
 });
 
+test('grading back link preserves newly created collection tasks', () => {
+  assert.match(gradingPage, /href="\.\/index\.html\?preserveCollection=1"/);
+  assert.match(indexPage, /preserveCollection/);
+  assert.match(indexPage, /!collectionCreated\s*&&\s*!preserveCollection/);
+});
+
 test('main list always keeps the three original grading tasks visible', () => {
   for (const taskId of ['cluster-homework', 'similar-homework', 'quiz']) {
     assert.match(indexPage, new RegExp(`id:\\s*["']${taskId}["']`));
