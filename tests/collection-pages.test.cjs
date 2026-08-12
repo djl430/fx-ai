@@ -9,6 +9,8 @@ const gradingPage = fs.readFileSync('grading-by-question-demo.html', 'utf8');
 
 test('confirmation page exposes the required group controls', () => {
   assert.match(confirmPage, /data-action="add-sample"/);
+  assert.match(confirmPage, /<div class="notice-actions">[\s\S]*data-action="add-sample"/);
+  assert.doesNotMatch(confirmPage, /<div class="add-row">/);
   assert.match(confirmPage, /data-action="edit-sample-name"/);
   assert.match(confirmPage, /data-action="change-sample-kind"/);
   assert.match(confirmPage, /本次扫描识别到以下/);
