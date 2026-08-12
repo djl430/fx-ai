@@ -28,7 +28,7 @@ test('adds only unassigned selected submission pages in source order', () => {
   ];
   const next = flow.addSubmissionPages(groups, 'sample-2', submissions, ['a-1', 'b-2', 'b-1']);
   assert.deepEqual(next[1].pages.map((page) => page.id), ['b-1', 'b-2']);
-  assert.equal(flow.pageOwner(groups, 'a-1').groupId, 'sample-1');
+  assert.equal(flow.pageOwner(groups, 'a-1').id, 'sample-1');
 });
 ```
 

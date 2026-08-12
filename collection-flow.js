@@ -77,6 +77,35 @@
     return true;
   };
 
+  const pageOwner = (groups, pageId) => (Array.isArray(groups) ? groups : [])
+    .find((group) => Array.isArray(group?.pages) && group.pages.some((page) => page?.id === pageId)) || null;
+
+  const addSubmissionPages = (groups, targetGroupId, submissions, pageIds) => {
+    const sourceGroups = Array.isArray(groups) ? groups : [];
+    const targetGroup = sourceGroups.find((group) => group?.id === targetGroupId);
+    if (!targetGroup) return sourceGroups;
+
+    const selectedPageIds = new Set(Array.isArray(pageIds) ? pageIds : []);
+    const assignedPageIds = new Set(sourceGroups.flatMap((group) => (Array.isArray(group?.pages) ? group.pages : [])
+      .map((page) => page?.id)));
+    const studentOrder = new Map();
+    const additions = (Array.isArray(submissions) ? submissions : [])
+      .map((page, index) => ({ page, index }))
+      .filter(({ page }) => page?.id && selectedPageIds.has(page.id) && !assignedPageIds.has(page.id))
+      .filter(({ page, index }) => {
+        if (!studentOrder.has(page.studentId)) studentOrder.set(page.studentId, index);
+        return true;
+      })
+      .sort((left, right) => studentOrder.get(left.page.studentId) - studentOrder.get(right.page.studentId)
+        || Number(left.page.sourcePageNumber) - Number(right.page.sourcePageNumber)
+        || left.index - right.index)
+      .map(({ page }) => page);
+
+    return sourceGroups.map((group) => group?.id === targetGroupId
+      ? { ...group, pages: [...(Array.isArray(group.pages) ? group.pages : []), ...additions] }
+      : group);
+  };
+
   const recognitionProgress = (task, now = Date.now(), duration = 5000) => {
     const safeDuration = Math.max(1, Number(duration) || 5000);
     const startedAt = Number(task && task.recognitionStartedAt);
@@ -214,6 +243,8 @@
     parseBatch,
     mergeTasks,
     movePage,
+    pageOwner,
+    addSubmissionPages,
     recognitionProgress,
     advanceRecognition,
     normalizeHistoryState,

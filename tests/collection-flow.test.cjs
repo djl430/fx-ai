@@ -83,6 +83,23 @@ test('moves a page into a new sample group and preserves target order', () => {
   assert.equal(groups[1].students, 31);
 });
 
+test('adds only unassigned selected submission pages in source order', () => {
+  const groups = [
+    { id: 'sample-1', pages: [{ id: 'a-1' }] },
+    { id: 'sample-2', pages: [] },
+  ];
+  const submissions = [
+    { id: 'a-1', studentId: 'a', sourcePageNumber: 1 },
+    { id: 'b-2', studentId: 'b', sourcePageNumber: 2 },
+    { id: 'b-1', studentId: 'b', sourcePageNumber: 1 },
+  ];
+
+  const next = flow.addSubmissionPages(groups, 'sample-2', submissions, ['a-1', 'b-2', 'b-1']);
+
+  assert.deepEqual(next[1].pages.map((page) => page.id), ['b-1', 'b-2']);
+  assert.equal(flow.pageOwner(groups, 'a-1').id, 'sample-1');
+});
+
 test('calculates five-second recognition progress from the original start time', () => {
   const task = { recognitionStartedAt: 1000 };
 
