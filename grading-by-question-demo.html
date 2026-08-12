@@ -663,6 +663,8 @@
       position: absolute;
       right: 12px;
       top: 10px;
+      display: inline-flex;
+      align-items: center;
       padding: 4px 8px;
       border-radius: 999px;
       color: var(--brand);
@@ -671,6 +673,26 @@
       font-size: 12px;
       font-weight: 900;
     }
+
+    .score-input {
+      width: 34px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-bottom: 1px solid transparent;
+      outline: 0;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      font-weight: inherit;
+      text-align: right;
+      -moz-appearance: textfield;
+    }
+
+    .score-input::-webkit-inner-spin-button,
+    .score-input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
+    .score-input:focus { border-bottom-color: currentColor; }
+    .score-input::placeholder { color: #8590ae; opacity: 1; }
 
     .question-confirm-bar {
       position: sticky;
@@ -1290,8 +1312,28 @@
         return formatScore(score);
       }
 
+      function scoreInputValue(student, question) {
+        const score = typeof student.score === "number"
+          ? student.score
+          : defaultScoreForResult(student.result, question);
+        return typeof score === "number" ? formatScore(score) : "";
+      }
+
+      function averageExamScore(question) {
+        const scores = question.students
+          .map((student) => {
+            const score = typeof student.score === "number"
+              ? student.score
+              : defaultScoreForResult(student.result, question);
+            return typeof score === "number" ? score : null;
+          })
+          .filter((score) => score !== null);
+        if (!scores.length) return "0";
+        return formatScore(scores.reduce((total, score) => total + score, 0) / scores.length);
+      }
+
       function questionMetric(question) {
-        return isExam ? `${avgScore(question)}/${maxScore(question)}分` : `${question.accuracy}%`;
+        return isExam ? `${averageExamScore(question)}/${maxScore(question)}分` : `${question.accuracy}%`;
       }
 
       function metricClass(question) {
@@ -1438,6 +1480,13 @@
       }
 
       function bindPaperInteractions() {
+        groupsScroll.querySelectorAll("[data-score-input]").forEach((input) => {
+          input.closest("[data-score-editor]").addEventListener("click", (event) => event.stopPropagation());
+          input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") input.blur();
+          });
+          input.addEventListener("change", () => commitExamScore(input.dataset.student, input.value));
+        });
         groupsScroll.querySelectorAll(".answer-paper").forEach(paper => {
           paper.addEventListener("click", () => cycleResult(paper.dataset.student, paper));
           paper.addEventListener("keydown", event => {
@@ -1452,7 +1501,7 @@
       function studentCard(student) {
         const question = activeQuestion();
         const mark = isExam
-          ? `<span class="score-mark">${studentScore(student, question)} / ${maxScore(question)} 分</span>`
+          ? `<span class="score-mark" data-score-editor><input class="score-input" type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" placeholder="待评" data-score-input data-student="${student.id}" aria-label="${student.name}第 ${question.id} 题得分"> / ${maxScore(question)} 分</span>`
           : `<span class="paper-trace-mark ${student.result}"><span class="mark-icon ${student.result}"></span></span>`;
         return `
           <article class="student-card" data-result="${student.result}">
@@ -1470,8 +1519,8 @@
       function renderCardResult(card, paper, student, question) {
         card.dataset.result = student.result;
         if (isExam) {
-          const scoreMark = paper.querySelector(".score-mark");
-          if (scoreMark) scoreMark.textContent = `${studentScore(student, question)} / ${maxScore(question)} 分`;
+          const scoreInput = paper.querySelector(".score-input");
+          if (scoreInput) scoreInput.value = scoreInputValue(student, question);
           return;
         }
         const trace = paper.querySelector(".paper-trace-mark");
@@ -1502,6 +1551,25 @@
         student.result = cycle[oldResult];
         renderCardResult(paper.closest(".student-card"), paper, student, question);
         showToast(`${student.name}：${labels[oldResult].name} → ${labels[student.result].name}`);
+      }
+
+      function commitExamScore(studentId, rawValue) {
+        const question = activeQuestion();
+        const student = question.students.find((item) => item.id === studentId);
+        const max = maxScore(question);
+        if (!student || rawValue === "") {
+          renderAll();
+          return;
+        }
+        const parsed = Number(rawValue);
+        if (!Number.isFinite(parsed)) {
+          renderAll();
+          return;
+        }
+        const score = Math.max(0, Math.min(max, Math.round(parsed * 2) / 2));
+        student.score = score;
+        student.result = score === max ? "correct" : score === 0 ? "wrong" : "partial";
+        renderAll();
       }
 
       function renderAll() {
