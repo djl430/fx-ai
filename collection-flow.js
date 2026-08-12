@@ -57,6 +57,23 @@
     });
   };
 
+  const movePage = (groups, move) => {
+    if (!Array.isArray(groups) || !move) return false;
+    const sourceGroup = groups.find((group) => group.id === move.sourceGroupId);
+    const targetGroup = groups.find((group) => group.id === move.targetGroupId);
+    const sourceIndex = sourceGroup?.pages.findIndex((page) => page.id === move.pageId) ?? -1;
+    if (!sourceGroup || !targetGroup || sourceIndex < 0) return false;
+    if (sourceGroup === targetGroup && move.beforePageId === move.pageId) return false;
+
+    const [page] = sourceGroup.pages.splice(sourceIndex, 1);
+    const beforeIndex = move.beforePageId
+      ? targetGroup.pages.findIndex((item) => item.id === move.beforePageId)
+      : -1;
+    targetGroup.pages.splice(beforeIndex < 0 ? targetGroup.pages.length : beforeIndex, 0, page);
+    if (!targetGroup.students) targetGroup.students = sourceGroup.students;
+    return true;
+  };
+
   return {
     normalizeKind,
     normalizeName,
@@ -64,5 +81,6 @@
     buildTasks,
     parseBatch,
     mergeTasks,
+    movePage,
   };
 });

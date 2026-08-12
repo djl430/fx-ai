@@ -52,3 +52,22 @@ test('deduplicates generated tasks by id and keeps incoming order', () => {
 
   assert.deepEqual(flow.mergeTasks(existing, [task]), [task, existing[0]]);
 });
+
+test('moves a page into a new sample group and preserves target order', () => {
+  const groups = [
+    { id: 'sample-1', students: 31, pages: [{ id: 'p1' }, { id: 'p2' }] },
+    { id: 'sample-2', students: 0, pages: [{ id: 'p3' }] },
+  ];
+
+  const moved = flow.movePage(groups, {
+    sourceGroupId: 'sample-1',
+    pageId: 'p2',
+    targetGroupId: 'sample-2',
+    beforePageId: 'p3',
+  });
+
+  assert.equal(moved, true);
+  assert.deepEqual(groups[0].pages.map((page) => page.id), ['p1']);
+  assert.deepEqual(groups[1].pages.map((page) => page.id), ['p2', 'p3']);
+  assert.equal(groups[1].students, 31);
+});

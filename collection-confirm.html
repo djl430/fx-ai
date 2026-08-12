@@ -503,18 +503,15 @@
         const zone = event.target.closest('.pages');
         if (!zone || !draggedPage) return;
         event.preventDefault();
-        const sourceGroup = findGroup(draggedPage.groupId);
         const targetGroup = findGroup(zone.dataset.groupId);
-        const sourceIndex = sourceGroup?.pages.findIndex((page) => page.id === draggedPage.pageId) ?? -1;
-        if (!sourceGroup || !targetGroup || sourceIndex < 0) return;
-
-        const [page] = sourceGroup.pages.splice(sourceIndex, 1);
         const targetCard = event.target.closest('.scan-card');
-        const targetIndex = targetCard
-          ? targetGroup.pages.findIndex((item) => item.id === targetCard.dataset.pageId)
-          : targetGroup.pages.length;
-        targetGroup.pages.splice(targetIndex < 0 ? targetGroup.pages.length : targetIndex, 0, page);
-        if (!targetGroup.students) targetGroup.students = sourceGroup.students;
+        const moved = FxCollectionFlow.movePage(groups, {
+          sourceGroupId: draggedPage.groupId,
+          pageId: draggedPage.pageId,
+          targetGroupId: zone.dataset.groupId,
+          beforePageId: targetCard?.dataset.pageId,
+        });
+        if (!moved || !targetGroup) return;
         zone.classList.remove('drag-over');
         formMessage.textContent = `已将页面移动到“${FxCollectionFlow.normalizeName(targetGroup.name)}”。`;
         formMessage.classList.remove('is-error');
