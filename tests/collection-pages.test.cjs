@@ -210,3 +210,12 @@ test('grading starts pending, restores progress, and selects the first pending q
   assert.match(gradingPage, /localStorage\.setItem\(["']fxGradingProgress["']/);
   assert.match(gradingPage, /find\(\(question\)\s*=>\s*question\.status\s*!==\s*["']completed["']/);
 });
+
+test('exam grading exposes direct score inputs without changing homework paper clicks', () => {
+  assert.match(gradingPage, /class="score-input"/);
+  assert.match(gradingPage, /type="number"/);
+  assert.match(gradingPage, /step="0\.5"/);
+  assert.match(gradingPage, /data-score-input/);
+  assert.match(gradingPage, /commitExamScore/);
+  assert.match(gradingPage, /if \(isExam\) return;/);
+});
