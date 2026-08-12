@@ -120,6 +120,11 @@ test('processing generated tasks are guarded and completed tasks open grading', 
   assert.match(indexPage, /className/);
 });
 
+test('generated homework and exams select grading mode from task kind', () => {
+  assert.match(indexPage, /mode:\s*task\.kind\s*===\s*["']考试["']\s*\?\s*["']exam["']\s*:\s*["']homework["']/);
+  assert.match(indexPage, /taskId:\s*task\.id/);
+});
+
 test('grading demo renders generated task metadata from query parameters', () => {
   for (const key of ['taskTitle', 'taskKind', 'className', 'students', 'pages']) {
     assert.match(gradingPage, new RegExp(`params\\.get\\(["']${key}["']\\)`));
