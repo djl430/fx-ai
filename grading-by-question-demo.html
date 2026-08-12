@@ -1530,9 +1530,22 @@
       }
 
       function cycleResult(studentId, paper) {
-        if (isExam) return;
         const question = activeQuestion();
         const student = question.students.find(item => item.id === studentId);
+
+        if (isExam) {
+          const max = maxScore(question);
+          const currentScore = typeof student.score === "number"
+            ? student.score
+            : defaultScoreForResult(student.result, question);
+          const numericScore = typeof currentScore === "number" ? currentScore : max;
+          const nextScore = numericScore <= 0 ? max : Math.max(0, Math.round((numericScore - 0.5) * 2) / 2);
+          student.score = nextScore;
+          student.result = nextScore === max ? "correct" : nextScore === 0 ? "wrong" : "partial";
+          renderAll();
+          showToast(`${student.name}：已调整为 ${formatScore(nextScore)} / ${max} 分`);
+          return;
+        }
 
         const oldResult = student.result;
         student.result = cycle[oldResult];
