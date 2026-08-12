@@ -139,6 +139,8 @@ test('history page renders pending and confirmed actions dynamically', () => {
 });
 
 test('generated tasks render a five-second recognition progress bar', () => {
+  assert.match(indexPage, /AI分析中/);
+  assert.doesNotMatch(indexPage, /AI识别中/);
   assert.match(indexPage, /task-recognition-progress/);
   assert.match(indexPage, /recognitionStartedAt/);
   assert.match(indexPage, /advanceRecognition/);
@@ -154,7 +156,7 @@ test('generated task timers update the existing DOM without rerendering the page
 });
 
 test('processing generated tasks are guarded and completed tasks open grading', () => {
-  assert.match(indexPage, /task\.generated\s*&&\s*task\.status\s*===\s*["']AI识别中["']/);
+  assert.match(indexPage, /task\.generated\s*&&\s*task\.status\s*===\s*["']AI分析中["']/);
   assert.match(indexPage, /grading-by-question-demo\.html/);
   assert.match(indexPage, /taskTitle/);
   assert.match(indexPage, /className/);

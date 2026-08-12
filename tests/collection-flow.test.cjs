@@ -38,7 +38,7 @@ test('maps homework and exam groups to list tasks', () => {
   assert.deepEqual(tasks.map((task) => task.kind), ['作业', '考试']);
   assert.deepEqual(tasks.map((task) => task.pages), [4, 2]);
   assert.deepEqual(tasks.map((task) => task.title), ['分数乘法练习', '第三单元测试']);
-  assert.ok(tasks.every((task) => task.status === 'AI识别中'));
+  assert.ok(tasks.every((task) => task.status === 'AI分析中'));
   assert.ok(tasks.every((task) => task.generated === true));
   assert.ok(tasks.every((task) => task.recognitionStartedAt === 1786550400000));
   assert.ok(tasks.every((task) => task.sourceTaskId === 'today-1942'));
@@ -109,7 +109,7 @@ test('calculates five-second recognition progress from the original start time',
 });
 
 test('marks a completed generated task as pending confirmation', () => {
-  const task = { id: 'generated-1', generated: true, recognitionStartedAt: 1000, status: 'AI识别中', listTag: 'AI识别中', progress: 0 };
+  const task = { id: 'generated-1', generated: true, recognitionStartedAt: 1000, status: 'AI分析中', listTag: 'AI分析中', progress: 0 };
   const completed = flow.advanceRecognition(task, 6000, 5000);
 
   assert.equal(completed.status, '待确认');

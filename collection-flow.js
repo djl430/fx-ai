@@ -26,8 +26,8 @@
     students: group.students,
     pages: group.pages.length,
     anomalyCount: 0,
-    status: 'AI识别中',
-    listTag: 'AI识别中',
+    status: 'AI分析中',
+    listTag: 'AI分析中',
     progress: 0,
     updated: '刚刚',
     generated: true,
@@ -117,13 +117,13 @@
   };
 
   const advanceRecognition = (task, now = Date.now(), duration = 5000) => {
-    if (!task || !task.generated || task.status !== 'AI识别中') return task;
+    if (!task || !task.generated || !['AI分析中', 'AI识别中'].includes(task.status)) return task;
     const progress = recognitionProgress(task, now, duration);
     return {
       ...task,
       progress: progress.percent,
-      status: progress.complete ? '待确认' : 'AI识别中',
-      listTag: progress.complete ? '待确认' : 'AI识别中',
+      status: progress.complete ? '待确认' : 'AI分析中',
+      listTag: progress.complete ? '待确认' : 'AI分析中',
     };
   };
 
