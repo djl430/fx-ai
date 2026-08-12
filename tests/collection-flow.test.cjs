@@ -58,8 +58,14 @@ test('deduplicates generated tasks by id and keeps incoming order', () => {
 });
 
 test('moves a page into a new sample group and preserves target order', () => {
+  const stablePage = {
+    id: 'p2',
+    sourcePageNumber: 4,
+    paperTitle: '第三单元测试',
+    content: ['7. 计算下面各题'],
+  };
   const groups = [
-    { id: 'sample-1', students: 31, pages: [{ id: 'p1' }, { id: 'p2' }] },
+    { id: 'sample-1', students: 31, pages: [{ id: 'p1' }, stablePage] },
     { id: 'sample-2', students: 0, pages: [{ id: 'p3' }] },
   ];
 
@@ -73,6 +79,7 @@ test('moves a page into a new sample group and preserves target order', () => {
   assert.equal(moved, true);
   assert.deepEqual(groups[0].pages.map((page) => page.id), ['p1']);
   assert.deepEqual(groups[1].pages.map((page) => page.id), ['p2', 'p3']);
+  assert.deepEqual(groups[1].pages[0], stablePage);
   assert.equal(groups[1].students, 31);
 });
 

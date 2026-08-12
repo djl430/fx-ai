@@ -19,10 +19,11 @@ test('sample pages wrap instead of scrolling horizontally', () => {
   assert.doesNotMatch(confirmPage, /\.pages\s*\{[^}]*overflow-x:\s*auto/s);
 });
 
-test('sample demo pages render distinct example content', () => {
-  assert.match(confirmPage, /pageQuestionSets/);
-  assert.match(confirmPage, /exampleIndex/);
-  assert.match(confirmPage, /content\.map/);
+test('sample paper content uses stable printed page metadata', () => {
+  assert.match(confirmPage, /sourcePageNumber/);
+  assert.match(confirmPage, /paper-page-number/);
+  assert.match(confirmPage, /paperTitle/);
+  assert.doesNotMatch(confirmPage, /<h4>\$\{escapeHtml\(groupName\)\}\s*·\s*第/);
 });
 
 test('confirmation serializes through the shared collection flow', () => {
@@ -53,12 +54,14 @@ test('all collection confirmation views hide the highlighted acquisition details
   assert.match(confirmPage, /(?:^|\n)\s*\.scan-mark\s*\{\s*display:\s*none/);
 });
 
-test('editable collection pages can delete a sample or page with confirmation', () => {
+test('whole samples confirm deletion while single pages delete immediately', () => {
   assert.match(confirmPage, /data-action="request-delete-sample"/);
+  assert.match(confirmPage, /data-action="confirm-delete-sample"/);
   assert.match(confirmPage, /data-action="request-delete-page"/);
-  assert.match(confirmPage, /data-action="confirm-delete-collection-item"/);
   assert.match(confirmPage, /removeSampleGroup/);
   assert.match(confirmPage, /removeSamplePage/);
+  assert.doesNotMatch(confirmPage, /pendingDelete\.type\s*===\s*['"]page['"]/);
+  assert.doesNotMatch(confirmPage, /确认删除这一页/);
   assert.match(confirmPage, /readOnly\s*\?\s*['"]['"]/);
 });
 
