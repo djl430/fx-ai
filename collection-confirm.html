@@ -137,8 +137,6 @@
     .scan-card:focus-within .page-delete { opacity: 1; pointer-events: auto; transform: none; }
     .sample-delete:hover,
     .page-delete:hover { color: #fff; background: #ce5661; }
-    .scan-card:hover .page-no,
-    .scan-card:focus-within .page-no { opacity: 0; }
     .sample-badge {
       flex: 0 0 auto;
       padding: 8px 11px;
@@ -256,27 +254,25 @@
       border-radius: 0 0 7px 7px;
       background: #e8ebf1;
     }
-    .page-no {
-      position: absolute;
-      z-index: 2;
-      top: 9px;
-      right: 9px;
-      padding: 5px 8px;
-      border-radius: 9px;
-      color: #5970cf;
-      background: #edf1ff;
-      font-size: 11px;
-      font-weight: 850;
-    }
     .scan-paper {
+      position: relative;
       height: 224px;
-      padding: 24px 14px;
+      padding: 24px 14px 36px;
       color: #5c6174;
       background: repeating-linear-gradient(to bottom, var(--paper) 0, var(--paper) 23px, #eee6db 24px);
       font-family: Georgia, "Songti SC", serif;
     }
     .scan-paper h4 { margin: 0 0 15px; font-size: 12px; font-weight: 500; text-align: center; }
     .scan-paper p { margin: 8px 0; font-size: 10px; }
+    .paper-page-number {
+      position: absolute;
+      right: 0;
+      bottom: 10px;
+      left: 0;
+      color: #8a8f9d;
+      font-size: 10px;
+      text-align: center;
+    }
     .scan-mark { position: absolute; right: 18px; bottom: 14px; color: #e95a60; font-size: 24px; }
     .add-row { display: flex; justify-content: center; padding: 22px 0 8px; }
     .add-sample {
@@ -431,27 +427,29 @@
             secondName: '第三单元测试',
       };
 
-      const pageQuestionSets = [
-        ['一、分数乘整数', '1. 3/5 × 10 =', '2. 7/12 × 6 =', '二、解决问题', '计算一周阅读页数。'],
-        ['一、分数乘分数', '1. 2/3 × 5/8 =', '2. 7/9 × 3/14 =', '二、填空', '积的分子是（ ）。'],
-        ['一、简便计算', '1. 5/11 × 22 =', '2. 3/8 × 16/9 =', '二、判断', '乘积一定小于因数。（ ）'],
-        ['一、单位换算', '1. 3/4 千米 =（ ）米', '2. 2/5 时 =（ ）分', '二、应用题', '求长方形草地面积。'],
-        ['一、连续求积', '1. 4/7 × 7/8 × 2 =', '2. 5/6 × 3 × 2/5 =', '二、看图列式', '写出阴影部分算式。'],
-        ['一、估算与比较', '1. 5/6 × 9 ○ 9', '2. 3/7 × 2 ○ 3/7', '二、改错', '找出计算中的错误。'],
-        ['一、选择题', '1. 12 的 2/3 是（ ）', '2. 最小的积是（ ）', '二、计算题', '7/15 × 25 ='],
-        ['一、基础检测', '1. 9 × 5/18 =', '2. 11/12 × 6/11 =', '二、实际应用', '计算已行驶的路程。'],
-        ['一、综合计算', '1. 4/9 × 3/8 =', '2. 7/10 × 15/14 =', '二、列式解答', '求剩余彩带长度。'],
-        ['一、图形问题', '1. 长 5/6 米', '2. 宽 3/5 米', '二、求面积', '结果保留最简分数。'],
-        ['一、生活数学', '1. 每袋重 3/8 千克', '2. 一共有 12 袋', '二、提出问题', '这些物品共重多少？'],
-        ['一、能力提升', '1. 8/15 × 5/12 =', '2. 1 - 3/7 × 7/9 =', '二、开放题', '写出两种解法。'],
-      ];
+      const paperTemplates = {
+        homework: [
+          { sourcePageNumber: 1, content: ['一、计算题', '1. 3/5 × 10 =', '2. 7/12 × 6 =', '3. 2/3 × 5/8 ='] },
+          { sourcePageNumber: 2, content: ['4. 简便计算', '（1）5/11 × 22', '（2）3/8 × 16/9', '5. 比较积的大小'] },
+          { sourcePageNumber: 3, content: ['二、解决问题', '6. 计算一周阅读页数。', '7. 求长方形草地面积。'] },
+          { sourcePageNumber: 4, content: ['三、综合应用', '8. 求剩余彩带长度。', '9. 写出两种解法。'] },
+        ],
+        exam: [
+          { sourcePageNumber: 1, content: ['一、选择题', '1. 判断图形的对称轴。', '2. 选择正确的展开图。', '3. 比较两个图形周长。'] },
+          { sourcePageNumber: 2, content: ['二、填空题', '4. 三角形内角和是（ ）。', '5. 填写面积计算结果。', '6. 写出合适的单位。'] },
+          { sourcePageNumber: 3, content: ['三、计算题', '7. 求阴影部分面积。', '8. 计算组合图形周长。'] },
+          { sourcePageNumber: 4, content: ['四、作图题', '9. 画出平移后的图形。', '10. 补全轴对称图形。'] },
+          { sourcePageNumber: 5, content: ['五、解答题', '11. 设计教室铺砖方案。', '12. 比较两种方案费用。'] },
+          { sourcePageNumber: 6, content: ['六、拓展题', '13. 求未知图形面积。', '14. 说明你的推理方法。'] },
+        ],
+      };
 
-      const makePages = (groupId, title, count, wrongPage, exampleStart = 0) => Array.from({ length: count }, (_, index) => ({
+      const makePages = (groupId, paperTitle, templates, wrongPage) => templates.map((template, index) => ({
         id: `${groupId}-page-${index + 1}`,
-        title,
+        paperTitle,
+        sourcePageNumber: template.sourcePageNumber,
+        content: [...template.content],
         mark: index + 1 === wrongPage ? '×' : '√',
-        exampleIndex: exampleStart + index,
-        content: pageQuestionSets[(exampleStart + index) % pageQuestionSets.length],
       }));
 
       const defaultGroups = [
@@ -460,14 +458,14 @@
           name: taskData.firstName,
           kind: '作业',
           students: 31,
-          pages: makePages('sample-1', taskData.firstName, 4),
+          pages: makePages('sample-1', taskData.firstName, paperTemplates.homework),
         },
         {
           id: 'sample-2',
           name: taskData.secondName,
           kind: '考试',
           students: 30,
-          pages: makePages('sample-2', taskData.secondName, 6, 2, 6),
+          pages: makePages('sample-2', taskData.secondName, paperTemplates.exam, 2),
         },
       ];
       let historyState = FxCollectionFlow.normalizeHistoryState(null);
@@ -481,7 +479,7 @@
         ? JSON.parse(JSON.stringify(savedRecord.groups))
         : defaultGroups;
       let draggedPage = null;
-      let pendingDelete = null;
+      let pendingSampleDelete = null;
 
       const sampleList = document.getElementById('sampleList');
       let sampleCount = document.getElementById('sampleCount');
@@ -504,17 +502,17 @@
       })[character]);
 
       const renderPage = (page, pageIndex, groupName, groupId) => {
-        const groupOffset = groupId === 'sample-2' ? 6 : 0;
-        const exampleIndex = Number.isInteger(page.exampleIndex) ? page.exampleIndex : groupOffset + pageIndex;
-        const content = Array.isArray(page.content) ? page.content : pageQuestionSets[exampleIndex % pageQuestionSets.length];
+        const sourcePageNumber = Number(page.sourcePageNumber) || pageIndex + 1;
+        const paperTitle = page.paperTitle || groupName;
+        const content = Array.isArray(page.content) ? page.content : ['扫描页内容待识别'];
         return `
         <article class="scan-card" draggable="${readOnly ? 'false' : 'true'}" data-page-id="${escapeHtml(page.id)}">
-          ${readOnly ? '' : `<button class="page-delete" type="button" data-action="request-delete-page" data-group-id="${escapeHtml(groupId)}" data-page-id="${escapeHtml(page.id)}" aria-label="删除${escapeHtml(groupName)}第${pageIndex + 1}页">×</button>`}
+          ${readOnly ? '' : `<button class="page-delete" type="button" data-action="request-delete-page" data-group-id="${escapeHtml(groupId)}" data-page-id="${escapeHtml(page.id)}" aria-label="删除${escapeHtml(groupName)}第${sourcePageNumber}页">×</button>`}
           <i class="clip" aria-hidden="true"></i>
-          <b class="page-no">${pageIndex + 1}</b>
           <div class="scan-paper">
-            <h4>${escapeHtml(groupName)} · 第${pageIndex + 1}页</h4>
+            <h4>${escapeHtml(paperTitle)}</h4>
             ${content.map((line) => `<p>${escapeHtml(line)}</p>`).join('')}
+            <footer class="paper-page-number">第 ${sourcePageNumber} 页</footer>
           </div>
           <span class="scan-mark">${page.mark}</span>
         </article>`;
@@ -542,20 +540,17 @@
         </section>`;
 
       const renderDeleteDialog = () => {
-        if (!pendingDelete || readOnly) {
+        if (!pendingSampleDelete || readOnly) {
           collectionDeleteLayer.innerHTML = '';
           return;
         }
-        const removesSample = pendingDelete.type === 'sample';
-        collectionDeleteLayer.innerHTML = `<div class="collection-delete-backdrop" data-action="cancel-delete-collection-item">
+        collectionDeleteLayer.innerHTML = `<div class="collection-delete-backdrop">
           <section class="collection-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="collection-delete-title">
-            <h2 id="collection-delete-title">${removesSample ? '确认删除整个样卷？' : '确认删除这一页？'}</h2>
-            <p>${removesSample
-              ? `删除“${escapeHtml(pendingDelete.name)}”后，其中全部页面也会一起删除。`
-              : `将删除“${escapeHtml(pendingDelete.name)}”的第 ${pendingDelete.pageNumber} 页。`}</p>
+            <h2 id="collection-delete-title">确认删除整个样卷？</h2>
+            <p>删除“${escapeHtml(pendingSampleDelete.name)}”后，其中全部页面也会一起删除。</p>
             <div class="collection-delete-actions">
-              <button class="collection-delete-cancel" type="button" data-action="cancel-delete-collection-item">取消</button>
-              <button class="collection-delete-confirm" type="button" data-action="confirm-delete-collection-item">确认删除</button>
+              <button class="collection-delete-cancel" type="button" data-action="cancel-delete-sample">取消</button>
+              <button class="collection-delete-confirm" type="button" data-action="confirm-delete-sample">确认删除</button>
             </div>
           </section>
         </div>`;
@@ -579,7 +574,7 @@
         if (deleteSample) {
           const group = findGroup(deleteSample.dataset.groupId);
           if (!group) return;
-          pendingDelete = { type: 'sample', groupId: group.id, name: FxCollectionFlow.normalizeName(group.name) };
+          pendingSampleDelete = { groupId: group.id, name: FxCollectionFlow.normalizeName(group.name) };
           renderDeleteDialog();
           return;
         }
@@ -588,35 +583,32 @@
           const group = findGroup(deletePage.dataset.groupId);
           const pageIndex = group?.pages.findIndex((page) => page.id === deletePage.dataset.pageId) ?? -1;
           if (!group || pageIndex < 0) return;
-          pendingDelete = {
-            type: 'page',
-            groupId: group.id,
-            pageId: deletePage.dataset.pageId,
-            pageNumber: pageIndex + 1,
-            name: FxCollectionFlow.normalizeName(group.name),
-          };
-          renderDeleteDialog();
+          const deletedPage = group.pages[pageIndex];
+          const groupName = FxCollectionFlow.normalizeName(group.name);
+          groups = FxCollectionFlow.removeSamplePage(groups, group.id, deletePage.dataset.pageId);
+          draggedPage = null;
+          formMessage.textContent = `已删除“${groupName}”第 ${Number(deletedPage.sourcePageNumber) || pageIndex + 1} 页。`;
+          formMessage.classList.remove('is-error');
+          render();
           return;
         }
-        const cancelDelete = event.target.closest('[data-action="cancel-delete-collection-item"]');
-        if (cancelDelete) {
-          if (event.target !== cancelDelete && cancelDelete.classList.contains('collection-delete-backdrop')) return;
-          pendingDelete = null;
-          renderDeleteDialog();
+        const confirmDelete = event.target.closest('[data-action="confirm-delete-sample"]');
+        if (confirmDelete && pendingSampleDelete) {
+          const deletedName = pendingSampleDelete.name;
+          groups = FxCollectionFlow.removeSampleGroup(groups, pendingSampleDelete.groupId);
+          pendingSampleDelete = null;
+          draggedPage = null;
+          formMessage.textContent = `已删除样卷“${deletedName}”。`;
+          formMessage.classList.remove('is-error');
+          render();
           return;
         }
-        if (!event.target.closest('[data-action="confirm-delete-collection-item"]') || !pendingDelete) return;
-        const message = pendingDelete.type === 'sample'
-          ? `已删除样卷“${pendingDelete.name}”。`
-          : `已删除“${pendingDelete.name}”第 ${pendingDelete.pageNumber} 页。`;
-        groups = pendingDelete.type === 'sample'
-          ? FxCollectionFlow.removeSampleGroup(groups, pendingDelete.groupId)
-          : FxCollectionFlow.removeSamplePage(groups, pendingDelete.groupId, pendingDelete.pageId);
-        pendingDelete = null;
-        draggedPage = null;
-        formMessage.textContent = message;
-        formMessage.classList.remove('is-error');
-        render();
+        const cancelDelete = event.target.closest('[data-action="cancel-delete-sample"]');
+        const clickedBackdrop = event.target.classList.contains('collection-delete-backdrop');
+        if (cancelDelete || clickedBackdrop) {
+          pendingSampleDelete = null;
+          renderDeleteDialog();
+        }
       });
 
       document.addEventListener('click', (event) => {
@@ -742,8 +734,8 @@
       });
 
       document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape' || !pendingDelete) return;
-        pendingDelete = null;
+        if (event.key !== 'Escape' || !pendingSampleDelete) return;
+        pendingSampleDelete = null;
         renderDeleteDialog();
       });
 
