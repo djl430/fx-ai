@@ -272,6 +272,59 @@
       box-shadow: 0 8px 22px rgba(79, 98, 172, .06);
     }
     .add-sample:hover { background: #fff; transform: translateY(-1px); }
+    .anomaly-summary {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      color: #7b5c2d;
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .anomaly-summary strong { color: #bd7417; font-size: 14px; }
+    .anomaly-chip, .sample-risk, .anomaly-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: #9d6820;
+      background: #fff4df;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .sample-risks { display: inline-flex; flex-wrap: wrap; gap: 5px; margin-left: 8px; }
+    .sample-risk { min-height: 22px; }
+    .anomaly-open { margin-left: auto; min-height: 30px; border: 1px solid #eccb9b; border-radius: 9px; padding: 0 10px; color: #a66714; background: #fffaf2; font-weight: 800; }
+    .anomaly-open:hover { background: #fff2df; }
+    .anomaly-backdrop { position: fixed; z-index: 55; inset: 0; display: flex; justify-content: flex-end; background: rgba(31, 42, 74, .22); backdrop-filter: blur(3px); }
+    .anomaly-drawer { width: min(460px, 100%); height: 100%; overflow: auto; padding: 22px; border-left: 1px solid rgba(255,255,255,.9); background: #fbfcff; box-shadow: -18px 0 50px rgba(34, 48, 89, .16); }
+    .anomaly-drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .anomaly-drawer-head h2 { margin: 0; font-size: 20px; }
+    .anomaly-drawer-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .anomaly-drawer-close { width: 32px; height: 32px; border: 0; border-radius: 9px; color: var(--muted); background: #edf1fb; font-size: 20px; }
+    .anomaly-section { margin-top: 18px; }
+    .anomaly-section h3 { margin: 0 0 8px; color: #5b6887; font-size: 12px; }
+    .anomaly-card { padding: 13px; border: 1px solid #e1e6f1; border-radius: 13px; background: #fff; }
+    .anomaly-card + .anomaly-card { margin-top: 8px; }
+    .anomaly-card-top { display: flex; align-items: center; gap: 8px; }
+    .anomaly-card-top strong { font-size: 14px; }
+    .anomaly-card p { margin: 7px 0 10px; color: #697793; font-size: 12px; line-height: 1.55; }
+    .anomaly-status.is-resolved { color: #277d58; background: #eaf8f1; }
+    .anomaly-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+    .anomaly-actions button { min-height: 29px; border: 1px solid #d7dff0; border-radius: 8px; padding: 0 9px; color: #495b91; background: #f9faff; font-size: 12px; font-weight: 800; }
+    .anomaly-actions button:first-child { border-color: transparent; color: #fff; background: #5268d6; }
+    .anomaly-drawer-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .anomaly-drawer-foot button { width: 100%; min-height: 38px; border: 1px solid #d8e0f1; border-radius: 10px; color: #657492; background: #fff; font-weight: 800; }
+    .anomaly-confirm-backdrop { position: fixed; z-index: 70; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(30, 39, 70, .32); backdrop-filter: blur(7px); }
+    .anomaly-confirm-dialog { width: min(440px, 100%); border-radius: 20px; padding: 22px; background: #fff; box-shadow: 0 26px 70px rgba(36, 49, 86, .24); }
+    .anomaly-confirm-dialog h2 { margin: 0; font-size: 20px; }
+    .anomaly-confirm-dialog p { margin: 10px 0 18px; color: var(--muted); line-height: 1.65; }
+    .anomaly-confirm-actions { display: flex; justify-content: flex-end; gap: 9px; }
+    .anomaly-confirm-actions button { min-height: 39px; border-radius: 10px; padding: 0 14px; font-weight: 800; }
+    .anomaly-return { border: 1px solid #d9e0ef; color: var(--ink); background: #fff; }
+    .anomaly-continue { border: 0; color: #fff; background: #5268d6; }
     .sticky {
       position: fixed;
       z-index: 20;
@@ -413,6 +466,7 @@
     }
     @media (max-width: 520px) {
       .notice-actions { grid-template-columns: 1fr; }
+      .anomaly-open { margin-left: 0; }
       .scan-notice { align-items: flex-start; }
       .sample-fields { width: 100%; }
       .sample-meta { width: 100%; margin-left: 0; }
@@ -435,6 +489,7 @@
         </aside>
         <button class="add-sample" type="button" data-action="add-sample">添加样卷</button>
       </div>
+      <div class="anomaly-summary" id="anomalySummary"><span>发现 <strong id="anomalyCount">5</strong> 份异常提交，建议确认后再开始分析</span></div>
     </header>
 
     <div class="sample-list" id="sampleList"></div>
@@ -446,6 +501,8 @@
   </footer>
   <div id="collectionDeleteLayer"></div>
   <div id="collectionSubmissionLayer"></div>
+  <div id="collectionAnomalyLayer"></div>
+  <div id="collectionContinueLayer"></div>
 
   <script src="collection-flow.js"></script>
   <script>
@@ -535,15 +592,30 @@
       let groups = readOnly && Array.isArray(savedRecord?.groups)
         ? JSON.parse(JSON.stringify(savedRecord.groups))
         : defaultGroups;
+      const defaultAnomalies = [
+        { id: 'missing-zhang', groupId: 'sample-1', type: '缺页', student: '张小明', detail: '应提交 4 页，当前 3 页，缺第 2 页。', action: '补充页面', status: 'pending' },
+        { id: 'extra-li', groupId: 'sample-2', type: '多页', student: '李华', detail: '应提交 4 页，当前 6 页，多出 2 页，可能混入其他样卷。', action: '保留多页', status: 'pending' },
+        { id: 'identity-wang', groupId: 'sample-1', type: '归属待确认', student: '王芳', detail: '姓名识别不清，可能属于王芳 / 王凡。', action: '确认归属', choices: ['王芳', '王凡'], status: 'pending' },
+        { id: 'identity-sun', groupId: 'sample-2', type: '归属待确认', student: '孙晨', detail: '页面身份与本组不一致，需要确认归属。', action: '确认归属', choices: ['孙晨', '孙成'], status: 'pending' },
+        { id: 'duplicate-chen', groupId: 'sample-2', type: '重复提交', student: '陈晨', detail: '检测到两份提交，请选择保留其中一份。', action: '选择保留', choices: ['保留第 1 份', '保留第 2 份'], status: 'pending' },
+      ];
+      let anomalies = readOnly && Array.isArray(savedRecord?.anomalies)
+        ? JSON.parse(JSON.stringify(savedRecord.anomalies))
+        : JSON.parse(JSON.stringify(defaultAnomalies));
       let draggedPage = null;
       let pendingSampleDelete = null;
       let submissionPicker = null;
+      let anomalyDrawerOpen = false;
+      let anomalyConfirmOpen = false;
 
       const sampleList = document.getElementById('sampleList');
       let sampleCount = document.getElementById('sampleCount');
       const formMessage = document.getElementById('formMessage');
       const collectionDeleteLayer = document.getElementById('collectionDeleteLayer');
       const collectionSubmissionLayer = document.getElementById('collectionSubmissionLayer');
+      const anomalySummary = document.getElementById('anomalySummary');
+      const collectionAnomalyLayer = document.getElementById('collectionAnomalyLayer');
+      const collectionContinueLayer = document.getElementById('collectionContinueLayer');
       document.getElementById('taskTitle').textContent = taskData.title;
       if (readOnly) {
         document.body.classList.add('is-read-only');
@@ -577,6 +649,17 @@
         </article>`;
       };
 
+      const pendingAnomalies = () => anomalies.filter((anomaly) => anomaly.status !== 'resolved');
+      const visibleAnomalies = () => readOnly ? anomalies : pendingAnomalies();
+      const anomaliesForGroup = (groupId) => visibleAnomalies().filter((anomaly) => anomaly.groupId === groupId);
+      const anomalyTypeCount = (type) => visibleAnomalies().filter((anomaly) => anomaly.type === type).length;
+      const renderRiskTags = (groupId) => anomaliesForGroup(groupId).length
+        ? `<span class="sample-risks">${['缺页', '多页', '归属待确认', '重复提交'].map((type) => {
+          const count = anomaliesForGroup(groupId).filter((anomaly) => anomaly.type === type).length;
+          return count ? `<span class="sample-risk">${type} ${count}</span>` : '';
+        }).join('')}</span>`
+        : '';
+
       const renderGroup = (group, index) => `
         <section class="sample" data-group-id="${group.id}">
           <div class="sample-head">
@@ -592,6 +675,7 @@
               </label>
               <input class="sample-title-input" data-action="edit-sample-name" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 名称" value="${escapeHtml(group.name)}" ${readOnly ? 'disabled' : ''}>
             </div>
+            ${renderRiskTags(group.id)}
             ${readOnly ? '' : `<button class="submission-picker-trigger" type="button" data-action="open-submission-picker" data-group-id="${escapeHtml(group.id)}">从全部提交中添加</button>`}
             <span class="sample-meta" data-role="sample-meta">${group.students ? `${group.students}人 · ` : ''}${group.pages.length}页</span>
             <span class="hint">${readOnly ? '已确认，仅支持查看' : '拖动页面调整顺序或归属'}</span>
@@ -612,6 +696,66 @@
               <button class="collection-delete-cancel" type="button" data-action="cancel-delete-sample">取消</button>
               <button class="collection-delete-confirm" type="button" data-action="confirm-delete-sample">确认删除</button>
             </div>
+          </section>
+        </div>`;
+      };
+
+      const renderAnomalySummary = () => {
+        const visible = visibleAnomalies();
+        if (!visible.length && !readOnly) {
+          anomalySummary.innerHTML = '<span>异常提交均已处理，可开始分析。</span>';
+          return;
+        }
+        const chips = ['缺页', '多页', '归属待确认', '重复提交'].map((type) => {
+          const count = anomalyTypeCount(type);
+          return count ? `<span class="anomaly-chip">${type} ${count}</span>` : '';
+        }).join('');
+        anomalySummary.innerHTML = `<span>${readOnly ? '本次采集共记录' : '发现'} <strong id="anomalyCount">${visible.length}</strong> 份异常提交${readOnly ? '' : '，建议确认后再开始分析'}</span>${chips}<button class="anomaly-open" type="button" data-action="open-anomaly-drawer">${readOnly ? '查看异常' : '查看并处理'}</button>`;
+      };
+
+      const renderAnomalyDrawer = () => {
+        if (!anomalyDrawerOpen) {
+          collectionAnomalyLayer.innerHTML = '';
+          return;
+        }
+        const grouped = ['缺页', '多页', '归属待确认', '重复提交'].map((type) => ({
+          type,
+          items: anomalies.filter((anomaly) => anomaly.type === type),
+        })).filter((group) => group.items.length);
+        collectionAnomalyLayer.innerHTML = `<div class="anomaly-backdrop" data-action="close-anomaly-drawer">
+          <aside class="anomaly-drawer" role="dialog" aria-modal="true" aria-labelledby="anomaly-drawer-title">
+            <header class="anomaly-drawer-head">
+              <div><h2 id="anomaly-drawer-title">提交异常</h2><p>${readOnly ? '已确认采集任务，仅支持查看处理状态。' : '仅处理识别有风险的提交，普通提交无需逐份检查。'}</p></div>
+              <button class="anomaly-drawer-close" type="button" data-action="close-anomaly-drawer" aria-label="关闭">×</button>
+            </header>
+            ${grouped.map(({ type, items }) => `<section class="anomaly-section"><h3>${type} · ${items.length}</h3>${items.map((anomaly) => {
+              const resolved = anomaly.status === 'resolved';
+              const choices = Array.isArray(anomaly.choices) ? anomaly.choices : [];
+              const actions = readOnly || resolved
+                ? ''
+                : anomaly.type === '缺页'
+                  ? `<button type="button" data-action="open-anomaly-submission-picker" data-anomaly-id="${anomaly.id}" data-group-id="${anomaly.groupId}">${anomaly.action}</button>`
+                  : choices.length
+                    ? choices.map((choice) => `<button type="button" data-action="resolve-anomaly" data-anomaly-id="${anomaly.id}" data-choice="${escapeHtml(choice)}">${escapeHtml(choice)}</button>`).join('')
+                    : `<button type="button" data-action="resolve-anomaly" data-anomaly-id="${anomaly.id}">${anomaly.action}</button>`;
+              return `<article class="anomaly-card"><div class="anomaly-card-top"><strong>${escapeHtml(anomaly.student)}</strong><span class="anomaly-status ${resolved ? 'is-resolved' : ''}">${resolved ? `已处理${anomaly.choice ? ` · ${escapeHtml(anomaly.choice)}` : ''}` : '待处理'}</span></div><p>${escapeHtml(anomaly.detail)}</p><div class="anomaly-actions">${actions}</div></article>`;
+            }).join('')}</section>`).join('')}
+            ${readOnly ? '' : '<footer class="anomaly-drawer-foot"><button type="button" data-action="defer-anomalies">稍后处理</button></footer>'}
+          </aside>
+        </div>`;
+      };
+
+      const renderContinueDialog = () => {
+        if (!anomalyConfirmOpen) {
+          collectionContinueLayer.innerHTML = '';
+          return;
+        }
+        const count = pendingAnomalies().length;
+        collectionContinueLayer.innerHTML = `<div class="anomaly-confirm-backdrop">
+          <section class="anomaly-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="anomaly-confirm-title">
+            <h2 id="anomaly-confirm-title">还有 ${count} 份异常提交待处理</h2>
+            <p>未处理异常不会自动归属，也不会进入批改。你可以返回处理，或继续开始分析。</p>
+            <div class="anomaly-confirm-actions"><button class="anomaly-return" type="button" data-action="return-anomaly-review">返回处理</button><button class="anomaly-continue" type="button" data-action="continue-analysis">继续分析</button></div>
           </section>
         </div>`;
       };
@@ -691,14 +835,78 @@
       const render = () => {
         sampleList.innerHTML = groups.map(renderGroup).join('');
         updateCount();
+        renderAnomalySummary();
         renderDeleteDialog();
         renderSubmissionPicker();
+        renderAnomalyDrawer();
+        renderContinueDialog();
       };
 
       const findGroup = (groupId) => groups.find((group) => group.id === groupId);
 
       document.addEventListener('click', (event) => {
+        const openAnomalyDrawer = event.target.closest('[data-action="open-anomaly-drawer"]');
+        if (openAnomalyDrawer) {
+          anomalyDrawerOpen = true;
+          renderAnomalyDrawer();
+          return;
+        }
+        const closeAnomalyDrawer = event.target.closest('[data-action="close-anomaly-drawer"]');
+        const clickedAnomalyBackdrop = event.target.classList.contains('anomaly-backdrop');
+        if (closeAnomalyDrawer || clickedAnomalyBackdrop) {
+          anomalyDrawerOpen = false;
+          renderAnomalyDrawer();
+          return;
+        }
+        const returnAnomalyReview = event.target.closest('[data-action="return-anomaly-review"]');
+        if (returnAnomalyReview) {
+          anomalyConfirmOpen = false;
+          anomalyDrawerOpen = true;
+          renderAnomalyDrawer();
+          renderContinueDialog();
+          return;
+        }
+        const continueAnalysis = event.target.closest('[data-action="continue-analysis"]');
+        if (continueAnalysis) {
+          anomalyConfirmOpen = false;
+          renderContinueDialog();
+          confirmCollection();
+          return;
+        }
         if (readOnly) return;
+        const deferAnomalies = event.target.closest('[data-action="defer-anomalies"]');
+        if (deferAnomalies) {
+          anomalyDrawerOpen = false;
+          formMessage.textContent = '已保留未处理异常，可继续分析或稍后返回处理。';
+          formMessage.classList.remove('is-error');
+          renderAnomalyDrawer();
+          return;
+        }
+        const resolveAnomaly = event.target.closest('[data-action="resolve-anomaly"]');
+        if (resolveAnomaly) {
+          const anomaly = anomalies.find((item) => item.id === resolveAnomaly.dataset.anomalyId);
+          if (!anomaly) return;
+          anomaly.status = 'resolved';
+          anomaly.choice = resolveAnomaly.dataset.choice || anomaly.action;
+          formMessage.textContent = `已处理${anomaly.student}的${anomaly.type}异常。`;
+          formMessage.classList.remove('is-error');
+          render();
+          return;
+        }
+        const openAnomalySubmissionPicker = event.target.closest('[data-action="open-anomaly-submission-picker"]');
+        if (openAnomalySubmissionPicker) {
+          anomalyDrawerOpen = false;
+          submissionPicker = {
+            targetGroupId: openAnomalySubmissionPicker.dataset.groupId,
+            anomalyId: openAnomalySubmissionPicker.dataset.anomalyId,
+            selectedPageIds: new Set(),
+            query: '',
+            unassignedOnly: true,
+          };
+          renderAnomalyDrawer();
+          renderSubmissionPicker();
+          return;
+        }
         const openSubmissionPicker = event.target.closest('[data-action="open-submission-picker"]');
         if (openSubmissionPicker) {
           submissionPicker = {
@@ -729,6 +937,11 @@
         if (addSelectedSubmissions && submissionPicker) {
           const selectedCount = submissionPicker.selectedPageIds.size;
           groups = FxCollectionFlow.addSubmissionPages(groups, submissionPicker.targetGroupId, allSubmissions, [...submissionPicker.selectedPageIds]);
+          const anomaly = anomalies.find((item) => item.id === submissionPicker.anomalyId);
+          if (anomaly && selectedCount) {
+            anomaly.status = 'resolved';
+            anomaly.choice = '已补充页面';
+          }
           submissionPicker = null;
           formMessage.textContent = `已添加 ${selectedCount} 页学生提交。`;
           formMessage.classList.remove('is-error');
@@ -889,8 +1102,7 @@
         render();
       });
 
-      document.getElementById('confirm').addEventListener('click', () => {
-        if (readOnly) return;
+      const confirmCollection = () => {
         const validGroups = FxCollectionFlow.validGroups(groups);
         if (validGroups.length === 0) {
           formMessage.textContent = '当前没有可创建的样卷，请先拖入样卷页面。';
@@ -911,6 +1123,7 @@
           className: taskData.className,
           createdAt: Date.now(),
           groups: validGroups,
+          anomalies: anomalies.map((anomaly) => ({ ...anomaly })),
         };
         localStorage.setItem('fxConfirmedCollectionBatch', JSON.stringify(batch));
         historyState = FxCollectionFlow.confirmHistoryRecord(historyState, batch, { title: taskData.title });
@@ -919,6 +1132,16 @@
         const goToList = () => { location.href = 'index.html?collectionCreated=1'; };
         if (hasEmptyGroups) window.setTimeout(goToList, 500);
         else goToList();
+      };
+
+      document.getElementById('confirm').addEventListener('click', () => {
+        if (readOnly) return;
+        if (pendingAnomalies().length) {
+          anomalyConfirmOpen = true;
+          renderContinueDialog();
+          return;
+        }
+        confirmCollection();
       });
 
       document.addEventListener('keydown', (event) => {
@@ -926,6 +1149,16 @@
         if (submissionPicker) {
           submissionPicker = null;
           renderSubmissionPicker();
+          return;
+        }
+        if (anomalyDrawerOpen) {
+          anomalyDrawerOpen = false;
+          renderAnomalyDrawer();
+          return;
+        }
+        if (anomalyConfirmOpen) {
+          anomalyConfirmOpen = false;
+          renderContinueDialog();
           return;
         }
         if (!pendingSampleDelete) return;

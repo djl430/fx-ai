@@ -144,6 +144,7 @@
       title: metadata.title || '',
       className: batch.className || metadata.className || '',
       groups: validGroups(batch.groups),
+      anomalies: Array.isArray(batch.anomalies) ? batch.anomalies.map((anomaly) => ({ ...anomaly })) : [],
     };
     return next;
   };

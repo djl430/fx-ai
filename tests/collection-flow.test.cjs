@@ -132,6 +132,20 @@ test('confirms a history record with a final sample snapshot', () => {
   assert.equal(next.records['today-1942'].groups[0].name, '练习');
 });
 
+test('keeps collection anomalies in confirmed history records', () => {
+  const anomalies = [{ id: 'missing-zhang', status: 'pending' }];
+  const next = flow.confirmHistoryRecord(null, {
+    version: 1,
+    batchId: 'batch-1',
+    sourceTaskId: 'today-1942',
+    groups: [],
+    anomalies,
+  });
+
+  assert.deepEqual(next.records['today-1942'].anomalies, anomalies);
+  assert.notEqual(next.records['today-1942'].anomalies, anomalies);
+});
+
 test('counts only unconfirmed seeded collection tasks', () => {
   const seeds = [{ id: 'today-1942' }, { id: 'today-1618' }];
   const history = { version: 1, records: { 'today-1942': { status: '已确认' } } };

@@ -16,6 +16,15 @@ test('confirmation page exposes the required group controls', () => {
   assert.match(confirmPage, /本次扫描识别到以下/);
 });
 
+test('collection confirmation contains a focused anomaly workflow without a home list entry', () => {
+  assert.match(confirmPage, /发现 <strong id="anomalyCount">5<\/strong> 份异常提交/);
+  assert.match(confirmPage, /data-action="open-anomaly-drawer"/);
+  assert.match(confirmPage, /data-action="resolve-anomaly"/);
+  assert.match(confirmPage, /data-action="continue-analysis"/);
+  assert.match(confirmPage, /未处理异常不会自动归属，也不会进入批改/);
+  assert.doesNotMatch(indexPage, /异常待处理/);
+});
+
 test('collection confirmation uses simplified analysis copy', () => {
   assert.match(confirmPage, /确认无误后 AI 开始分析/);
   assert.match(confirmPage, /<button class="confirm"[^>]*>确认无误并开始分析<\/button>/);
