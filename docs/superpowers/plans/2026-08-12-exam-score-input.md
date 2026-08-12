@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 让考试模式的每张学生答题卡支持直接输入分数，并实时同步该题的统计展示。
+**Goal:** 让考试模式的每张学生答题卡同时支持点击循环赋分和直接输入分数，并实时同步该题的统计展示。
 
-**Architecture:** 在 `grading-by-question-demo.html` 的考试渲染分支中，将只读分数徽标替换为具有最小验证逻辑的数字输入控件。输入提交后更新现有 `student.score` 与 `student.result`，再用现有 `renderAll()` 重绘左侧题目分数、分组及答题卡；作业模式继续沿用原有点击批改逻辑。
+**Architecture:** 在 `grading-by-question-demo.html` 的考试渲染分支中，分数徽标内保留数字输入控件，输入提交后更新现有 `student.score` 与 `student.result`。答题卡的点击交互复用原有 0.5 分循环算法；输入容器阻止冒泡，避免一次编辑同时触发循环；两种方式均用 `renderAll()` 重绘左侧题目分数、分组及答题卡。
 
 **Tech Stack:** 原生 HTML、CSS、JavaScript、Node.js 内置测试运行器。
 
@@ -21,13 +21,14 @@
 在 `grading starts pending...` 测试之后新增：
 
 ```js
-test('exam grading exposes direct score inputs without changing homework paper clicks', () => {
+test('exam grading supports both direct score input and card click cycling', () => {
   assert.match(gradingPage, /class="score-input"/);
   assert.match(gradingPage, /type="number"/);
   assert.match(gradingPage, /step="0\.5"/);
   assert.match(gradingPage, /data-score-input/);
   assert.match(gradingPage, /commitExamScore/);
-  assert.match(gradingPage, /if \(isExam\) return;/);
+  assert.match(gradingPage, /const nextScore = numericScore <= 0 \? max : Math\.max\(0, Math\.round\(\(numericScore - 0\.5\) \* 2\) \/ 2\);/);
+  assert.match(gradingPage, /data-score-editor.*stopPropagation/s);
 });
 ```
 
@@ -35,7 +36,7 @@ test('exam grading exposes direct score inputs without changing homework paper c
 
 Run: `node --test --test-name-pattern="exam grading exposes direct score inputs" tests/collection-pages.test.cjs`
 
-Expected: FAIL，因为当前答题卡只渲染 `.score-mark` 文本，且考试模式点击答题纸仍会循环扣分。
+Expected: FAIL，因为当前实现会在考试模式的 `cycleResult` 开头返回，点击答题卡不会循环切换分数。
 
 - [ ] **Step 3: 保持测试为红色前不改生产代码**
 
@@ -129,13 +130,24 @@ groupsScroll.querySelectorAll("[data-score-input]").forEach((input) => {
 });
 ```
 
-并在 `cycleResult` 函数开头加入：
+在 `cycleResult` 中保留考试分支的循环算法：
 
 ```js
-if (isExam) return;
+if (isExam) {
+  const max = maxScore(question);
+  const currentScore = typeof student.score === "number"
+    ? student.score
+    : defaultScoreForResult(student.result, question);
+  const numericScore = typeof currentScore === "number" ? currentScore : max;
+  const nextScore = numericScore <= 0 ? max : Math.max(0, Math.round((numericScore - 0.5) * 2) / 2);
+  student.score = nextScore;
+  student.result = nextScore === max ? "correct" : nextScore === 0 ? "wrong" : "partial";
+  renderAll();
+  return;
+}
 ```
 
-删除原有 `if (isExam) { ... }` 循环扣分分支，保留其后的作业逻辑。
+保留输入容器的 `stopPropagation()`，使点击输入框不会触发上述循环。
 
 - [ ] **Step 6: 运行专项测试确认通过**
 
