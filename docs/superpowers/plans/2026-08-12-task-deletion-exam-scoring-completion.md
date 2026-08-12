@@ -1,5 +1,7 @@
 # Task Deletion, Exam Scoring, and Completion State Implementation Plan
 
+> **Final-scope amendment (2026-08-12):** The user withdrew grading-task deletion after implementation. Task 2 is superseded: the final task list exposes no delete control or delete dialog, and stale deleted-task IDs are cleared on load. Sample/page deletion remains in scope. Sample demo pages also render distinct per-page content.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add persistent deletion for all grading tasks, editable sample papers and pages; route generated exams to scoring mode; and write completed grading state back to the task list.

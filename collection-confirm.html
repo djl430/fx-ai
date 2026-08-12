@@ -431,10 +431,27 @@
             secondName: '第三单元测试',
       };
 
-      const makePages = (groupId, title, count, wrongPage) => Array.from({ length: count }, (_, index) => ({
+      const pageQuestionSets = [
+        ['一、分数乘整数', '1. 3/5 × 10 =', '2. 7/12 × 6 =', '二、解决问题', '计算一周阅读页数。'],
+        ['一、分数乘分数', '1. 2/3 × 5/8 =', '2. 7/9 × 3/14 =', '二、填空', '积的分子是（ ）。'],
+        ['一、简便计算', '1. 5/11 × 22 =', '2. 3/8 × 16/9 =', '二、判断', '乘积一定小于因数。（ ）'],
+        ['一、单位换算', '1. 3/4 千米 =（ ）米', '2. 2/5 时 =（ ）分', '二、应用题', '求长方形草地面积。'],
+        ['一、连续求积', '1. 4/7 × 7/8 × 2 =', '2. 5/6 × 3 × 2/5 =', '二、看图列式', '写出阴影部分算式。'],
+        ['一、估算与比较', '1. 5/6 × 9 ○ 9', '2. 3/7 × 2 ○ 3/7', '二、改错', '找出计算中的错误。'],
+        ['一、选择题', '1. 12 的 2/3 是（ ）', '2. 最小的积是（ ）', '二、计算题', '7/15 × 25 ='],
+        ['一、基础检测', '1. 9 × 5/18 =', '2. 11/12 × 6/11 =', '二、实际应用', '计算已行驶的路程。'],
+        ['一、综合计算', '1. 4/9 × 3/8 =', '2. 7/10 × 15/14 =', '二、列式解答', '求剩余彩带长度。'],
+        ['一、图形问题', '1. 长 5/6 米', '2. 宽 3/5 米', '二、求面积', '结果保留最简分数。'],
+        ['一、生活数学', '1. 每袋重 3/8 千克', '2. 一共有 12 袋', '二、提出问题', '这些物品共重多少？'],
+        ['一、能力提升', '1. 8/15 × 5/12 =', '2. 1 - 3/7 × 7/9 =', '二、开放题', '写出两种解法。'],
+      ];
+
+      const makePages = (groupId, title, count, wrongPage, exampleStart = 0) => Array.from({ length: count }, (_, index) => ({
         id: `${groupId}-page-${index + 1}`,
         title,
         mark: index + 1 === wrongPage ? '×' : '√',
+        exampleIndex: exampleStart + index,
+        content: pageQuestionSets[(exampleStart + index) % pageQuestionSets.length],
       }));
 
       const defaultGroups = [
@@ -450,7 +467,7 @@
           name: taskData.secondName,
           kind: '考试',
           students: 30,
-          pages: makePages('sample-2', taskData.secondName, 6, 2),
+          pages: makePages('sample-2', taskData.secondName, 6, 2, 6),
         },
       ];
       let historyState = FxCollectionFlow.normalizeHistoryState(null);
@@ -486,21 +503,22 @@
         "'": '&#039;',
       })[character]);
 
-      const renderPage = (page, pageIndex, groupName, groupId) => `
+      const renderPage = (page, pageIndex, groupName, groupId) => {
+        const groupOffset = groupId === 'sample-2' ? 6 : 0;
+        const exampleIndex = Number.isInteger(page.exampleIndex) ? page.exampleIndex : groupOffset + pageIndex;
+        const content = Array.isArray(page.content) ? page.content : pageQuestionSets[exampleIndex % pageQuestionSets.length];
+        return `
         <article class="scan-card" draggable="${readOnly ? 'false' : 'true'}" data-page-id="${escapeHtml(page.id)}">
           ${readOnly ? '' : `<button class="page-delete" type="button" data-action="request-delete-page" data-group-id="${escapeHtml(groupId)}" data-page-id="${escapeHtml(page.id)}" aria-label="删除${escapeHtml(groupName)}第${pageIndex + 1}页">×</button>`}
           <i class="clip" aria-hidden="true"></i>
           <b class="page-no">${pageIndex + 1}</b>
           <div class="scan-paper">
             <h4>${escapeHtml(groupName)} · 第${pageIndex + 1}页</h4>
-            <p>一、计算下面各题</p>
-            <p>1. 3/5 × 10 =</p>
-            <p>2. 7/8 × 4/7 =</p>
-            <p>二、解决问题</p>
-            <p>请列式并解答。</p>
+            ${content.map((line) => `<p>${escapeHtml(line)}</p>`).join('')}
           </div>
           <span class="scan-mark">${page.mark}</span>
         </article>`;
+      };
 
       const renderGroup = (group, index) => `
         <section class="sample" data-group-id="${group.id}">

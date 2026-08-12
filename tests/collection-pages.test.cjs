@@ -19,6 +19,12 @@ test('sample pages wrap instead of scrolling horizontally', () => {
   assert.doesNotMatch(confirmPage, /\.pages\s*\{[^}]*overflow-x:\s*auto/s);
 });
 
+test('sample demo pages render distinct example content', () => {
+  assert.match(confirmPage, /pageQuestionSets/);
+  assert.match(confirmPage, /exampleIndex/);
+  assert.match(confirmPage, /content\.map/);
+});
+
 test('confirmation serializes through the shared collection flow', () => {
   assert.match(confirmPage, /FxCollectionFlow\.validGroups\(groups\)/);
   assert.match(confirmPage, /fxConfirmedCollectionBatch/);
@@ -75,13 +81,11 @@ test('main list always keeps the three original grading tasks visible', () => {
   assert.doesNotMatch(indexPage, /tasks\.slice\(0,\s*7\)\.filter/);
 });
 
-test('all grading tasks expose persistent confirmed deletion', () => {
-  assert.match(indexPage, /data-action="request-delete-task"/);
-  assert.match(indexPage, /data-action="confirm-delete-task"/);
-  assert.match(indexPage, /role="dialog"/);
-  assert.match(indexPage, /fxTaskListState/);
-  assert.match(indexPage, /markTaskDeleted/);
-  assert.match(indexPage, /fxGeneratedCollectionTasks/);
+test('grading task list does not expose deletion controls', () => {
+  assert.doesNotMatch(indexPage, /data-action="request-delete-task"/);
+  assert.doesNotMatch(indexPage, /data-action="confirm-delete-task"/);
+  assert.doesNotMatch(indexPage, /task-row__delete/);
+  assert.doesNotMatch(indexPage, /markTaskDeleted/);
 });
 
 test('history button is permanent and its pending badge is conditional', () => {
