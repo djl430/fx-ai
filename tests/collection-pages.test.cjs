@@ -115,7 +115,9 @@ test('grading task list does not expose deletion controls', () => {
 });
 
 test('history button is permanent and its pending badge is conditional', () => {
-  assert.match(indexPage, />历史采集任务</);
+  assert.match(indexPage, />采集记录</);
+  assert.doesNotMatch(indexPage, />历史采集任务</);
+  assert.doesNotMatch(indexPage, /link\.innerHTML\s*=\s*`<span class="collection-history-entry__icon"/);
   assert.match(indexPage, /pendingHistoryCount/);
   assert.match(indexPage, /collection-history-entry__badge/);
   assert.match(indexPage, /pendingCount\s*>\s*0/);
