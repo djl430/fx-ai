@@ -163,6 +163,49 @@
       ? { ...group, pages: (Array.isArray(group.pages) ? group.pages : []).filter((page) => page.id !== pageId) }
       : group);
 
+  const normalizeGradingProgress = (value) => {
+    const tasks = {};
+    if (value && value.version === 1 && value.tasks && typeof value.tasks === 'object') {
+      Object.entries(value.tasks).forEach(([taskId, record]) => {
+        const completedQuestionIds = [...new Set((Array.isArray(record?.completedQuestionIds) ? record.completedQuestionIds : [])
+          .map(Number)
+          .filter((id) => Number.isInteger(id) && id > 0))];
+        tasks[taskId] = { completedQuestionIds, updatedAt: Number(record?.updatedAt) || 0 };
+      });
+    }
+    return { version: 1, tasks };
+  };
+
+  const markQuestionCompleted = (state, taskId, questionId, updatedAt = Date.now()) => {
+    const next = normalizeGradingProgress(state);
+    const current = next.tasks[taskId] || { completedQuestionIds: [], updatedAt: 0 };
+    const normalizedId = Number(questionId);
+    if (!taskId || !Number.isInteger(normalizedId) || normalizedId < 1) return next;
+    return {
+      ...next,
+      tasks: {
+        ...next.tasks,
+        [taskId]: {
+          completedQuestionIds: [...new Set([...current.completedQuestionIds, normalizedId])],
+          updatedAt,
+        },
+      },
+    };
+  };
+
+  const applyGradingProgress = (questions, state, taskId) => {
+    const completedIds = new Set(normalizeGradingProgress(state).tasks[taskId]?.completedQuestionIds || []);
+    return (Array.isArray(questions) ? questions : []).map((question) => ({
+      ...question,
+      status: completedIds.has(Number(question.id)) ? 'completed' : 'pending',
+    }));
+  };
+
+  const firstPendingQuestionId = (questions) =>
+    (Array.isArray(questions) ? questions : []).find((question) => question.status !== 'completed')?.id
+      ?? (Array.isArray(questions) ? questions : [])[0]?.id
+      ?? null;
+
   return {
     normalizeKind,
     normalizeName,
@@ -182,5 +225,9 @@
     applyTaskListState,
     removeSampleGroup,
     removeSamplePage,
+    normalizeGradingProgress,
+    markQuestionCompleted,
+    applyGradingProgress,
+    firstPendingQuestionId,
   };
 });

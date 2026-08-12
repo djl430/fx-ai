@@ -158,3 +158,26 @@ test('removes an entire sample group or one page', () => {
   assert.deepEqual(flow.removeSampleGroup(groups, 'g2').map((group) => group.id), ['g1']);
   assert.deepEqual(flow.removeSamplePage(groups, 'g1', 'p1')[0].pages.map((page) => page.id), ['p2']);
 });
+
+test('normalizes and updates grading progress by task id', () => {
+  const initial = flow.normalizeGradingProgress({
+    version: 1,
+    tasks: { taskA: { completedQuestionIds: [1, 2, 2, 'bad'], updatedAt: 10 } },
+  });
+  assert.deepEqual(initial.tasks.taskA.completedQuestionIds, [1, 2]);
+
+  const next = flow.markQuestionCompleted(initial, 'taskA', 3, 20);
+  assert.deepEqual(next.tasks.taskA.completedQuestionIds, [1, 2, 3]);
+  assert.equal(next.tasks.taskA.updatedAt, 20);
+});
+
+test('applies only valid completed question ids and finds first pending', () => {
+  const questions = [{ id: 1 }, { id: 2 }, { id: 3 }];
+  const applied = flow.applyGradingProgress(questions, {
+    version: 1,
+    tasks: { taskA: { completedQuestionIds: [2, 99] } },
+  }, 'taskA');
+
+  assert.deepEqual(applied.map((question) => question.status), ['pending', 'completed', 'pending']);
+  assert.equal(flow.firstPendingQuestionId(applied), 1);
+});
