@@ -91,6 +91,7 @@
     .scan-notice strong { color: #4058bd; font-size: 18px; }
     .sample-list { display: grid; gap: 18px; }
     .sample {
+      position: relative;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, .92);
       border-radius: 24px;
@@ -99,14 +100,45 @@
       backdrop-filter: blur(18px);
     }
     .sample-head {
+      position: relative;
       display: flex;
       align-items: center;
       gap: 14px;
       min-height: 82px;
-      padding: 15px 18px;
+      padding: 15px 58px 15px 18px;
       border-bottom: 1px solid var(--line);
       background: rgba(255, 255, 255, .52);
     }
+    .sample-delete,
+    .page-delete {
+      position: absolute;
+      z-index: 6;
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 0;
+      border-radius: 10px;
+      color: #bd4e59;
+      background: #fff0f2;
+      box-shadow: 0 7px 16px rgba(156, 60, 70, .13);
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-3px);
+      transition: opacity .16s ease, transform .16s ease, background .16s ease;
+    }
+    .sample-delete { top: 15px; right: 16px; }
+    .page-delete { top: 9px; right: 9px; }
+    .sample-head:hover .sample-delete,
+    .sample-head:focus-within .sample-delete,
+    .scan-card:hover .page-delete,
+    .scan-card:focus-within .page-delete { opacity: 1; pointer-events: auto; transform: none; }
+    .sample-delete:hover,
+    .page-delete:hover { color: #fff; background: #ce5661; }
+    .scan-card:hover .page-no,
+    .scan-card:focus-within .page-no { opacity: 0; }
     .sample-badge {
       flex: 0 0 auto;
       padding: 8px 11px;
@@ -290,6 +322,40 @@
       font-weight: 850;
     }
     .confirm:hover { transform: translateY(-1px); }
+    .collection-delete-backdrop {
+      position: fixed;
+      z-index: 60;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(30, 39, 70, .32);
+      backdrop-filter: blur(7px);
+    }
+    .collection-delete-dialog {
+      width: min(430px, 100%);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 22px;
+      padding: 24px;
+      background: #fff;
+      box-shadow: 0 26px 70px rgba(36, 49, 86, .24);
+    }
+    .collection-delete-dialog h2 { margin: 0; font-size: 21px; }
+    .collection-delete-dialog p { margin: 10px 0 22px; color: var(--muted); line-height: 1.65; }
+    .collection-delete-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .collection-delete-actions button { min-height: 42px; border-radius: 12px; padding: 0 16px; font-weight: 800; }
+    .collection-delete-cancel { border: 1px solid #dde3f0; color: var(--ink); background: #fff; }
+    .collection-delete-confirm { border: 0; color: #fff; background: #c94f5a; }
+    body.is-read-only .add-row,
+    body.is-read-only .sticky { display: none; }
+    .page-head .eyebrow,
+    .sample-meta,
+    .scan-mark { display: none; }
+    body.is-read-only .kind-field::after { display: none; }
+    body.is-read-only .kind-select,
+    body.is-read-only .sample-title-input { cursor: default; opacity: 1; }
+    body.is-read-only .scan-card { cursor: default; }
+    body.is-read-only .scan-card:hover { transform: none; }
     @media (max-width: 820px) {
       .shell { padding: 20px 18px 124px; }
       .page-head { margin-top: 30px; }
@@ -333,24 +399,37 @@
     <p class="form-message" id="formMessage" role="status"></p>
     <button class="confirm" id="confirm" type="button">确认并开始识别或批改</button>
   </footer>
+  <div id="collectionDeleteLayer"></div>
 
   <script src="collection-flow.js"></script>
   <script>
     (() => {
-      const task = new URLSearchParams(location.search).get('task') || 'today-1942';
-      const taskData = task === 'today-1618'
-        ? {
+      const params = new URLSearchParams(location.search);
+      const task = params.get('task') || 'today-1942';
+      const readOnly = params.get('mode') === 'view';
+      const taskDataMap = {
+        'today-1618': {
             title: '今天 16:18 · 六年级1班 · 数学',
             className: '六年级1班 · 数学',
             firstName: '小数运算专项',
             secondName: '几何图形检测',
-          }
-        : {
+        },
+        'yesterday-1835': {
+            title: '昨天 18:35 · 八年级3班 · 数学', className: '八年级3班 · 数学', firstName: '整式乘法练习', secondName: '周末单元检测',
+        },
+        'yesterday-1206': {
+            title: '昨天 12:06 · 六年级2班 · 数学', className: '六年级2班 · 数学', firstName: '小数乘法练习', secondName: '计算能力检测',
+        },
+        'aug09-1740': {
+            title: '8月9日 17:40 · 七年级4班 · 数学', className: '七年级4班 · 数学', firstName: '有理数专项练习', secondName: '第一单元测试',
+        },
+      };
+      const taskData = taskDataMap[task] || {
             title: '今天 19:42 · 六年级3班 · 数学',
             className: '六年级3班 · 数学',
             firstName: '分数乘法练习',
             secondName: '第三单元测试',
-          };
+      };
 
       const makePages = (groupId, title, count, wrongPage) => Array.from({ length: count }, (_, index) => ({
         id: `${groupId}-page-${index + 1}`,
@@ -358,7 +437,7 @@
         mark: index + 1 === wrongPage ? '×' : '√',
       }));
 
-      let groups = [
+      const defaultGroups = [
         {
           id: 'sample-1',
           name: taskData.firstName,
@@ -374,12 +453,30 @@
           pages: makePages('sample-2', taskData.secondName, 6, 2),
         },
       ];
+      let historyState = FxCollectionFlow.normalizeHistoryState(null);
+      try {
+        historyState = FxCollectionFlow.normalizeHistoryState(JSON.parse(localStorage.getItem('fxCollectionHistoryState') || 'null'));
+      } catch (_) {
+        historyState = FxCollectionFlow.normalizeHistoryState(null);
+      }
+      const savedRecord = historyState.records[task];
+      let groups = readOnly && Array.isArray(savedRecord?.groups)
+        ? JSON.parse(JSON.stringify(savedRecord.groups))
+        : defaultGroups;
       let draggedPage = null;
+      let pendingDelete = null;
 
       const sampleList = document.getElementById('sampleList');
-      const sampleCount = document.getElementById('sampleCount');
+      let sampleCount = document.getElementById('sampleCount');
       const formMessage = document.getElementById('formMessage');
+      const collectionDeleteLayer = document.getElementById('collectionDeleteLayer');
       document.getElementById('taskTitle').textContent = taskData.title;
+      if (readOnly) {
+        document.body.classList.add('is-read-only');
+        document.querySelector('.eyebrow').textContent = '高扫采集 · 查看结果';
+        document.querySelector('.scan-notice span').innerHTML = `本采集任务已确认，共识别 <strong id="sampleCount">${groups.length}</strong> 个样卷；仅支持查看，不能修改`;
+        sampleCount = document.getElementById('sampleCount');
+      }
 
       const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
         '&': '&amp;',
@@ -389,8 +486,9 @@
         "'": '&#039;',
       })[character]);
 
-      const renderPage = (page, pageIndex, groupName) => `
-        <article class="scan-card" draggable="true" data-page-id="${escapeHtml(page.id)}">
+      const renderPage = (page, pageIndex, groupName, groupId) => `
+        <article class="scan-card" draggable="${readOnly ? 'false' : 'true'}" data-page-id="${escapeHtml(page.id)}">
+          ${readOnly ? '' : `<button class="page-delete" type="button" data-action="request-delete-page" data-group-id="${escapeHtml(groupId)}" data-page-id="${escapeHtml(page.id)}" aria-label="删除${escapeHtml(groupName)}第${pageIndex + 1}页">×</button>`}
           <i class="clip" aria-hidden="true"></i>
           <b class="page-no">${pageIndex + 1}</b>
           <div class="scan-paper">
@@ -407,22 +505,43 @@
       const renderGroup = (group, index) => `
         <section class="sample" data-group-id="${group.id}">
           <div class="sample-head">
+            ${readOnly ? '' : `<button class="sample-delete" type="button" data-action="request-delete-sample" data-group-id="${escapeHtml(group.id)}" aria-label="删除样卷${escapeHtml(group.name)}">×</button>`}
             <span class="sample-badge">样卷 ${index + 1}</span>
             <div class="sample-fields">
               <label class="kind-field">
                 <span class="sr-only" hidden>样卷类型</span>
-                <select class="kind-select" data-action="change-sample-kind" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 类型">
+                <select class="kind-select" data-action="change-sample-kind" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 类型" ${readOnly ? 'disabled' : ''}>
                   <option value="作业" ${group.kind === '作业' ? 'selected' : ''}>作业</option>
                   <option value="考试" ${group.kind === '考试' ? 'selected' : ''}>考试</option>
                 </select>
               </label>
-              <input class="sample-title-input" data-action="edit-sample-name" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 名称" value="${escapeHtml(group.name)}">
+              <input class="sample-title-input" data-action="edit-sample-name" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 名称" value="${escapeHtml(group.name)}" ${readOnly ? 'disabled' : ''}>
             </div>
             <span class="sample-meta" data-role="sample-meta">${group.students ? `${group.students}人 · ` : ''}${group.pages.length}页</span>
-            <span class="hint">拖动页面调整顺序或归属</span>
+            <span class="hint">${readOnly ? '已确认，仅支持查看' : '拖动页面调整顺序或归属'}</span>
           </div>
-          <div class="pages" data-group-id="${group.id}">${group.pages.map((page, pageIndex) => renderPage(page, pageIndex, group.name)).join('')}</div>
+          <div class="pages" data-group-id="${group.id}">${group.pages.map((page, pageIndex) => renderPage(page, pageIndex, group.name, group.id)).join('')}</div>
         </section>`;
+
+      const renderDeleteDialog = () => {
+        if (!pendingDelete || readOnly) {
+          collectionDeleteLayer.innerHTML = '';
+          return;
+        }
+        const removesSample = pendingDelete.type === 'sample';
+        collectionDeleteLayer.innerHTML = `<div class="collection-delete-backdrop" data-action="cancel-delete-collection-item">
+          <section class="collection-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="collection-delete-title">
+            <h2 id="collection-delete-title">${removesSample ? '确认删除整个样卷？' : '确认删除这一页？'}</h2>
+            <p>${removesSample
+              ? `删除“${escapeHtml(pendingDelete.name)}”后，其中全部页面也会一起删除。`
+              : `将删除“${escapeHtml(pendingDelete.name)}”的第 ${pendingDelete.pageNumber} 页。`}</p>
+            <div class="collection-delete-actions">
+              <button class="collection-delete-cancel" type="button" data-action="cancel-delete-collection-item">取消</button>
+              <button class="collection-delete-confirm" type="button" data-action="confirm-delete-collection-item">确认删除</button>
+            </div>
+          </section>
+        </div>`;
+      };
 
       const updateCount = () => {
         sampleCount.textContent = String(groups.filter((group) => group.pages.length > 0).length);
@@ -431,11 +550,59 @@
       const render = () => {
         sampleList.innerHTML = groups.map(renderGroup).join('');
         updateCount();
+        renderDeleteDialog();
       };
 
       const findGroup = (groupId) => groups.find((group) => group.id === groupId);
 
       document.addEventListener('click', (event) => {
+        if (readOnly) return;
+        const deleteSample = event.target.closest('[data-action="request-delete-sample"]');
+        if (deleteSample) {
+          const group = findGroup(deleteSample.dataset.groupId);
+          if (!group) return;
+          pendingDelete = { type: 'sample', groupId: group.id, name: FxCollectionFlow.normalizeName(group.name) };
+          renderDeleteDialog();
+          return;
+        }
+        const deletePage = event.target.closest('[data-action="request-delete-page"]');
+        if (deletePage) {
+          const group = findGroup(deletePage.dataset.groupId);
+          const pageIndex = group?.pages.findIndex((page) => page.id === deletePage.dataset.pageId) ?? -1;
+          if (!group || pageIndex < 0) return;
+          pendingDelete = {
+            type: 'page',
+            groupId: group.id,
+            pageId: deletePage.dataset.pageId,
+            pageNumber: pageIndex + 1,
+            name: FxCollectionFlow.normalizeName(group.name),
+          };
+          renderDeleteDialog();
+          return;
+        }
+        const cancelDelete = event.target.closest('[data-action="cancel-delete-collection-item"]');
+        if (cancelDelete) {
+          if (event.target !== cancelDelete && cancelDelete.classList.contains('collection-delete-backdrop')) return;
+          pendingDelete = null;
+          renderDeleteDialog();
+          return;
+        }
+        if (!event.target.closest('[data-action="confirm-delete-collection-item"]') || !pendingDelete) return;
+        const message = pendingDelete.type === 'sample'
+          ? `已删除样卷“${pendingDelete.name}”。`
+          : `已删除“${pendingDelete.name}”第 ${pendingDelete.pageNumber} 页。`;
+        groups = pendingDelete.type === 'sample'
+          ? FxCollectionFlow.removeSampleGroup(groups, pendingDelete.groupId)
+          : FxCollectionFlow.removeSamplePage(groups, pendingDelete.groupId, pendingDelete.pageId);
+        pendingDelete = null;
+        draggedPage = null;
+        formMessage.textContent = message;
+        formMessage.classList.remove('is-error');
+        render();
+      });
+
+      document.addEventListener('click', (event) => {
+        if (readOnly) return;
         if (!event.target.closest('[data-action="add-sample"]')) return;
         const id = `sample-${Date.now()}-${groups.length + 1}`;
         groups.push({ id, name: '未命名样卷', kind: '作业', students: 0, pages: [] });
@@ -449,6 +616,7 @@
       });
 
       sampleList.addEventListener('input', (event) => {
+        if (readOnly) return;
         const input = event.target.closest('[data-action="edit-sample-name"]');
         if (!input) return;
         const group = findGroup(input.dataset.groupId);
@@ -456,6 +624,7 @@
       });
 
       sampleList.addEventListener('change', (event) => {
+        if (readOnly) return;
         const kindSelect = event.target.closest('[data-action="change-sample-kind"]');
         if (kindSelect) {
           const group = findGroup(kindSelect.dataset.groupId);
@@ -471,6 +640,7 @@
       });
 
       sampleList.addEventListener('dragstart', (event) => {
+        if (readOnly) return;
         const card = event.target.closest('.scan-card');
         const zone = card?.closest('.pages');
         if (!card || !zone) return;
@@ -487,6 +657,7 @@
       });
 
       sampleList.addEventListener('dragover', (event) => {
+        if (readOnly) return;
         const zone = event.target.closest('.pages');
         if (!zone || !draggedPage) return;
         event.preventDefault();
@@ -500,6 +671,7 @@
       });
 
       sampleList.addEventListener('drop', (event) => {
+        if (readOnly) return;
         const zone = event.target.closest('.pages');
         if (!zone || !draggedPage) return;
         event.preventDefault();
@@ -520,6 +692,7 @@
       });
 
       document.getElementById('confirm').addEventListener('click', () => {
+        if (readOnly) return;
         const validGroups = FxCollectionFlow.validGroups(groups);
         if (validGroups.length === 0) {
           formMessage.textContent = '当前没有可创建的样卷，请先拖入样卷页面。';
@@ -542,10 +715,18 @@
           groups: validGroups,
         };
         localStorage.setItem('fxConfirmedCollectionBatch', JSON.stringify(batch));
+        historyState = FxCollectionFlow.confirmHistoryRecord(historyState, batch, { title: taskData.title });
+        localStorage.setItem('fxCollectionHistoryState', JSON.stringify(historyState));
 
         const goToList = () => { location.href = 'index.html?collectionCreated=1'; };
         if (hasEmptyGroups) window.setTimeout(goToList, 500);
         else goToList();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || !pendingDelete) return;
+        pendingDelete = null;
+        renderDeleteDialog();
       });
 
       render();

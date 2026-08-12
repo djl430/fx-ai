@@ -47,6 +47,15 @@ test('all collection confirmation views hide the highlighted acquisition details
   assert.match(confirmPage, /(?:^|\n)\s*\.scan-mark\s*\{\s*display:\s*none/);
 });
 
+test('editable collection pages can delete a sample or page with confirmation', () => {
+  assert.match(confirmPage, /data-action="request-delete-sample"/);
+  assert.match(confirmPage, /data-action="request-delete-page"/);
+  assert.match(confirmPage, /data-action="confirm-delete-collection-item"/);
+  assert.match(confirmPage, /removeSampleGroup/);
+  assert.match(confirmPage, /removeSamplePage/);
+  assert.match(confirmPage, /readOnly\s*\?\s*['"]['"]/);
+});
+
 test('main list loads and persists confirmed collection tasks', () => {
   assert.match(indexPage, /fxConfirmedCollectionBatch/);
   assert.match(indexPage, /fxGeneratedCollectionTasks/);
