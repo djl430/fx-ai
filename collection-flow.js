@@ -123,7 +123,7 @@
     const history = normalizeHistoryState(state);
     return (Array.isArray(seeds) ? seeds : []).filter((seed) => {
       const record = seed && history.records[seed.id];
-      return !record || record.status !== '已确认';
+      return !seed?.confirmed && (!record || record.status !== '已确认');
     }).length;
   };
 

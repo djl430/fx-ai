@@ -14,6 +14,13 @@ test('confirmation page exposes the required group controls', () => {
   assert.match(confirmPage, /本次扫描识别到以下/);
 });
 
+test('collection confirmation uses simplified analysis copy', () => {
+  assert.match(confirmPage, /确认无误后 AI 开始分析/);
+  assert.match(confirmPage, /<button class="confirm"[^>]*>确认<\/button>/);
+  assert.doesNotMatch(confirmPage, /\.scan-notice::before/);
+  assert.doesNotMatch(confirmPage, /确认并开始识别或批改/);
+});
+
 test('sample pages wrap instead of scrolling horizontally', () => {
   assert.match(confirmPage, /\.pages\s*\{[^}]*flex-wrap:\s*wrap/s);
   assert.doesNotMatch(confirmPage, /\.pages\s*\{[^}]*overflow-x:\s*auto/s);
@@ -96,6 +103,9 @@ test('history button is permanent and its pending badge is conditional', () => {
   assert.match(indexPage, /pendingHistoryCount/);
   assert.match(indexPage, /collection-history-entry__badge/);
   assert.match(indexPage, /pendingCount\s*>\s*0/);
+  assert.match(indexPage, /today-1618['"],\s*confirmed:\s*true/);
+  assert.match(indexPage, /批待确认/);
+  assert.match(historyPage, /today-1618[^\n]*confirmed:true/);
 });
 
 test('history page does not auto-redirect after confirmation', () => {
@@ -118,6 +128,13 @@ test('generated tasks render a five-second recognition progress bar', () => {
   assert.match(indexPage, /advanceRecognition/);
   assert.match(indexPage, /5000/);
   assert.match(indexPage, /requestAnimationFrame/);
+});
+
+test('generated task timers update the existing DOM without rerendering the page', () => {
+  assert.match(indexPage, /function updateRecognitionTaskRow/);
+  assert.match(indexPage, /class="task-updated"/);
+  assert.match(indexPage, /toastNode\?\.remove\(\)/);
+  assert.doesNotMatch(indexPage, /if \(completed\) \{[\s\S]*?render\(\);[\s\S]*?return;/);
 });
 
 test('processing generated tasks are guarded and completed tasks open grading', () => {

@@ -123,6 +123,11 @@ test('counts only unconfirmed seeded collection tasks', () => {
   assert.equal(flow.pendingHistoryCount(seeds, { version: 1, records: { 'today-1942': { status: '已确认' }, 'today-1618': { status: '已确认' } } }), 0);
 });
 
+test('seeded confirmed history tasks are excluded from the pending count', () => {
+  const seeds = [{ id: 'today-1942' }, { id: 'today-1618', confirmed: true }];
+  assert.equal(flow.pendingHistoryCount(seeds, null), 1);
+});
+
 test('applies persistent deleted and confirmed task state by task id', () => {
   const tasks = [
     { id: 'keep', status: '待确认', listTag: '待确认' },

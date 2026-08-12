@@ -74,20 +74,6 @@
       box-shadow: 0 12px 30px rgba(66, 84, 137, .08);
       font-size: 14px;
     }
-    .scan-notice::before {
-      display: grid;
-      flex: 0 0 auto;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      border-radius: 12px;
-      color: #fff;
-      background: linear-gradient(145deg, #6f84e8, #8b78da);
-      content: "AI";
-      font-size: 10px;
-      font-weight: 900;
-      box-shadow: 0 8px 18px rgba(91, 105, 196, .25);
-    }
     .scan-notice strong { color: #4058bd; font-size: 18px; }
     .sample-list { display: grid; gap: 18px; }
     .sample {
@@ -381,7 +367,7 @@
       <p class="eyebrow">高扫采集 · 样卷确认</p>
       <h1 class="page-title" id="taskTitle">今天 19:42 · 六年级3班 · 数学</h1>
       <aside class="scan-notice" aria-live="polite">
-        <span>本次扫描识别到以下 <strong id="sampleCount">2</strong> 个样卷，确认无误后 AI 开始识别或批改</span>
+        <span>本次扫描识别到以下 <strong id="sampleCount">2</strong> 个样卷，确认无误后 AI 开始分析</span>
       </aside>
     </header>
 
@@ -393,7 +379,7 @@
 
   <footer class="sticky">
     <p class="form-message" id="formMessage" role="status"></p>
-    <button class="confirm" id="confirm" type="button">确认并开始识别或批改</button>
+    <button class="confirm" id="confirm" type="button">确认</button>
   </footer>
   <div id="collectionDeleteLayer"></div>
 
