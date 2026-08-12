@@ -26,6 +26,7 @@ test('maps homework and exam groups to list tasks', () => {
   const tasks = flow.buildTasks({
     version: 1,
     batchId: 'batch-1',
+    sourceTaskId: 'today-1942',
     createdAt: 1786550400000,
     className: '六年级3班 · 数学',
     groups: [
@@ -38,6 +39,9 @@ test('maps homework and exam groups to list tasks', () => {
   assert.deepEqual(tasks.map((task) => task.pages), [4, 2]);
   assert.deepEqual(tasks.map((task) => task.title), ['分数乘法练习', '第三单元测试']);
   assert.ok(tasks.every((task) => task.status === 'AI识别中'));
+  assert.ok(tasks.every((task) => task.generated === true));
+  assert.ok(tasks.every((task) => task.recognitionStartedAt === 1786550400000));
+  assert.ok(tasks.every((task) => task.sourceTaskId === 'today-1942'));
 });
 
 test('returns null for malformed stored batches', () => {
@@ -70,4 +74,80 @@ test('moves a page into a new sample group and preserves target order', () => {
   assert.deepEqual(groups[0].pages.map((page) => page.id), ['p1']);
   assert.deepEqual(groups[1].pages.map((page) => page.id), ['p2', 'p3']);
   assert.equal(groups[1].students, 31);
+});
+
+test('calculates five-second recognition progress from the original start time', () => {
+  const task = { recognitionStartedAt: 1000 };
+
+  assert.deepEqual(flow.recognitionProgress(task, 1000, 5000), { percent: 0, complete: false });
+  assert.deepEqual(flow.recognitionProgress(task, 3500, 5000), { percent: 50, complete: false });
+  assert.deepEqual(flow.recognitionProgress(task, 6000, 5000), { percent: 100, complete: true });
+});
+
+test('marks a completed generated task as pending confirmation', () => {
+  const task = { id: 'generated-1', generated: true, recognitionStartedAt: 1000, status: 'AI识别中', listTag: 'AI识别中', progress: 0 };
+  const completed = flow.advanceRecognition(task, 6000, 5000);
+
+  assert.equal(completed.status, '待确认');
+  assert.equal(completed.listTag, '待确认');
+  assert.equal(completed.progress, 100);
+});
+
+test('confirms a history record with a final sample snapshot', () => {
+  const next = flow.confirmHistoryRecord(null, {
+    version: 1,
+    batchId: 'batch-1',
+    sourceTaskId: 'today-1942',
+    className: '六年级3班 · 数学',
+    createdAt: 2000,
+    groups: [{ id: 'sample-1', name: '练习', kind: '作业', pages: [{ id: 'p1' }] }],
+  }, { title: '今天 19:42 · 六年级3班 · 数学' });
+
+  assert.equal(next.version, 1);
+  assert.equal(next.records['today-1942'].status, '已确认');
+  assert.equal(next.records['today-1942'].groups[0].name, '练习');
+});
+
+test('counts only unconfirmed seeded collection tasks', () => {
+  const seeds = [{ id: 'today-1942' }, { id: 'today-1618' }];
+  const history = { version: 1, records: { 'today-1942': { status: '已确认' } } };
+
+  assert.equal(flow.pendingHistoryCount(seeds, history), 1);
+  assert.equal(flow.pendingHistoryCount(seeds, { version: 1, records: { 'today-1942': { status: '已确认' }, 'today-1618': { status: '已确认' } } }), 0);
+});
+
+test('applies persistent deleted and confirmed task state by task id', () => {
+  const tasks = [
+    { id: 'keep', status: '待确认', listTag: '待确认' },
+    { id: 'done', status: '待确认', listTag: '待确认' },
+    { id: 'remove', status: '待确认', listTag: '待确认' },
+  ];
+  const state = {
+    version: 1,
+    deletedTaskIds: ['remove'],
+    confirmedTaskIds: ['done'],
+  };
+
+  assert.deepEqual(flow.applyTaskListState(tasks, state).map((task) => [task.id, task.status]), [
+    ['keep', '待确认'],
+    ['done', '已确认'],
+  ]);
+});
+
+test('marks one task deleted or confirmed without affecting other ids', () => {
+  const deleted = flow.markTaskDeleted(null, 'task-1');
+  const confirmed = flow.markTaskConfirmed(deleted, 'task-2');
+
+  assert.deepEqual(confirmed.deletedTaskIds, ['task-1']);
+  assert.deepEqual(confirmed.confirmedTaskIds, ['task-2']);
+});
+
+test('removes an entire sample group or one page', () => {
+  const groups = [
+    { id: 'g1', pages: [{ id: 'p1' }, { id: 'p2' }] },
+    { id: 'g2', pages: [{ id: 'p3' }] },
+  ];
+
+  assert.deepEqual(flow.removeSampleGroup(groups, 'g2').map((group) => group.id), ['g1']);
+  assert.deepEqual(flow.removeSamplePage(groups, 'g1', 'p1')[0].pages.map((page) => page.id), ['p2']);
 });

@@ -30,6 +30,9 @@
     listTag: 'AI识别中',
     progress: 0,
     updated: '刚刚',
+    generated: true,
+    sourceTaskId: batch.sourceTaskId || '',
+    recognitionStartedAt: Number(batch.createdAt) || Date.now(),
     anomalies: [],
     studentRows: [],
   }));
@@ -74,6 +77,92 @@
     return true;
   };
 
+  const recognitionProgress = (task, now = Date.now(), duration = 5000) => {
+    const safeDuration = Math.max(1, Number(duration) || 5000);
+    const startedAt = Number(task && task.recognitionStartedAt);
+    const safeStart = Number.isFinite(startedAt) ? startedAt : Number(now) || Date.now();
+    const elapsed = Math.max(0, (Number(now) || safeStart) - safeStart);
+    const complete = elapsed >= safeDuration;
+    const percent = complete ? 100 : Math.floor((elapsed / safeDuration) * 100);
+    return { percent, complete };
+  };
+
+  const advanceRecognition = (task, now = Date.now(), duration = 5000) => {
+    if (!task || !task.generated || task.status !== 'AI识别中') return task;
+    const progress = recognitionProgress(task, now, duration);
+    return {
+      ...task,
+      progress: progress.percent,
+      status: progress.complete ? '待确认' : 'AI识别中',
+      listTag: progress.complete ? '待确认' : 'AI识别中',
+    };
+  };
+
+  const normalizeHistoryState = (state) => state
+    && state.version === 1
+    && state.records
+    && typeof state.records === 'object'
+    ? { version: 1, records: { ...state.records } }
+    : { version: 1, records: {} };
+
+  const confirmHistoryRecord = (state, batch, metadata = {}) => {
+    const next = normalizeHistoryState(state);
+    if (!batch || !batch.sourceTaskId) return next;
+    next.records[batch.sourceTaskId] = {
+      taskId: batch.sourceTaskId,
+      status: '已确认',
+      confirmedAt: Number(batch.createdAt) || Date.now(),
+      title: metadata.title || '',
+      className: batch.className || metadata.className || '',
+      groups: validGroups(batch.groups),
+    };
+    return next;
+  };
+
+  const pendingHistoryCount = (seeds, state) => {
+    const history = normalizeHistoryState(state);
+    return (Array.isArray(seeds) ? seeds : []).filter((seed) => {
+      const record = seed && history.records[seed.id];
+      return !record || record.status !== '已确认';
+    }).length;
+  };
+
+  const normalizeTaskListState = (state) => ({
+    version: 1,
+    deletedTaskIds: [...new Set(Array.isArray(state && state.deletedTaskIds) ? state.deletedTaskIds : [])],
+    confirmedTaskIds: [...new Set(Array.isArray(state && state.confirmedTaskIds) ? state.confirmedTaskIds : [])],
+  });
+
+  const markTaskDeleted = (state, taskId) => {
+    const next = normalizeTaskListState(state);
+    if (taskId && !next.deletedTaskIds.includes(taskId)) next.deletedTaskIds.push(taskId);
+    next.confirmedTaskIds = next.confirmedTaskIds.filter((id) => id !== taskId);
+    return next;
+  };
+
+  const markTaskConfirmed = (state, taskId) => {
+    const next = normalizeTaskListState(state);
+    if (taskId && !next.confirmedTaskIds.includes(taskId)) next.confirmedTaskIds.push(taskId);
+    return next;
+  };
+
+  const applyTaskListState = (tasks, state) => {
+    const normalized = normalizeTaskListState(state);
+    return (Array.isArray(tasks) ? tasks : [])
+      .filter((task) => task && !normalized.deletedTaskIds.includes(task.id))
+      .map((task) => normalized.confirmedTaskIds.includes(task.id)
+        ? { ...task, status: '已确认', listTag: '已确认', progress: 100 }
+        : task);
+  };
+
+  const removeSampleGroup = (groups, groupId) => (Array.isArray(groups) ? groups : [])
+    .filter((group) => group && group.id !== groupId);
+
+  const removeSamplePage = (groups, groupId, pageId) => (Array.isArray(groups) ? groups : [])
+    .map((group) => group && group.id === groupId
+      ? { ...group, pages: (Array.isArray(group.pages) ? group.pages : []).filter((page) => page.id !== pageId) }
+      : group);
+
   return {
     normalizeKind,
     normalizeName,
@@ -82,5 +171,16 @@
     parseBatch,
     mergeTasks,
     movePage,
+    recognitionProgress,
+    advanceRecognition,
+    normalizeHistoryState,
+    confirmHistoryRecord,
+    pendingHistoryCount,
+    normalizeTaskListState,
+    markTaskDeleted,
+    markTaskConfirmed,
+    applyTaskListState,
+    removeSampleGroup,
+    removeSamplePage,
   };
 });
