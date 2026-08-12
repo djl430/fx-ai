@@ -36,18 +36,18 @@
       width: min(1440px, 100%);
       min-height: 100vh;
       margin: 0 auto;
-      padding: 28px 34px 126px;
+      padding: 18px 28px 82px;
     }
     .back {
       display: inline-flex;
       align-items: center;
       gap: 7px;
       color: #5068a6;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 750;
       text-decoration: none;
     }
-    .page-head { margin: 38px 0 22px; }
+    .page-head { margin: 22px 0 14px; }
     .eyebrow {
       margin: 0 0 8px;
       color: #6d7daf;
@@ -58,29 +58,29 @@
     }
     .page-title {
       margin: 0;
-      font-size: clamp(26px, 3vw, 38px);
+      font-size: clamp(24px, 2.4vw, 30px);
       letter-spacing: -.035em;
     }
     .scan-notice {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-top: 20px;
-      padding: 17px 19px;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 12px 15px;
       border: 1px solid rgba(108, 131, 221, .2);
-      border-radius: 18px;
+      border-radius: 14px;
       color: #526180;
       background: linear-gradient(115deg, rgba(255, 255, 255, .88), rgba(238, 242, 255, .82));
       box-shadow: 0 12px 30px rgba(66, 84, 137, .08);
-      font-size: 14px;
+      font-size: 13px;
     }
-    .scan-notice strong { color: #4058bd; font-size: 18px; }
-    .sample-list { display: grid; gap: 18px; }
+    .scan-notice strong { color: #4058bd; font-size: 16px; }
+    .sample-list { display: grid; gap: 12px; }
     .sample {
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, .92);
-      border-radius: 24px;
+      border-radius: 18px;
       background: rgba(255, 255, 255, .7);
       box-shadow: 0 15px 38px rgba(70, 88, 134, .09);
       backdrop-filter: blur(18px);
@@ -89,9 +89,9 @@
       position: relative;
       display: flex;
       align-items: center;
-      gap: 14px;
-      min-height: 82px;
-      padding: 15px 58px 15px 18px;
+      gap: 10px;
+      min-height: 60px;
+      padding: 10px 48px 10px 14px;
       border-bottom: 1px solid var(--line);
       background: rgba(255, 255, 255, .52);
     }
@@ -115,7 +115,7 @@
       transform: translateY(-3px);
       transition: opacity .16s ease, transform .16s ease, background .16s ease;
     }
-    .sample-delete { top: 15px; right: 16px; }
+    .sample-delete { top: 10px; right: 12px; }
     .page-delete { top: 9px; right: 9px; }
     .sample-head:hover .sample-delete,
     .sample-head:focus-within .sample-delete,
@@ -125,8 +125,8 @@
     .page-delete:hover { color: #fff; background: #ce5661; }
     .sample-badge {
       flex: 0 0 auto;
-      padding: 8px 11px;
-      border-radius: 12px;
+      padding: 6px 9px;
+      border-radius: 10px;
       color: #5369c8;
       background: #e9edff;
       font-size: 12px;
@@ -137,7 +137,7 @@
       min-width: 0;
       flex: 1;
       align-items: center;
-      gap: 10px;
+      gap: 7px;
     }
     .kind-field { position: relative; flex: 0 0 auto; }
     .kind-field::after {
@@ -154,25 +154,25 @@
     .kind-select {
       appearance: none;
       min-width: 74px;
-      height: 36px;
+      height: 32px;
       border: 1px solid #cfd8fb;
       border-radius: 10px;
       padding: 0 27px 0 11px;
       color: #465dbb;
       background: #f0f3ff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
     }
     .sample-title-input {
       width: min(430px, 100%);
       min-width: 120px;
-      height: 39px;
+      height: 34px;
       border: 1px solid transparent;
       border-radius: 10px;
       padding: 0 10px;
       color: var(--ink);
       background: transparent;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 820;
     }
     .sample-title-input:hover { border-color: #dbe2f4; background: rgba(255, 255, 255, .72); }
@@ -180,36 +180,36 @@
     .sample-meta {
       flex: 0 0 auto;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       white-space: nowrap;
     }
     .hint {
       flex: 0 0 auto;
       color: #7885aa;
-      font-size: 12px;
+      font-size: 11px;
     }
     .pages {
       display: flex;
-      min-height: 282px;
+      min-height: 216px;
       flex-wrap: wrap;
       align-content: flex-start;
       align-items: flex-start;
-      gap: 14px;
+      gap: 10px;
       overflow: visible;
-      padding: 20px;
+      padding: 13px;
       transition: background .18s ease, box-shadow .18s ease;
     }
     .pages:empty::before {
       display: grid;
       width: 100%;
-      min-height: 236px;
+      min-height: 188px;
       place-items: center;
       border: 1.5px dashed #c9d3ef;
       border-radius: 16px;
       color: #8490ae;
       background: rgba(244, 247, 255, .55);
       content: "将上方样卷页面拖到这里";
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
     }
     .pages.drag-over {
@@ -218,12 +218,12 @@
     }
     .scan-card {
       position: relative;
-      width: 202px;
-      min-width: 202px;
-      min-height: 246px;
+      width: 172px;
+      min-width: 172px;
+      min-height: 202px;
       border: 1px solid #dbe2ee;
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px;
       background: #fff;
       box-shadow: 0 5px 14px rgba(63, 78, 112, .08);
       cursor: grab;
@@ -234,37 +234,37 @@
     .clip {
       position: absolute;
       top: -4px;
-      left: calc(50% - 17px);
-      width: 34px;
-      height: 7px;
+      left: calc(50% - 15px);
+      width: 30px;
+      height: 6px;
       border-radius: 0 0 7px 7px;
       background: #e8ebf1;
     }
     .scan-paper {
       position: relative;
-      height: 224px;
-      padding: 24px 14px 36px;
+      height: 184px;
+      padding: 18px 11px 28px;
       color: #5c6174;
-      background: repeating-linear-gradient(to bottom, var(--paper) 0, var(--paper) 23px, #eee6db 24px);
+      background: repeating-linear-gradient(to bottom, var(--paper) 0, var(--paper) 19px, #eee6db 20px);
       font-family: Georgia, "Songti SC", serif;
     }
-    .scan-paper h4 { margin: 0 0 15px; font-size: 12px; font-weight: 500; text-align: center; }
-    .scan-paper p { margin: 8px 0; font-size: 10px; }
+    .scan-paper h4 { margin: 0 0 10px; font-size: 11px; font-weight: 500; text-align: center; }
+    .scan-paper p { margin: 6px 0; font-size: 9px; }
     .paper-page-number {
       position: absolute;
       right: 0;
-      bottom: 10px;
+      bottom: 7px;
       left: 0;
       color: #8a8f9d;
-      font-size: 10px;
+      font-size: 9px;
       text-align: center;
     }
     .scan-mark { position: absolute; right: 18px; bottom: 14px; color: #e95a60; font-size: 24px; }
-    .add-row { display: flex; justify-content: center; padding: 22px 0 8px; }
+    .add-row { display: flex; justify-content: center; padding: 12px 0 4px; }
     .add-sample {
-      min-height: 46px;
+      min-height: 38px;
       border: 1px dashed #aebbe4;
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 0 20px;
       color: #4f64bd;
       background: rgba(255, 255, 255, .66);
@@ -275,17 +275,17 @@
     .sticky {
       position: fixed;
       z-index: 20;
-      right: 20px;
-      bottom: 20px;
-      left: 20px;
+      right: 14px;
+      bottom: 14px;
+      left: 14px;
       display: flex;
-      min-height: 76px;
+      min-height: 58px;
       align-items: center;
       justify-content: flex-end;
-      gap: 16px;
-      padding: 12px 18px;
+      gap: 12px;
+      padding: 8px 14px;
       border: 1px solid rgba(255, 255, 255, .95);
-      border-radius: 20px;
+      border-radius: 16px;
       background: rgba(255, 255, 255, .92);
       box-shadow: 0 14px 34px rgba(73, 91, 139, .17);
       backdrop-filter: blur(18px);
@@ -293,14 +293,14 @@
     .form-message { margin: 0 auto 0 0; color: #9a6d29; font-size: 13px; font-weight: 700; }
     .form-message.is-error { color: #c54955; }
     .confirm {
-      min-height: 48px;
+      min-height: 40px;
       border: 0;
-      border-radius: 14px;
-      padding: 0 22px;
+      border-radius: 12px;
+      padding: 0 18px;
       color: #fff;
       background: linear-gradient(135deg, var(--primary-dark), #5c70d5);
       box-shadow: 0 10px 24px rgba(55, 74, 143, .24);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 850;
     }
     .confirm:hover { transform: translateY(-1px); }
@@ -328,6 +328,68 @@
     .collection-delete-actions button { min-height: 42px; border-radius: 12px; padding: 0 16px; font-weight: 800; }
     .collection-delete-cancel { border: 1px solid #dde3f0; color: var(--ink); background: #fff; }
     .collection-delete-confirm { border: 0; color: #fff; background: #c94f5a; }
+    .submission-picker-trigger {
+      flex: 0 0 auto;
+      min-height: 30px;
+      border: 1px solid #cfd8fb;
+      border-radius: 9px;
+      padding: 0 9px;
+      color: #4b61bb;
+      background: #f4f6ff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .submission-picker-trigger:hover { color: #fff; background: #5c70d5; }
+    .submission-picker-backdrop {
+      position: fixed;
+      z-index: 70;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(30, 39, 70, .38);
+      backdrop-filter: blur(7px);
+    }
+    .submission-picker-dialog {
+      display: grid;
+      width: min(920px, 100%);
+      max-height: min(760px, calc(100vh - 40px));
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 20px;
+      background: #fbfcff;
+      box-shadow: 0 26px 70px rgba(36, 49, 86, .28);
+    }
+    .submission-picker-head,
+    .submission-picker-actions,
+    .submission-picker-foot { display: flex; align-items: center; gap: 12px; }
+    .submission-picker-head { justify-content: space-between; padding: 16px 18px 10px; }
+    .submission-picker-head h2 { margin: 0; font-size: 18px; }
+    .submission-picker-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .submission-picker-close { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 9px; color: #64708e; background: #eef1fa; font-size: 19px; }
+    .submission-picker-actions { justify-content: space-between; padding: 10px 18px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .submission-picker-search { width: min(280px, 100%); height: 34px; border: 1px solid #d9e0f1; border-radius: 9px; padding: 0 10px; color: var(--ink); background: #fff; font-size: 12px; }
+    .submission-picker-filter { display: inline-flex; align-items: center; gap: 6px; color: #5c6988; font-size: 12px; font-weight: 700; }
+    .submission-picker-list { overflow: auto; padding: 12px 18px 18px; }
+    .submission-student { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .submission-student:last-child { border-bottom: 0; }
+    .submission-student-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+    .submission-student-head strong { font-size: 14px; }
+    .submission-student-head button { min-height: 28px; border: 1px solid #d3dcfb; border-radius: 8px; padding: 0 8px; color: #4b61bb; background: #f7f8ff; font-size: 11px; font-weight: 800; }
+    .submission-page-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .submission-page-option { position: relative; display: grid; width: 128px; min-height: 86px; grid-template-columns: 17px 1fr; gap: 6px; align-items: start; border: 1px solid #dde4f1; border-radius: 10px; padding: 8px; color: #4b5675; background: #fffefb; font-size: 11px; line-height: 1.45; }
+    .submission-page-option input { margin: 2px 0 0; accent-color: #596ed2; }
+    .submission-page-option strong, .submission-page-option small { display: block; }
+    .submission-page-option small { margin-top: 4px; color: #7c87a0; }
+    .submission-page-option.is-owned { color: #8a7191; background: #f4f1f7; }
+    .submission-page-option.is-owned small { color: #9a6d75; }
+    .submission-picker-empty { padding: 36px 0; color: var(--muted); text-align: center; font-size: 13px; }
+    .submission-picker-foot { justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--line); background: #fff; }
+    .submission-picker-foot button { min-height: 36px; border-radius: 10px; padding: 0 13px; font-weight: 800; }
+    .submission-picker-cancel { border: 1px solid #dce3f0; color: var(--ink); background: #fff; }
+    .submission-picker-add { border: 0; color: #fff; background: #5268d6; }
+    .submission-picker-add:disabled { cursor: not-allowed; opacity: .45; }
     body.is-read-only .add-row,
     body.is-read-only .sticky { display: none; }
     .page-head .eyebrow,
@@ -382,6 +444,7 @@
     <button class="confirm" id="confirm" type="button">确认</button>
   </footer>
   <div id="collectionDeleteLayer"></div>
+  <div id="collectionSubmissionLayer"></div>
 
   <script src="collection-flow.js"></script>
   <script>
@@ -430,8 +493,10 @@
         ],
       };
 
-      const makePages = (groupId, paperTitle, templates, wrongPage) => templates.map((template, index) => ({
+      const makePages = (groupId, paperTitle, templates, wrongPage, studentId, studentName) => templates.map((template, index) => ({
         id: `${groupId}-page-${index + 1}`,
+        studentId,
+        studentName,
         paperTitle,
         sourcePageNumber: template.sourcePageNumber,
         content: [...template.content],
@@ -444,15 +509,20 @@
           name: taskData.firstName,
           kind: '作业',
           students: 31,
-          pages: makePages('sample-1', taskData.firstName, paperTemplates.homework),
+          pages: makePages('sample-1', taskData.firstName, paperTemplates.homework, null, 'student-zhang', '张小凡'),
         },
         {
           id: 'sample-2',
           name: taskData.secondName,
           kind: '考试',
           students: 30,
-          pages: makePages('sample-2', taskData.secondName, paperTemplates.exam, 2),
+          pages: makePages('sample-2', taskData.secondName, paperTemplates.exam, 2, 'student-li', '李思雨'),
         },
+      ];
+      const allSubmissions = [
+        ...defaultGroups.flatMap((group) => group.pages),
+        ...makePages('submission-wang', taskData.firstName, paperTemplates.homework.slice(0, 3), null, 'student-wang', '王晓宇'),
+        ...makePages('submission-chen', taskData.secondName, paperTemplates.exam.slice(0, 2), null, 'student-chen', '陈子涵'),
       ];
       let historyState = FxCollectionFlow.normalizeHistoryState(null);
       try {
@@ -466,11 +536,13 @@
         : defaultGroups;
       let draggedPage = null;
       let pendingSampleDelete = null;
+      let submissionPicker = null;
 
       const sampleList = document.getElementById('sampleList');
       let sampleCount = document.getElementById('sampleCount');
       const formMessage = document.getElementById('formMessage');
       const collectionDeleteLayer = document.getElementById('collectionDeleteLayer');
+      const collectionSubmissionLayer = document.getElementById('collectionSubmissionLayer');
       document.getElementById('taskTitle').textContent = taskData.title;
       if (readOnly) {
         document.body.classList.add('is-read-only');
@@ -519,6 +591,7 @@
               </label>
               <input class="sample-title-input" data-action="edit-sample-name" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 名称" value="${escapeHtml(group.name)}" ${readOnly ? 'disabled' : ''}>
             </div>
+            ${readOnly ? '' : `<button class="submission-picker-trigger" type="button" data-action="open-submission-picker" data-group-id="${escapeHtml(group.id)}">从全部提交中添加</button>`}
             <span class="sample-meta" data-role="sample-meta">${group.students ? `${group.students}人 · ` : ''}${group.pages.length}页</span>
             <span class="hint">${readOnly ? '已确认，仅支持查看' : '拖动页面调整顺序或归属'}</span>
           </div>
@@ -542,6 +615,74 @@
         </div>`;
       };
 
+      const submissionOwnerLabel = (pageId) => {
+        const owner = FxCollectionFlow.pageOwner(groups, pageId);
+        if (!owner) return '';
+        const index = groups.findIndex((group) => group.id === owner.id) + 1;
+        return `已添加至样卷 ${index}`;
+      };
+
+      const renderSubmissionPicker = () => {
+        if (!submissionPicker || readOnly) {
+          collectionSubmissionLayer.innerHTML = '';
+          return;
+        }
+        const targetGroup = findGroup(submissionPicker.targetGroupId);
+        if (!targetGroup) {
+          submissionPicker = null;
+          collectionSubmissionLayer.innerHTML = '';
+          return;
+        }
+        const query = submissionPicker.query.trim();
+        const students = [];
+        allSubmissions.forEach((page) => {
+          let student = students.find((item) => item.id === page.studentId);
+          if (!student) {
+            student = { id: page.studentId, name: page.studentName, pages: [] };
+            students.push(student);
+          }
+          student.pages.push(page);
+        });
+        const studentCards = students.map((student) => {
+          if (query && !student.name.includes(query)) return '';
+          const pages = student.pages.filter((page) => !submissionPicker.unassignedOnly || !FxCollectionFlow.pageOwner(groups, page.id));
+          if (!pages.length) return '';
+          const selectable = pages.filter((page) => !FxCollectionFlow.pageOwner(groups, page.id));
+          return `<section class="submission-student">
+            <header class="submission-student-head">
+              <strong>${escapeHtml(student.name)} · ${student.pages.length} 页</strong>
+              ${selectable.length ? `<button type="button" data-action="select-student-pages" data-student-id="${escapeHtml(student.id)}">全选本次可添加页面</button>` : '<span class="hint">全部页面已归属</span>'}
+            </header>
+            <div class="submission-page-list">${pages.map((page) => {
+              const ownerLabel = submissionOwnerLabel(page.id);
+              const owned = Boolean(ownerLabel);
+              return `<label class="submission-page-option ${owned ? 'is-owned' : ''}">
+                <input type="checkbox" data-action="toggle-submission-page" data-page-id="${escapeHtml(page.id)}" ${owned ? 'disabled' : ''} ${submissionPicker.selectedPageIds.has(page.id) ? 'checked' : ''}>
+                <span><strong>第 ${page.sourcePageNumber} 页</strong><span>${escapeHtml(page.content[0] || page.paperTitle)}</span><small>${owned ? ownerLabel : '可添加'}</small></span>
+              </label>`;
+            }).join('')}</div>
+          </section>`;
+        }).join('');
+        const selectedCount = submissionPicker.selectedPageIds.size;
+        collectionSubmissionLayer.innerHTML = `<div class="submission-picker-backdrop">
+          <section class="submission-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="submission-picker-title">
+            <header class="submission-picker-head">
+              <div><h2 id="submission-picker-title">从全部提交中添加</h2><p>添加到“${escapeHtml(FxCollectionFlow.normalizeName(targetGroup.name))}”</p></div>
+              <button class="submission-picker-close" type="button" aria-label="关闭" data-action="close-submission-picker">×</button>
+            </header>
+            <div class="submission-picker-actions">
+              <input class="submission-picker-search" type="search" data-action="search-submissions" value="${escapeHtml(submissionPicker.query)}" placeholder="搜索学生姓名">
+              <label class="submission-picker-filter"><input type="checkbox" data-action="filter-unassigned-submissions" ${submissionPicker.unassignedOnly ? 'checked' : ''}>仅看未归属页面</label>
+            </div>
+            <div class="submission-picker-list">${studentCards || '<p class="submission-picker-empty">没有符合条件的学生提交。</p>'}</div>
+            <footer class="submission-picker-foot">
+              <button class="submission-picker-cancel" type="button" data-action="close-submission-picker">取消</button>
+              <button class="submission-picker-add" type="button" data-action="add-selected-submissions" ${selectedCount ? '' : 'disabled'}>添加已选页面（${selectedCount}）</button>
+            </footer>
+          </section>
+        </div>`;
+      };
+
       const updateCount = () => {
         sampleCount.textContent = String(groups.filter((group) => group.pages.length > 0).length);
       };
@@ -550,12 +691,49 @@
         sampleList.innerHTML = groups.map(renderGroup).join('');
         updateCount();
         renderDeleteDialog();
+        renderSubmissionPicker();
       };
 
       const findGroup = (groupId) => groups.find((group) => group.id === groupId);
 
       document.addEventListener('click', (event) => {
         if (readOnly) return;
+        const openSubmissionPicker = event.target.closest('[data-action="open-submission-picker"]');
+        if (openSubmissionPicker) {
+          submissionPicker = {
+            targetGroupId: openSubmissionPicker.dataset.groupId,
+            selectedPageIds: new Set(),
+            query: '',
+            unassignedOnly: false,
+          };
+          renderSubmissionPicker();
+          return;
+        }
+        const closeSubmissionPicker = event.target.closest('[data-action="close-submission-picker"]');
+        const clickedSubmissionBackdrop = event.target.classList.contains('submission-picker-backdrop');
+        if (closeSubmissionPicker || clickedSubmissionBackdrop) {
+          submissionPicker = null;
+          renderSubmissionPicker();
+          return;
+        }
+        const selectStudentPages = event.target.closest('[data-action="select-student-pages"]');
+        if (selectStudentPages && submissionPicker) {
+          allSubmissions
+            .filter((page) => page.studentId === selectStudentPages.dataset.studentId && !FxCollectionFlow.pageOwner(groups, page.id))
+            .forEach((page) => submissionPicker.selectedPageIds.add(page.id));
+          renderSubmissionPicker();
+          return;
+        }
+        const addSelectedSubmissions = event.target.closest('[data-action="add-selected-submissions"]');
+        if (addSelectedSubmissions && submissionPicker) {
+          const selectedCount = submissionPicker.selectedPageIds.size;
+          groups = FxCollectionFlow.addSubmissionPages(groups, submissionPicker.targetGroupId, allSubmissions, [...submissionPicker.selectedPageIds]);
+          submissionPicker = null;
+          formMessage.textContent = `已添加 ${selectedCount} 页学生提交。`;
+          formMessage.classList.remove('is-error');
+          render();
+          return;
+        }
         const deleteSample = event.target.closest('[data-action="request-delete-sample"]');
         if (deleteSample) {
           const group = findGroup(deleteSample.dataset.groupId);
@@ -617,6 +795,29 @@
         if (!input) return;
         const group = findGroup(input.dataset.groupId);
         if (group) group.name = input.value;
+      });
+
+      document.addEventListener('input', (event) => {
+        const searchInput = event.target.closest('[data-action="search-submissions"]');
+        if (!searchInput || !submissionPicker) return;
+        submissionPicker.query = searchInput.value;
+        renderSubmissionPicker();
+        document.querySelector('[data-action="search-submissions"]')?.focus();
+      });
+
+      document.addEventListener('change', (event) => {
+        const pageToggle = event.target.closest('[data-action="toggle-submission-page"]');
+        if (pageToggle && submissionPicker) {
+          if (pageToggle.checked) submissionPicker.selectedPageIds.add(pageToggle.dataset.pageId);
+          else submissionPicker.selectedPageIds.delete(pageToggle.dataset.pageId);
+          renderSubmissionPicker();
+          return;
+        }
+        const unassignedFilter = event.target.closest('[data-action="filter-unassigned-submissions"]');
+        if (unassignedFilter && submissionPicker) {
+          submissionPicker.unassignedOnly = unassignedFilter.checked;
+          renderSubmissionPicker();
+        }
       });
 
       sampleList.addEventListener('change', (event) => {
@@ -720,7 +921,13 @@
       });
 
       document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape' || !pendingSampleDelete) return;
+        if (event.key !== 'Escape') return;
+        if (submissionPicker) {
+          submissionPicker = null;
+          renderSubmissionPicker();
+          return;
+        }
+        if (!pendingSampleDelete) return;
         pendingSampleDelete = null;
         renderDeleteDialog();
       });

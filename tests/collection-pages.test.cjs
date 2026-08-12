@@ -21,6 +21,15 @@ test('collection confirmation uses simplified analysis copy', () => {
   assert.doesNotMatch(confirmPage, /确认并开始识别或批改/);
 });
 
+test('confirmation supports compact submission page selection', () => {
+  assert.match(confirmPage, /data-action="open-submission-picker"/);
+  assert.match(confirmPage, /data-action="add-selected-submissions"/);
+  assert.match(confirmPage, /仅看未归属页面/);
+  assert.match(confirmPage, /已添加至样卷/);
+  assert.match(confirmPage, /min-height:\s*216px/);
+  assert.match(confirmPage, /font-size:\s*clamp\(24px, 2\.4vw, 30px\)/);
+});
+
 test('sample pages wrap instead of scrolling horizontally', () => {
   assert.match(confirmPage, /\.pages\s*\{[^}]*flex-wrap:\s*wrap/s);
   assert.doesNotMatch(confirmPage, /\.pages\s*\{[^}]*overflow-x:\s*auto/s);
@@ -82,6 +91,13 @@ test('main list loads and persists confirmed collection tasks', () => {
 test('main list stays on the home view after collection creation', () => {
   assert.match(indexPage, /collectionCreated/);
   assert.doesNotMatch(indexPage, /location\.href\s*=\s*['"]grading-by-question-demo\.html/);
+});
+
+test('direct home entry resets only collection demo data', () => {
+  assert.match(indexPage, /collectionCreated\s*=.*===\s*['"]1['"]/);
+  assert.match(indexPage, /resetCollectionDemoState/);
+  assert.match(indexPage, /removeItem\(['"]fxGeneratedCollectionTasks['"]\)/);
+  assert.match(indexPage, /delete[\s\S]*today-1942/);
 });
 
 test('main list always keeps the three original grading tasks visible', () => {
