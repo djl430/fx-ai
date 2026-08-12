@@ -73,6 +73,10 @@
     }
 
     .title-lockup { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .grading-task-lockup { min-width: 0; }
+    .grading-task-lockup strong, .grading-task-lockup small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .grading-task-lockup strong { max-width:460px; color:var(--ink); font-size:15px; }
+    .grading-task-lockup small { margin-top:3px; color:var(--muted); font-size:11px; }
 
     .back-link {
       width: 32px;
@@ -863,6 +867,10 @@
       <header class="topbar">
         <div class="title-lockup">
           <a class="back-link" href="./index.html" aria-label="返回批改首页">←</a>
+          <div class="grading-task-lockup">
+            <strong id="gradingTaskTitle">二次函数单元作业</strong>
+            <small id="gradingTaskMeta">作业 · 九年级 2 班 · 42 人 / 84 页</small>
+          </div>
         </div>
         <div class="top-actions">
           <a class="button ghost" href="./student-trace-preview.html">预览学生留痕</a>
@@ -966,13 +974,22 @@
     </section>
   </div>
 
+  <script src="collection-flow.js"></script>
   <script>
     (() => {
       const params = new URLSearchParams(window.location.search);
+      const taskId = params.get("taskId") || "";
       const isExam = params.get("mode") === "exam";
       const variant = params.get("variant");
+      const taskTitle = params.get("taskTitle") || (isExam ? "数学期中质量检测" : "二次函数单元作业");
+      const taskKind = params.get("taskKind") || (isExam ? "考试" : "作业");
+      const className = params.get("className") || (isExam ? "八年级 5 班" : "九年级 2 班");
+      const studentsCount = params.get("students") || (isExam ? "40" : "42");
+      const pagesCount = params.get("pages") || (isExam ? "240" : "84");
       const isSimilarityGrouping = variant === "similar";
       document.title = isExam ? "飞象智批 · 试卷批改 Demo" : isSimilarityGrouping ? "飞象智批 · 形似作答分组 Demo" : "飞象智批 · 按题批改 Demo";
+      document.getElementById("gradingTaskTitle").textContent = taskTitle;
+      document.getElementById("gradingTaskMeta").textContent = `${taskKind} · ${className} · ${studentsCount} 人 / ${pagesCount} 页`;
 
       const students = ["王晓宇", "李思雨", "陈子涵", "张可欣", "周明远", "许安然", "林嘉言", "苏雨桐", "赵亦辰", "沈乐言", "何宇辰", "宋雨桐", "顾晨然", "刘子涵", "马思源", "郑雨欣"];
 
@@ -1198,8 +1215,37 @@
       const basisList = document.getElementById("basisList");
       const explanationDetails = document.getElementById("explanationDetails");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
+      const confirmAllButton = document.getElementById("confirmAll");
+      confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "确认全部题目批改";
 
       const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
+
+      function persistTaskCompletionIfReady() {
+        if (!taskId || !questions.every((question) => question.status === "completed")) return false;
+        let taskListState = FxCollectionFlow.normalizeTaskListState(null);
+        try {
+          taskListState = FxCollectionFlow.normalizeTaskListState(JSON.parse(localStorage.getItem("fxTaskListState") || "null"));
+        } catch (_) {}
+        taskListState = FxCollectionFlow.markTaskConfirmed(taskListState, taskId);
+        try {
+          localStorage.setItem("fxTaskListState", JSON.stringify(taskListState));
+        } catch (_) {}
+
+        try {
+          const generatedTasks = JSON.parse(localStorage.getItem("fxGeneratedCollectionTasks") || "[]");
+          if (Array.isArray(generatedTasks)) {
+            localStorage.setItem("fxGeneratedCollectionTasks", JSON.stringify(generatedTasks.map((task) =>
+              task.id === taskId ? { ...task, status: "已确认", listTag: "已确认", progress: 100 } : task
+            )));
+          }
+        } catch (_) {}
+        return true;
+      }
+
+      function showTaskCompletion() {
+        confirmAllButton.textContent = isExam ? "✓ 已确认全部题目赋分" : "✓ 已确认全部题目批改";
+        confirmAllButton.disabled = true;
+      }
 
       function maxScore(question) {
         return [3, 6].includes(question.id) ? 6 : 4;
@@ -1474,17 +1520,19 @@
         });
       });
 
-      document.getElementById("confirmAll").addEventListener("click", event => {
+      confirmAllButton.addEventListener("click", () => {
         questions.forEach(question => question.status = "completed");
         renderQuestions();
-        event.currentTarget.textContent = "✓ 已确认全部题目批改";
-        event.currentTarget.disabled = true;
-        showToast(`已确认全部 ${questions.length} 道题的批改结果`);
+        persistTaskCompletionIfReady();
+        showTaskCompletion();
+        showToast(`已确认全部 ${questions.length} 道题的${isExam ? "赋分" : "批改"}结果`);
       });
 
       confirmQuestionButton.addEventListener("click", () => {
         const currentIndex = questions.findIndex(question => question.id === activeQuestionId);
         questions[currentIndex].status = "completed";
+        const allCompleted = persistTaskCompletionIfReady();
+        if (allCompleted) showTaskCompletion();
         const nextQuestion = questions[currentIndex + 1];
         if (nextQuestion) {
           activeQuestionId = nextQuestion.id;
@@ -1495,7 +1543,7 @@
           return;
         }
         renderAll();
-        showToast("已确认最后一题，可以发布批改结果");
+        showToast(allCompleted ? `全部题目${isExam ? "赋分" : "批改"}已确认` : "已确认最后一题，可以发布批改结果");
       });
 
       const modals = {

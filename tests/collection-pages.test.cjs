@@ -132,3 +132,12 @@ test('grading demo renders generated task metadata from query parameters', () =>
   assert.match(gradingPage, /gradingTaskTitle/);
   assert.match(gradingPage, /gradingTaskMeta/);
 });
+
+test('grading completion is persisted by task id and reflected on the list', () => {
+  assert.match(gradingPage, /params\.get\(["']taskId["']\)/);
+  assert.match(gradingPage, /questions\.every\(.*status\s*===\s*["']completed["']/s);
+  assert.match(gradingPage, /markTaskConfirmed/);
+  assert.match(gradingPage, /fxTaskListState/);
+  assert.match(indexPage, /applyTaskListState/);
+  assert.match(indexPage, /已确认/);
+});
