@@ -16,7 +16,7 @@ test('confirmation page exposes the required group controls', () => {
 
 test('collection confirmation uses simplified analysis copy', () => {
   assert.match(confirmPage, /确认无误后 AI 开始分析/);
-  assert.match(confirmPage, /<button class="confirm"[^>]*>确认<\/button>/);
+  assert.match(confirmPage, /<button class="confirm"[^>]*>确认无误并开始分析<\/button>/);
   assert.doesNotMatch(confirmPage, /\.scan-notice::before/);
   assert.doesNotMatch(confirmPage, /确认并开始识别或批改/);
 });
