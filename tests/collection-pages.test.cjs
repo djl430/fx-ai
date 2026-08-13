@@ -17,7 +17,8 @@ test('confirmation page exposes the required group controls', () => {
 });
 
 test('collection confirmation contains a focused anomaly workflow without a home list entry', () => {
-  assert.match(confirmPage, /发现 <strong id="anomalyCount">5<\/strong> 份异常提交/);
+  assert.match(confirmPage, /提交异常 <strong id="anomalyCount">5<\/strong> 人/);
+  assert.match(confirmPage, />去处理<\/button>/);
   assert.match(confirmPage, /<div class="notice-actions__right">[\s\S]*id="anomalySummary"/);
   assert.match(confirmPage, /data-action="open-anomaly-drawer"/);
   assert.match(confirmPage, /data-action="resolve-anomaly"/);

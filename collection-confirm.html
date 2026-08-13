@@ -489,7 +489,7 @@
         </aside>
         <div class="notice-actions__right">
           <button class="add-sample" type="button" data-action="add-sample">添加样卷</button>
-          <div class="anomaly-summary" id="anomalySummary"><span>发现 <strong id="anomalyCount">5</strong> 份异常提交，建议确认后再开始分析</span></div>
+          <div class="anomaly-summary" id="anomalySummary"><span>提交异常 <strong id="anomalyCount">5</strong> 人</span><button class="anomaly-open" type="button" data-action="open-anomaly-drawer">去处理</button></div>
         </div>
       </div>
     </header>
@@ -699,7 +699,7 @@
           anomalySummary.innerHTML = '<span>异常提交均已处理，可开始分析。</span>';
           return;
         }
-        anomalySummary.innerHTML = `<span>${readOnly ? '本次采集共记录' : '发现'} <strong id="anomalyCount">${visible.length}</strong> 份异常提交${readOnly ? '' : '，建议确认后再开始分析'}</span><button class="anomaly-open" type="button" data-action="open-anomaly-drawer">${readOnly ? '查看异常' : '查看并处理'}</button>`;
+        anomalySummary.innerHTML = `<span>${readOnly ? '本次采集异常' : '提交异常'} <strong id="anomalyCount">${visible.length}</strong> 人</span><button class="anomaly-open" type="button" data-action="open-anomaly-drawer">${readOnly ? '查看' : '去处理'}</button>`;
       };
 
       const renderAnomalyDrawer = () => {
