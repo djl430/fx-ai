@@ -75,6 +75,7 @@
       gap: 12px;
       margin-top: 12px;
     }
+    .notice-actions__right { display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
     .scan-notice strong { color: #4058bd; font-size: 16px; }
     .sample-list { display: grid; gap: 12px; }
     .sample {
@@ -275,15 +276,15 @@
     .anomaly-summary {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
+      justify-content: flex-end;
+      gap: 9px;
       color: #7b5c2d;
       font-size: 12px;
       font-weight: 750;
+      text-align: right;
     }
     .anomaly-summary strong { color: #bd7417; font-size: 14px; }
-    .anomaly-chip, .sample-risk, .anomaly-status {
+    .anomaly-status {
       display: inline-flex;
       align-items: center;
       min-height: 24px;
@@ -294,9 +295,7 @@
       font-size: 11px;
       font-weight: 800;
     }
-    .sample-risks { display: inline-flex; flex-wrap: wrap; gap: 5px; margin-left: 8px; }
-    .sample-risk { min-height: 22px; }
-    .anomaly-open { margin-left: auto; min-height: 30px; border: 1px solid #eccb9b; border-radius: 9px; padding: 0 10px; color: #a66714; background: #fffaf2; font-weight: 800; }
+    .anomaly-open { min-height: 30px; border: 1px solid #eccb9b; border-radius: 9px; padding: 0 10px; color: #a66714; background: #fffaf2; font-weight: 800; }
     .anomaly-open:hover { background: #fff2df; }
     .anomaly-backdrop { position: fixed; z-index: 55; inset: 0; display: flex; justify-content: flex-end; background: rgba(31, 42, 74, .22); backdrop-filter: blur(3px); }
     .anomaly-drawer { width: min(460px, 100%); height: 100%; overflow: auto; padding: 22px; border-left: 1px solid rgba(255,255,255,.9); background: #fbfcff; box-shadow: -18px 0 50px rgba(34, 48, 89, .16); }
@@ -466,7 +465,8 @@
     }
     @media (max-width: 520px) {
       .notice-actions { grid-template-columns: 1fr; }
-      .anomaly-open { margin-left: 0; }
+      .notice-actions__right { align-items: flex-start; }
+      .anomaly-summary { justify-content: flex-start; text-align: left; }
       .scan-notice { align-items: flex-start; }
       .sample-fields { width: 100%; }
       .sample-meta { width: 100%; margin-left: 0; }
@@ -487,9 +487,11 @@
         <aside class="scan-notice" aria-live="polite">
           <span>本次扫描识别到以下 <strong id="sampleCount">2</strong> 个样卷，确认无误后 AI 开始分析</span>
         </aside>
-        <button class="add-sample" type="button" data-action="add-sample">添加样卷</button>
+        <div class="notice-actions__right">
+          <button class="add-sample" type="button" data-action="add-sample">添加样卷</button>
+          <div class="anomaly-summary" id="anomalySummary"><span>发现 <strong id="anomalyCount">5</strong> 份异常提交，建议确认后再开始分析</span></div>
+        </div>
       </div>
-      <div class="anomaly-summary" id="anomalySummary"><span>发现 <strong id="anomalyCount">5</strong> 份异常提交，建议确认后再开始分析</span></div>
     </header>
 
     <div class="sample-list" id="sampleList"></div>
@@ -651,14 +653,6 @@
 
       const pendingAnomalies = () => anomalies.filter((anomaly) => anomaly.status !== 'resolved');
       const visibleAnomalies = () => readOnly ? anomalies : pendingAnomalies();
-      const anomaliesForGroup = (groupId) => visibleAnomalies().filter((anomaly) => anomaly.groupId === groupId);
-      const anomalyTypeCount = (type) => visibleAnomalies().filter((anomaly) => anomaly.type === type).length;
-      const renderRiskTags = (groupId) => anomaliesForGroup(groupId).length
-        ? `<span class="sample-risks">${['缺页', '多页', '归属待确认', '重复提交'].map((type) => {
-          const count = anomaliesForGroup(groupId).filter((anomaly) => anomaly.type === type).length;
-          return count ? `<span class="sample-risk">${type} ${count}</span>` : '';
-        }).join('')}</span>`
-        : '';
 
       const renderGroup = (group, index) => `
         <section class="sample" data-group-id="${group.id}">
@@ -675,7 +669,6 @@
               </label>
               <input class="sample-title-input" data-action="edit-sample-name" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 名称" value="${escapeHtml(group.name)}" ${readOnly ? 'disabled' : ''}>
             </div>
-            ${renderRiskTags(group.id)}
             ${readOnly ? '' : `<button class="submission-picker-trigger" type="button" data-action="open-submission-picker" data-group-id="${escapeHtml(group.id)}">从全部提交中添加</button>`}
             <span class="sample-meta" data-role="sample-meta">${group.students ? `${group.students}人 · ` : ''}${group.pages.length}页</span>
             <span class="hint">${readOnly ? '已确认，仅支持查看' : '拖动页面调整顺序或归属'}</span>
@@ -706,11 +699,7 @@
           anomalySummary.innerHTML = '<span>异常提交均已处理，可开始分析。</span>';
           return;
         }
-        const chips = ['缺页', '多页', '归属待确认', '重复提交'].map((type) => {
-          const count = anomalyTypeCount(type);
-          return count ? `<span class="anomaly-chip">${type} ${count}</span>` : '';
-        }).join('');
-        anomalySummary.innerHTML = `<span>${readOnly ? '本次采集共记录' : '发现'} <strong id="anomalyCount">${visible.length}</strong> 份异常提交${readOnly ? '' : '，建议确认后再开始分析'}</span>${chips}<button class="anomaly-open" type="button" data-action="open-anomaly-drawer">${readOnly ? '查看异常' : '查看并处理'}</button>`;
+        anomalySummary.innerHTML = `<span>${readOnly ? '本次采集共记录' : '发现'} <strong id="anomalyCount">${visible.length}</strong> 份异常提交${readOnly ? '' : '，建议确认后再开始分析'}</span><button class="anomaly-open" type="button" data-action="open-anomaly-drawer">${readOnly ? '查看异常' : '查看并处理'}</button>`;
       };
 
       const renderAnomalyDrawer = () => {
