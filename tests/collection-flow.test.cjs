@@ -146,6 +146,99 @@ test('keeps collection anomalies in confirmed history records', () => {
   assert.notEqual(next.records['today-1942'].anomalies, anomalies);
 });
 
+test('chooses anomaly review only when a supported anomaly is pending', () => {
+  assert.equal(flow.nextCollectionStep([]), 'start-analysis');
+  assert.equal(flow.nextCollectionStep([{ type: '缺页', status: 'pending' }]), 'review-anomalies');
+  assert.equal(flow.nextCollectionStep([{ type: '多页', status: 'resolved' }]), 'start-analysis');
+  assert.equal(flow.nextCollectionStep([{ type: '重复提交', status: 'pending' }]), 'start-analysis');
+});
+
+test('resolves one collection anomaly without mutating the source list', () => {
+  const source = [{ id: 'missing-1', type: '缺页', status: 'pending' }];
+  const next = flow.resolveCollectionAnomaly(source, 'missing-1', '标记缺页');
+
+  assert.equal(source[0].status, 'pending');
+  assert.deepEqual(next[0], {
+    id: 'missing-1',
+    type: '缺页',
+    status: 'resolved',
+    choice: '标记缺页',
+  });
+});
+
+test('applies an unrecognized student ownership decision without mutating source data', () => {
+  const source = [
+    { id: 'owner-1', type: '未识别学生', student: '未识别', status: 'pending', pages: [{ id: 'page-1', studentName: '未识别' }] },
+  ];
+
+  const assigned = flow.resolveCollectionAnomaly(source, 'owner-1', '王芳');
+
+  assert.equal(assigned[0].student, '王芳');
+  assert.equal(assigned[0].pages[0].studentName, '王芳');
+  assert.equal(assigned[0].status, 'resolved');
+  assert.equal(source[0].student, '未识别');
+  assert.equal(source[0].pages[0].studentName, '未识别');
+});
+
+test('groups supported anomalies by sample and excludes samples without anomalies', () => {
+  const groups = [
+    { id: 'sample-1', name: '分数练习', kind: '作业' },
+    { id: 'sample-2', name: '单元测试', kind: '考试' },
+    { id: 'sample-3', name: '无异常样卷', kind: '作业' },
+  ];
+  const result = flow.groupCollectionAnomalies(groups, [
+    { id: 'a1', groupId: 'sample-1', type: '缺页', status: 'pending' },
+    { id: 'a2', groupId: 'sample-1', type: '未识别学生', status: 'pending' },
+    { id: 'a3', groupId: 'sample-2', type: '缺页', status: 'resolved' },
+    { id: 'ignored', groupId: 'sample-2', type: '多页', status: 'pending' },
+  ]);
+
+  assert.deepEqual(result.map((item) => item.groupId), ['sample-1', 'sample-2']);
+  assert.deepEqual(result.map((item) => item.anomalies.length), [2, 1]);
+  assert.deepEqual(result.map((item) => item.name), ['分数练习', '单元测试']);
+});
+
+test('summarizes pending anomaly labels for one sample', () => {
+  assert.deepEqual(flow.summarizeCollectionAnomalies([
+    { id: 'm1', groupId: 'g1', type: '缺页', student: '张三', status: 'pending' },
+    { id: 'm2', groupId: 'g1', type: '缺页', student: '张三', status: 'pending' },
+    { id: 'u1', groupId: 'g1', type: '未识别学生', status: 'pending' },
+    { id: 'u2', groupId: 'g1', type: '未识别学生', status: 'pending' },
+    { id: 'done', groupId: 'g1', type: '缺页', student: '李四', status: 'resolved' },
+    { id: 'other', groupId: 'g2', type: '缺页', student: '王五', status: 'pending' },
+  ], 'g1'), {
+    missingStudents: 1,
+    unrecognizedPages: 2,
+    firstPendingIds: { missing: 'm1', unrecognized: 'u1' },
+  });
+});
+
+test('only unresolved ownership anomalies block analysis', () => {
+  assert.deepEqual(flow.blockingCollectionAnomalies([
+    { id: 'missing', type: '缺页', status: 'pending' },
+    { id: 'owner', type: '未识别学生', status: 'pending' },
+    { id: 'done', type: '未识别学生', status: 'resolved' },
+  ]).map((item) => item.id), ['owner']);
+});
+
+test('normalizes only the draft for the requested collection task', () => {
+  const source = {
+    taskId: 'today-1942',
+    groups: [{ id: 'g1', name: '练习', kind: '作业', pages: [{ id: 'p1' }] }],
+    anomalies: [{ id: 'a1', groupId: 'g1', type: '未识别学生', status: 'pending', pages: [{ id: 'scan-1' }] }],
+  };
+  const draft = flow.normalizeCollectionDraft(source, 'today-1942');
+
+  assert.equal(flow.collectionDraftKey('today-1942'), 'fxCollectionDraft:today-1942');
+  assert.equal(draft.taskId, 'today-1942');
+  assert.equal(draft.groups[0].pages[0].id, 'p1');
+  assert.equal(draft.anomalies[0].pages[0].id, 'scan-1');
+  assert.notEqual(draft.groups, source.groups);
+  assert.notEqual(draft.anomalies, source.anomalies);
+  assert.equal(flow.normalizeCollectionDraft(source, 'today-2026'), null);
+  assert.equal(flow.normalizeCollectionDraft({ taskId: 'today-1942' }, 'today-1942'), null);
+});
+
 test('counts only unconfirmed seeded collection tasks', () => {
   const seeds = [{ id: 'today-1942' }, { id: 'today-1618' }];
   const history = { version: 1, records: { 'today-1942': { status: '已确认' } } };

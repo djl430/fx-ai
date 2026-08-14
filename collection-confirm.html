@@ -78,6 +78,9 @@
     .notice-actions__right { display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
     .scan-notice strong { color: #4058bd; font-size: 16px; }
     .sample-list { display: grid; gap: 12px; }
+    .sample-list[hidden] { display: none; }
+    .sample-drag-hint { margin: 10px 2px 8px; color: #7885aa; font-size: 11px; text-align: right; }
+    .sample-drag-hint[hidden] { display: none; }
     .sample {
       position: relative;
       overflow: hidden;
@@ -185,6 +188,9 @@
       font-size: 11px;
       white-space: nowrap;
     }
+    .sample-anomaly-tags { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+    .sample-anomaly-tags button { min-height: 28px; border: 1px solid #edc98e; border-radius: 999px; padding: 0 10px; color: #a56716; background: #fff7e8; font-size: 11px; font-weight: 820; }
+    .sample-anomaly-tags button:hover { border-color: #d99e43; color: #8a510a; background: #ffefcf; }
     .hint {
       flex: 0 0 auto;
       color: #7885aa;
@@ -201,10 +207,11 @@
       padding: 13px;
       transition: background .18s ease, box-shadow .18s ease;
     }
-    .pages:empty::before {
+    .pages.is-empty::before {
       display: grid;
-      width: 100%;
+      min-width: 240px;
       min-height: 188px;
+      flex: 1;
       place-items: center;
       border: 1.5px dashed #c9d3ef;
       border-radius: 16px;
@@ -273,57 +280,67 @@
       box-shadow: 0 8px 22px rgba(79, 98, 172, .06);
     }
     .add-sample:hover { background: #fff; transform: translateY(-1px); }
-    .anomaly-summary {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 9px;
-      color: #7b5c2d;
-      font-size: 12px;
-      font-weight: 750;
-      text-align: right;
-    }
+    .anomaly-summary { display: flex; align-items: center; justify-content: flex-end; gap: 8px; color: #7b5c2d; font-size: 12px; font-weight: 750; text-align: right; }
+    .anomaly-summary[hidden] { display: none; }
     .anomaly-summary strong { color: #bd7417; font-size: 14px; }
-    .anomaly-status {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      padding: 0 8px;
-      border-radius: 999px;
-      color: #9d6820;
-      background: #fff4df;
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .anomaly-open { min-height: 30px; border: 1px solid #eccb9b; border-radius: 9px; padding: 0 10px; color: #a66714; background: #fffaf2; font-weight: 800; }
-    .anomaly-open:hover { background: #fff2df; }
-    .anomaly-backdrop { position: fixed; z-index: 55; inset: 0; display: flex; justify-content: flex-end; background: rgba(31, 42, 74, .22); backdrop-filter: blur(3px); }
-    .anomaly-drawer { width: min(460px, 100%); height: 100%; overflow: auto; padding: 22px; border-left: 1px solid rgba(255,255,255,.9); background: #fbfcff; box-shadow: -18px 0 50px rgba(34, 48, 89, .16); }
-    .anomaly-drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
-    .anomaly-drawer-head h2 { margin: 0; font-size: 20px; }
-    .anomaly-drawer-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
-    .anomaly-drawer-close { width: 32px; height: 32px; border: 0; border-radius: 9px; color: var(--muted); background: #edf1fb; font-size: 20px; }
-    .anomaly-section { margin-top: 18px; }
-    .anomaly-section h3 { margin: 0 0 8px; color: #5b6887; font-size: 12px; }
-    .anomaly-card { padding: 13px; border: 1px solid #e1e6f1; border-radius: 13px; background: #fff; }
-    .anomaly-card + .anomaly-card { margin-top: 8px; }
-    .anomaly-card-top { display: flex; align-items: center; gap: 8px; }
-    .anomaly-card-top strong { font-size: 14px; }
-    .anomaly-card p { margin: 7px 0 10px; color: #697793; font-size: 12px; line-height: 1.55; }
-    .anomaly-status.is-resolved { color: #277d58; background: #eaf8f1; }
-    .anomaly-actions { display: flex; flex-wrap: wrap; gap: 7px; }
-    .anomaly-actions button { min-height: 29px; border: 1px solid #d7dff0; border-radius: 8px; padding: 0 9px; color: #495b91; background: #f9faff; font-size: 12px; font-weight: 800; }
+    .anomaly-summary button { min-height: 30px; border: 1px solid #eccb9b; border-radius: 9px; padding: 0 10px; color: #a66714; background: #fffaf2; font-weight: 800; }
+    .anomaly-review[hidden] { display: none; }
+    .anomaly-review { overflow: hidden; border: 1px solid rgba(255,255,255,.92); border-radius: 22px; background: rgba(255,255,255,.76); box-shadow: 0 18px 48px rgba(62,81,132,.12); }
+    .anomaly-workspace { display: grid; min-height: 690px; grid-template-columns: 240px minmax(420px, 1fr) 292px; }
+    .anomaly-workspace.is-missing { grid-template-columns: 240px minmax(420px, 1fr); }
+    .anomaly-student-rail { padding: 14px; border-right: 1px solid var(--line); background: rgba(246,248,253,.72); }
+    .anomaly-student-rail h3 { margin: 0 4px 10px; color: #74809d; font-size: 11px; letter-spacing: .08em; }
+    .anomaly-sample-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px; border-bottom: 1px solid var(--line); background: rgba(248,250,255,.8); scrollbar-width: thin; }
+    .anomaly-sample-card { display: grid; width: 230px; min-width: 230px; grid-template-columns: minmax(0,1fr) auto; gap: 4px 8px; border: 1px solid #dce2ef; border-radius: 12px; padding: 10px 11px; color: #4e5c7d; background: #fff; text-align: left; }
+    .anomaly-sample-card:hover { border-color: #bdc8ef; }
+    .anomaly-sample-card.is-active { border-color: #8fa2ec; color: #30468e; background: #edf1ff; box-shadow: inset 3px 0 0 #5268d6; }
+    .anomaly-sample-card strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .anomaly-sample-card span { grid-row: 1; grid-column: 2; align-self: center; color: #a66c1c; font-size: 11px; font-weight: 850; }
+    .anomaly-sample-card small { color: #8490a9; font-size: 10px; }
+    .anomaly-student-card { display: grid; width: 100%; grid-template-columns: 1fr auto; gap: 5px 8px; margin-bottom: 8px; border: 1px solid transparent; border-radius: 13px; padding: 12px; color: var(--ink); background: transparent; text-align: left; }
+    .anomaly-student-card:hover { background: #fff; }
+    .anomaly-student-card.is-active { border-color: #aab9f2; background: #edf1ff; box-shadow: inset 3px 0 0 #5268d6; }
+    .anomaly-student-card.is-resolved { color: #63708a; }
+    .anomaly-student-card strong { font-size: 13px; }
+    .anomaly-student-card small { grid-column: 1; color: #bd7417; font-size: 11px; font-weight: 800; }
+    .anomaly-student-card.is-resolved small { color: #2c8a64; }
+    .anomaly-student-card i { grid-row: 1 / 3; grid-column: 2; align-self: center; color: #7a88a5; font-style: normal; font-size: 13px; }
+    .anomaly-viewer { min-width: 0; padding: 16px 18px 24px; background: #f1f4fa; }
+    .anomaly-page-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 12px; }
+    .anomaly-page-tabs button { min-width: 42px; min-height: 30px; border: 1px solid #d8dfec; border-radius: 9px; color: #65718d; background: #fff; font-size: 11px; font-weight: 800; }
+    .anomaly-page-tabs button.is-active { border-color: #5268d6; color: #fff; background: #5268d6; }
+    .anomaly-page-tabs .is-missing { border-style: dashed; color: #b87319; background: #fff8eb; }
+    .missing-rescan-inline { align-self: center; color: #a66a17; font-size: 12px; font-weight: 800; }
+    .anomaly-document-viewer { display: grid; min-height: 586px; place-items: start center; overflow: auto; border: 1px solid #dce2ed; border-radius: 16px; padding: 20px; background: #e7ebf3; }
+    .student-document { position: relative; width: min(520px, 100%); min-height: 700px; padding: 42px 48px 64px; color: #41485a; background: repeating-linear-gradient(to bottom,#fffdf9 0,#fffdf9 31px,#eee8de 32px); box-shadow: 0 15px 35px rgba(48,59,89,.15); font-family: Georgia,"Songti SC",serif; }
+    .student-document h3 { margin: 0 0 8px; color: #2f3546; font-size: 22px; text-align: center; }
+    .student-document-meta { display: flex; justify-content: space-between; margin-bottom: 28px; padding-bottom: 12px; border-bottom: 1px solid #d8d2c8; color: #646b7d; font-size: 12px; }
+    .student-document-line { min-height: 31px; margin: 0; font-size: 14px; line-height: 31px; }
+    .student-document-answer { display: inline-block; margin-left: 12px; color: #35548b; font-family:"Kaiti SC","STKaiti",serif; font-size: 16px; transform: rotate(-1deg); }
+    .student-document-page { position: absolute; right: 0; bottom: 22px; left: 0; color: #8b8f9c; font-size: 12px; text-align: center; }
+    .missing-document { display: grid; width: min(520px,100%); min-height: 700px; place-items: center; border: 2px dashed #ddb976; color: #98661d; background: #fffaf0; text-align: center; }
+    .missing-document strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .missing-document span { font-size: 13px; }
+    .anomaly-decision { padding: 18px; border-left: 1px solid var(--line); background: #fff; }
+    .anomaly-type { display: inline-flex; min-height: 26px; align-items: center; border-radius: 999px; padding: 0 9px; color: #9d6820; background: #fff3dd; font-size: 11px; font-weight: 850; }
+    .anomaly-decision h3 { margin: 14px 0 7px; font-size: 18px; }
+    .anomaly-decision p { margin: 0; color: #6d7893; font-size: 12px; line-height: 1.65; }
+    .anomaly-actions { display: grid; gap: 8px; margin-top: 20px; }
+    .anomaly-actions button { min-height: 40px; border: 1px solid #d8dfed; border-radius: 11px; color: #46577f; background: #fff; font-size: 12px; font-weight: 820; }
     .anomaly-actions button:first-child { border-color: transparent; color: #fff; background: #5268d6; }
-    .anomaly-drawer-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
-    .anomaly-drawer-foot button { width: 100%; min-height: 38px; border: 1px solid #d8e0f1; border-radius: 10px; color: #657492; background: #fff; font-weight: 800; }
-    .anomaly-confirm-backdrop { position: fixed; z-index: 70; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(30, 39, 70, .32); backdrop-filter: blur(7px); }
-    .anomaly-confirm-dialog { width: min(440px, 100%); border-radius: 20px; padding: 22px; background: #fff; box-shadow: 0 26px 70px rgba(36, 49, 86, .24); }
-    .anomaly-confirm-dialog h2 { margin: 0; font-size: 20px; }
-    .anomaly-confirm-dialog p { margin: 10px 0 18px; color: var(--muted); line-height: 1.65; }
-    .anomaly-confirm-actions { display: flex; justify-content: flex-end; gap: 9px; }
-    .anomaly-confirm-actions button { min-height: 39px; border-radius: 10px; padding: 0 14px; font-weight: 800; }
-    .anomaly-return { border: 1px solid #d9e0ef; color: var(--ink); background: #fff; }
-    .anomaly-continue { border: 0; color: #fff; background: #5268d6; }
+    .anomaly-actions button:disabled { cursor: not-allowed; opacity: .45; }
+    .owner-picker { margin-top: 18px; }
+    .owner-search { width: 100%; height: 38px; border: 1px solid #d8dfed; border-radius: 10px; padding: 0 11px; color: var(--ink); background: #fff; font-size: 12px; }
+    .owner-group { margin-top: 14px; }
+    .owner-group h4 { margin: 0 0 7px; color: #7885a0; font-size: 11px; }
+    .owner-all-students summary { color: #7885a0; cursor: pointer; font-size: 11px; font-weight: 800; list-style-position: inside; }
+    .owner-all-students[open] summary { margin-bottom: 7px; }
+    .owner-options { display: flex; max-height: 126px; flex-wrap: wrap; gap: 6px; overflow-y: auto; }
+    .owner-option { min-height: 30px; border: 1px solid #dce2ef; border-radius: 9px; padding: 0 9px; color: #52617e; background: #fff; font-size: 11px; }
+    .owner-option.is-recommended { border-color: #edc98e; color: #9a6419; background: #fff7e8; }
+    .owner-option.is-selected { border-color: #5268d6; color: #fff; background: #5268d6; }
+    .owner-empty { color: #8a94a8; font-size: 11px; }
+    .anomaly-resolved { margin-top: 20px; padding: 14px; border-radius: 12px; color: #247a59; background: #eaf8f1; font-size: 13px; font-weight: 800; }
     .sticky {
       position: fixed;
       z-index: 20;
@@ -356,6 +373,9 @@
       font-weight: 850;
     }
     .confirm:hover { transform: translateY(-1px); }
+    .confirm:disabled { cursor: not-allowed; opacity: .52; transform: none; }
+    .footer-secondary { min-height: 40px; border: 1px solid #dbe1ef; border-radius: 12px; padding: 0 16px; color: #53617d; background: #fff; font-size: 13px; font-weight: 800; }
+    .footer-secondary[hidden] { display: none; }
     .collection-delete-backdrop {
       position: fixed;
       z-index: 60;
@@ -392,6 +412,17 @@
       font-weight: 800;
     }
     .submission-picker-trigger:hover { color: #fff; background: #5c70d5; }
+    .submission-picker-card {
+      width: 104px;
+      min-width: 104px;
+      min-height: 202px;
+      align-self: stretch;
+      border-style: dashed;
+      border-radius: 12px;
+      color: #5268d6;
+      background: rgba(247, 249, 255, .72);
+      font-size: 14px;
+    }
     .submission-picker-backdrop {
       position: fixed;
       z-index: 70;
@@ -462,6 +493,9 @@
       .hint { display: none; }
       .scan-card { width: calc(50% - 7px); min-width: 150px; }
       .form-message { max-width: 55%; }
+      .anomaly-workspace { grid-template-columns: 170px minmax(360px,1fr); }
+      .anomaly-workspace.is-missing { grid-template-columns: 170px minmax(360px,1fr); }
+      .anomaly-decision { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
     }
     @media (max-width: 520px) {
       .notice-actions { grid-template-columns: 1fr; }
@@ -474,6 +508,10 @@
       .scan-card { width: 100%; }
       .sticky { right: 10px; bottom: 10px; left: 10px; align-items: stretch; flex-direction: column; }
       .form-message { max-width: none; }
+      .anomaly-workspace { display: block; }
+      .anomaly-student-rail { border-right: 0; border-bottom: 1px solid var(--line); }
+      .anomaly-student-card { display: inline-grid; width: calc(50% - 6px); margin-right: 6px; vertical-align: top; }
+      .student-document { min-height: 590px; padding: 34px 28px 58px; }
     }
   </style>
 </head>
@@ -489,30 +527,38 @@
         </aside>
         <div class="notice-actions__right">
           <button class="add-sample" type="button" data-action="add-sample">添加样卷</button>
-          <div class="anomaly-summary" id="anomalySummary"><span>提交异常 <strong id="anomalyCount">5</strong> 人</span><button class="anomaly-open" type="button" data-action="open-anomaly-drawer">去处理</button></div>
+          <div class="anomaly-summary" id="anomalySummary" hidden></div>
         </div>
       </div>
     </header>
 
+    <p class="sample-drag-hint" id="sampleDragHint">拖动页面调整顺序或归属</p>
     <div class="sample-list" id="sampleList"></div>
+    <section class="anomaly-review" id="anomalyReview" hidden></section>
   </main>
 
   <footer class="sticky">
     <p class="form-message" id="formMessage" role="status"></p>
+    <button class="footer-secondary" id="backToSamples" type="button" data-action="back-to-samples" hidden>返回修改样卷</button>
     <button class="confirm" id="confirm" type="button">确认无误并开始分析</button>
   </footer>
   <div id="collectionDeleteLayer"></div>
   <div id="collectionSubmissionLayer"></div>
-  <div id="collectionAnomalyLayer"></div>
-  <div id="collectionContinueLayer"></div>
 
   <script src="collection-flow.js"></script>
   <script>
     (() => {
       const params = new URLSearchParams(location.search);
-      const task = params.get('task') || 'today-1942';
+      const task = params.get('task') || 'today-2026';
       const readOnly = params.get('mode') === 'view';
       const taskDataMap = {
+        'today-2026': {
+            title: '今天 20:26 · 六年级2班 · 数学',
+            className: '六年级2班 · 数学',
+            firstName: '分数除法基础练习',
+            secondName: '圆的认识随堂测',
+            hasAnomalies: false,
+        },
         'today-1618': {
             title: '今天 16:18 · 六年级1班 · 数学',
             className: '六年级1班 · 数学',
@@ -534,6 +580,7 @@
             className: '六年级3班 · 数学',
             firstName: '分数乘法练习',
             secondName: '第三单元测试',
+            hasAnomalies: true,
       };
 
       const paperTemplates = {
@@ -584,6 +631,18 @@
         ...makePages('submission-wang', taskData.firstName, paperTemplates.homework.slice(0, 3), null, 'student-wang', '王晓宇'),
         ...makePages('submission-chen', taskData.secondName, paperTemplates.exam.slice(0, 2), null, 'student-chen', '陈子涵'),
       ];
+      const makeStudentPreviewPages = (prefix, paperTitle, studentName, templates) => templates.map((template, index) => ({
+        id: `${prefix}-preview-${index + 1}`,
+        paperTitle,
+        studentName,
+        sourcePageNumber: Number(template.sourcePageNumber) || index + 1,
+        content: [...template.content],
+      }));
+      const classStudents = ['张小明', '李华', '王芳', '王凡', '陈子涵', '陈梓涵', '赵敏', '周雨桐', '孙晨', '刘洋', '林悦', '郭航'];
+      const identifiedStudentsByGroup = {
+        'sample-1': ['张小明', '李华', '陈子涵', '陈梓涵', '赵敏', '周雨桐', '孙晨', '刘洋', '林悦', '郭航'],
+        'sample-2': ['张小明', '李华', '王芳', '王凡', '赵敏', '周雨桐', '孙晨', '刘洋', '林悦', '郭航'],
+      };
       let historyState = FxCollectionFlow.normalizeHistoryState(null);
       try {
         historyState = FxCollectionFlow.normalizeHistoryState(JSON.parse(localStorage.getItem('fxCollectionHistoryState') || 'null'));
@@ -594,30 +653,78 @@
       let groups = readOnly && Array.isArray(savedRecord?.groups)
         ? JSON.parse(JSON.stringify(savedRecord.groups))
         : defaultGroups;
-      const defaultAnomalies = [
-        { id: 'missing-zhang', groupId: 'sample-1', type: '缺页', student: '张小明', detail: '应提交 4 页，当前 3 页，缺第 2 页。', action: '补充页面', status: 'pending' },
-        { id: 'extra-li', groupId: 'sample-2', type: '多页', student: '李华', detail: '应提交 4 页，当前 6 页，多出 2 页，可能混入其他样卷。', action: '保留多页', status: 'pending' },
-        { id: 'identity-wang', groupId: 'sample-1', type: '归属待确认', student: '王芳', detail: '姓名识别不清，可能属于王芳 / 王凡。', action: '确认归属', choices: ['王芳', '王凡'], status: 'pending' },
-        { id: 'identity-sun', groupId: 'sample-2', type: '归属待确认', student: '孙晨', detail: '页面身份与本组不一致，需要确认归属。', action: '确认归属', choices: ['孙晨', '孙成'], status: 'pending' },
-        { id: 'duplicate-chen', groupId: 'sample-2', type: '重复提交', student: '陈晨', detail: '检测到两份提交，请选择保留其中一份。', action: '选择保留', choices: ['保留第 1 份', '保留第 2 份'], status: 'pending' },
+      const anomalySeeds = [
+        {
+          id: 'missing-zhang', groupId: 'sample-1', type: '缺页', student: '张小明',
+          detail: '该样卷应提交 4 页，当前只有 3 页，缺少第 2 页。',
+          note: '请先查看现有页面是否属于同一位学生，再确认按缺页提交处理。',
+          missingPageNumbers: [2], status: 'pending',
+          pages: makeStudentPreviewPages('missing-zhang', taskData.firstName, '张小明', [paperTemplates.homework[0], paperTemplates.homework[2], paperTemplates.homework[3]]),
+        },
+        {
+          id: 'identity-wang-1', groupId: 'sample-1', type: '未识别学生', student: '未识别',
+          detail: '这张纸的姓名区域识别不清，请选择所属学生。', status: 'pending',
+          pages: makeStudentPreviewPages('identity-wang-1', taskData.firstName, '未识别', [paperTemplates.homework[1]]),
+        },
+        {
+          id: 'identity-wang-2', groupId: 'sample-1', type: '未识别学生', student: '未识别',
+          detail: '这张纸未识别到学生信息，请选择所属学生。', status: 'pending',
+          pages: makeStudentPreviewPages('identity-wang-2', taskData.firstName, '未识别', [paperTemplates.homework[3]]),
+        },
+        {
+          id: 'missing-li', groupId: 'sample-2', type: '缺页', student: '李华',
+          detail: '该样卷应提交 6 页，当前只有 5 页，缺少第 4 页。',
+          note: '请先核对其余五页属于同一位学生，再确认按缺页提交处理。',
+          missingPageNumbers: [4], status: 'pending',
+          pages: makeStudentPreviewPages('missing-li', taskData.secondName, '李华', paperTemplates.exam.filter((page) => page.sourcePageNumber !== 4)),
+        },
+        {
+          id: 'identity-chen-1', groupId: 'sample-2', type: '未识别学生', student: '未识别',
+          detail: '这张纸的姓名区域被涂改，请选择所属学生。', status: 'pending',
+          pages: makeStudentPreviewPages('identity-chen-1', taskData.secondName, '未识别', [paperTemplates.exam[2]]),
+        },
+        {
+          id: 'identity-chen-2', groupId: 'sample-2', type: '未识别学生', student: '未识别',
+          detail: '这张纸未识别到学生信息，请选择所属学生。', status: 'pending',
+          pages: makeStudentPreviewPages('identity-chen-2', taskData.secondName, '未识别', [paperTemplates.exam[5]]),
+        },
       ];
+      const defaultAnomalies = taskData.hasAnomalies ? anomalySeeds : [];
       let anomalies = readOnly && Array.isArray(savedRecord?.anomalies)
         ? JSON.parse(JSON.stringify(savedRecord.anomalies))
         : JSON.parse(JSON.stringify(defaultAnomalies));
+      anomalies = FxCollectionFlow.supportedCollectionAnomalies(anomalies);
+      const draftKey = FxCollectionFlow.collectionDraftKey(task);
+      if (!readOnly && params.get('resumeCollection') === '1') {
+        try {
+          const restoredDraft = FxCollectionFlow.normalizeCollectionDraft(JSON.parse(localStorage.getItem(draftKey) || 'null'), task);
+          if (restoredDraft) {
+            groups = restoredDraft.groups;
+            anomalies = restoredDraft.anomalies;
+          }
+        } catch (_) {}
+      }
       let draggedPage = null;
       let pendingSampleDelete = null;
       let submissionPicker = null;
-      let anomalyDrawerOpen = false;
-      let anomalyConfirmOpen = false;
+      let ownershipSearch = '';
+      let selectedOwnershipStudent = '';
+      let stage = 'samples';
+      let selectedAnomalyGroupId = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies)[0]?.groupId || '';
+      let selectedAnomalyId = anomalies.find((anomaly) => anomaly.status !== 'resolved')?.id || anomalies[0]?.id || '';
+      let selectedAnomalyPageId = anomalies[0]?.pages?.[0]?.id || '';
 
       const sampleList = document.getElementById('sampleList');
+      const sampleDragHint = document.getElementById('sampleDragHint');
+      const pageHead = document.querySelector('.page-head');
       let sampleCount = document.getElementById('sampleCount');
       const formMessage = document.getElementById('formMessage');
       const collectionDeleteLayer = document.getElementById('collectionDeleteLayer');
       const collectionSubmissionLayer = document.getElementById('collectionSubmissionLayer');
       const anomalySummary = document.getElementById('anomalySummary');
-      const collectionAnomalyLayer = document.getElementById('collectionAnomalyLayer');
-      const collectionContinueLayer = document.getElementById('collectionContinueLayer');
+      const anomalyReview = document.getElementById('anomalyReview');
+      const confirmButton = document.getElementById('confirm');
+      const backToSamples = document.getElementById('backToSamples');
       document.getElementById('taskTitle').textContent = taskData.title;
       if (readOnly) {
         document.body.classList.add('is-read-only');
@@ -651,11 +758,41 @@
         </article>`;
       };
 
-      const pendingAnomalies = () => anomalies.filter((anomaly) => anomaly.status !== 'resolved');
-      const visibleAnomalies = () => readOnly ? anomalies : pendingAnomalies();
+      const pendingAnomalies = () => FxCollectionFlow.blockingCollectionAnomalies(anomalies);
 
-      const renderGroup = (group, index) => `
-        <section class="sample" data-group-id="${group.id}">
+      const saveCollectionDraft = () => {
+        localStorage.setItem(draftKey, JSON.stringify({
+          version: 1,
+          taskId: task,
+          taskData,
+          groups,
+          anomalies,
+          updatedAt: Date.now(),
+        }));
+      };
+
+      const openIndependentAnomalyPage = (anomalyId = '') => {
+        saveCollectionDraft();
+        const focusQuery = anomalyId ? `&focus=${encodeURIComponent(anomalyId)}` : '';
+        location.href = `collection-anomalies.html?task=${encodeURIComponent(task)}${focusQuery}`;
+      };
+
+      const resetOwnershipSelection = () => {
+        ownershipSearch = '';
+        selectedOwnershipStudent = '';
+      };
+
+      const renderGroup = (group, index) => {
+        const anomalyCounts = FxCollectionFlow.summarizeCollectionAnomalies(anomalies, group.id);
+        const anomalyTags = readOnly ? '' : [
+          anomalyCounts.missingStudents
+            ? `<button type="button" data-action="open-sample-anomaly" data-group-id="${escapeHtml(group.id)}" data-anomaly-type="缺页">缺页 ${anomalyCounts.missingStudents} 人</button>`
+            : '',
+          anomalyCounts.unrecognizedPages
+            ? `<button type="button" data-action="open-sample-anomaly" data-group-id="${escapeHtml(group.id)}" data-anomaly-type="未识别学生">未识别 ${anomalyCounts.unrecognizedPages} 页</button>`
+            : '',
+        ].filter(Boolean).join('');
+        return `<section class="sample" data-group-id="${group.id}">
           <div class="sample-head">
             ${readOnly ? '' : `<button class="sample-delete" type="button" data-action="request-delete-sample" data-group-id="${escapeHtml(group.id)}" aria-label="删除样卷${escapeHtml(group.name)}">×</button>`}
             <span class="sample-badge">样卷 ${index + 1}</span>
@@ -669,12 +806,12 @@
               </label>
               <input class="sample-title-input" data-action="edit-sample-name" data-group-id="${group.id}" aria-label="样卷 ${index + 1} 名称" value="${escapeHtml(group.name)}" ${readOnly ? 'disabled' : ''}>
             </div>
-            ${readOnly ? '' : `<button class="submission-picker-trigger" type="button" data-action="open-submission-picker" data-group-id="${escapeHtml(group.id)}">从全部提交中添加</button>`}
+            ${anomalyTags ? `<div class="sample-anomaly-tags" aria-label="待处理提交异常">${anomalyTags}</div>` : ''}
             <span class="sample-meta" data-role="sample-meta">${group.students ? `${group.students}人 · ` : ''}${group.pages.length}页</span>
-            <span class="hint">${readOnly ? '已确认，仅支持查看' : '拖动页面调整顺序或归属'}</span>
           </div>
-          <div class="pages" data-group-id="${group.id}">${group.pages.map((page, pageIndex) => renderPage(page, pageIndex, group.name, group.id)).join('')}</div>
+          <div class="pages ${group.pages.length ? '' : 'is-empty'}" data-group-id="${group.id}">${group.pages.map((page, pageIndex) => renderPage(page, pageIndex, group.name, group.id)).join('')}${readOnly ? '' : `<button class="submission-picker-trigger submission-picker-card" type="button" data-action="open-submission-picker" data-group-id="${escapeHtml(group.id)}">＋ 添加</button>`}</div>
         </section>`;
+      };
 
       const renderDeleteDialog = () => {
         if (!pendingSampleDelete || readOnly) {
@@ -694,58 +831,101 @@
       };
 
       const renderAnomalySummary = () => {
-        const visible = visibleAnomalies();
-        if (!visible.length && !readOnly) {
-          anomalySummary.innerHTML = '<span>异常提交均已处理，可开始分析。</span>';
+        if (!readOnly || !anomalies.length || stage === 'anomalies') {
+          anomalySummary.hidden = true;
+          anomalySummary.innerHTML = '';
           return;
         }
-        anomalySummary.innerHTML = `<span>${readOnly ? '本次采集异常' : '提交异常'} <strong id="anomalyCount">${visible.length}</strong> 人</span><button class="anomaly-open" type="button" data-action="open-anomaly-drawer">${readOnly ? '查看' : '去处理'}</button>`;
+        const anomalyGroups = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies);
+        anomalySummary.hidden = false;
+        anomalySummary.innerHTML = `<span>本次采集异常 <strong id="anomalyCount">${anomalies.length}</strong> 人 · ${anomalyGroups.length} 份样卷</span><button type="button" data-action="view-anomalies">查看</button>`;
       };
 
-      const renderAnomalyDrawer = () => {
-        if (!anomalyDrawerOpen) {
-          collectionAnomalyLayer.innerHTML = '';
-          return;
+      const anomalyPageOptions = (anomaly) => {
+        const pages = Array.isArray(anomaly?.pages) ? anomaly.pages : [];
+        const missingPages = (Array.isArray(anomaly?.missingPageNumbers) ? anomaly.missingPageNumbers : []).map((pageNumber) => ({
+          id: `missing-page-${pageNumber}`,
+          sourcePageNumber: pageNumber,
+          missing: true,
+        }));
+        return [...pages, ...missingPages].sort((left, right) => Number(left.sourcePageNumber) - Number(right.sourcePageNumber));
+      };
+
+      const renderStudentDocument = (anomaly, page) => {
+        if (!page || page.missing) {
+          return `<div class="missing-document"><div><strong>缺少第 ${Number(page?.sourcePageNumber) || 1} 页</strong><span>本次扫描中未找到这一页</span></div></div>`;
         }
-        const grouped = ['缺页', '多页', '归属待确认', '重复提交'].map((type) => ({
-          type,
-          items: anomalies.filter((anomaly) => anomaly.type === type),
-        })).filter((group) => group.items.length);
-        collectionAnomalyLayer.innerHTML = `<div class="anomaly-backdrop" data-action="close-anomaly-drawer">
-          <aside class="anomaly-drawer" role="dialog" aria-modal="true" aria-labelledby="anomaly-drawer-title">
-            <header class="anomaly-drawer-head">
-              <div><h2 id="anomaly-drawer-title">提交异常</h2><p>${readOnly ? '已确认采集任务，仅支持查看处理状态。' : '仅处理识别有风险的提交，普通提交无需逐份检查。'}</p></div>
-              <button class="anomaly-drawer-close" type="button" data-action="close-anomaly-drawer" aria-label="关闭">×</button>
-            </header>
-            ${grouped.map(({ type, items }) => `<section class="anomaly-section"><h3>${type} · ${items.length}</h3>${items.map((anomaly) => {
-              const resolved = anomaly.status === 'resolved';
-              const choices = Array.isArray(anomaly.choices) ? anomaly.choices : [];
-              const actions = readOnly || resolved
-                ? ''
-                : anomaly.type === '缺页'
-                  ? `<button type="button" data-action="open-anomaly-submission-picker" data-anomaly-id="${anomaly.id}" data-group-id="${anomaly.groupId}">${anomaly.action}</button>`
-                  : choices.length
-                    ? choices.map((choice) => `<button type="button" data-action="resolve-anomaly" data-anomaly-id="${anomaly.id}" data-choice="${escapeHtml(choice)}">${escapeHtml(choice)}</button>`).join('')
-                    : `<button type="button" data-action="resolve-anomaly" data-anomaly-id="${anomaly.id}">${anomaly.action}</button>`;
-              return `<article class="anomaly-card"><div class="anomaly-card-top"><strong>${escapeHtml(anomaly.student)}</strong><span class="anomaly-status ${resolved ? 'is-resolved' : ''}">${resolved ? `已处理${anomaly.choice ? ` · ${escapeHtml(anomaly.choice)}` : ''}` : '待处理'}</span></div><p>${escapeHtml(anomaly.detail)}</p><div class="anomaly-actions">${actions}</div></article>`;
-            }).join('')}</section>`).join('')}
-            ${readOnly ? '' : '<footer class="anomaly-drawer-foot"><button type="button" data-action="defer-anomalies">稍后处理</button></footer>'}
-          </aside>
+        const content = Array.isArray(page.content) ? page.content : ['扫描页面内容'];
+        return `<article class="student-document">
+          <h3>${escapeHtml(page.paperTitle || taskData.firstName)}</h3>
+          <div class="student-document-meta"><span>姓名：${escapeHtml(anomaly.student)}</span><span>${escapeHtml(taskData.className)}</span></div>
+          ${content.map((line, index) => `<p class="student-document-line">${escapeHtml(line)}${/^\d|^（/.test(line) ? `<span class="student-document-answer">${['12', '5/6', '24 cm²', '答：符合题意'][index % 4]}</span>` : ''}</p>`).join('')}
+          <footer class="student-document-page">第 ${Number(page.sourcePageNumber) || 1} 页</footer>
+        </article>`;
+      };
+
+      const renderOwnerOptions = (students, recommended = false) => students.length
+        ? students.map((student) => `<button class="owner-option ${recommended ? 'is-recommended' : ''} ${selectedOwnershipStudent === student ? 'is-selected' : ''}" type="button" data-action="select-owner-student" data-student-name="${escapeHtml(student)}" aria-pressed="${selectedOwnershipStudent === student}">${escapeHtml(student)}</button>`).join('')
+        : '<span class="owner-empty">暂无匹配学生</span>';
+
+      const renderAnomalyActions = (anomaly) => {
+        if (anomaly.type === '缺页') return '';
+        if (readOnly || anomaly.status === 'resolved') {
+          return `<div class="anomaly-resolved">${anomaly.status === 'resolved' ? `已处理${anomaly.choice ? ` · ${escapeHtml(anomaly.choice)}` : ''}` : '待处理'}</div>`;
+        }
+        const alreadyIdentified = new Set([
+          ...(identifiedStudentsByGroup[anomaly.groupId] || []),
+          ...anomalies.filter((item) => item.groupId === anomaly.groupId && item.status === 'resolved' && item.choice).map((item) => item.choice),
+        ]);
+        const query = ownershipSearch.trim();
+        const recommended = classStudents.filter((student) => !alreadyIdentified.has(student) && (!query || student.includes(query)));
+        const allStudents = classStudents.filter((student) => !query || student.includes(query));
+        return `<div class="owner-picker">
+          <input class="owner-search" type="search" value="${escapeHtml(ownershipSearch)}" placeholder="搜索学生姓名" data-action="search-owner-students" aria-label="搜索学生姓名">
+          <section class="owner-group"><h4>优先推荐 · 当前样卷未识别到作业</h4><div class="owner-options">${renderOwnerOptions(recommended, true)}</div></section>
+          <details class="owner-group owner-all-students" ${query ? 'open' : ''}><summary>全部学生</summary><div class="owner-options">${renderOwnerOptions(allStudents)}</div></details>
+          <div class="anomaly-actions"><button type="button" data-action="resolve-anomaly" data-anomaly-id="${anomaly.id}" data-choice="${escapeHtml(selectedOwnershipStudent)}" ${selectedOwnershipStudent ? '' : 'disabled'}>确认归属给${selectedOwnershipStudent ? ` ${escapeHtml(selectedOwnershipStudent)}` : '所选学生'}</button></div>
         </div>`;
       };
 
-      const renderContinueDialog = () => {
-        if (!anomalyConfirmOpen) {
-          collectionContinueLayer.innerHTML = '';
+      const renderAnomalyReview = () => {
+        if (stage !== 'anomalies' || !anomalies.length) {
+          anomalyReview.hidden = true;
+          anomalyReview.innerHTML = '';
           return;
         }
-        const count = pendingAnomalies().length;
-        collectionContinueLayer.innerHTML = `<div class="anomaly-confirm-backdrop">
-          <section class="anomaly-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="anomaly-confirm-title">
-            <h2 id="anomaly-confirm-title">还有 ${count} 份异常提交待处理</h2>
-            <p>未处理异常不会自动归属，也不会进入批改。你可以返回处理，或继续开始分析。</p>
-            <div class="anomaly-confirm-actions"><button class="anomaly-return" type="button" data-action="return-anomaly-review">返回处理</button><button class="anomaly-continue" type="button" data-action="continue-analysis">继续分析</button></div>
+        anomalyReview.hidden = false;
+        const anomalyGroups = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies);
+        const selectedGroup = anomalyGroups.find((group) => group.groupId === selectedAnomalyGroupId) || anomalyGroups[0];
+        if (!selectedGroup) return;
+        selectedAnomalyGroupId = selectedGroup.groupId;
+        const selected = selectedGroup.anomalies.find((anomaly) => anomaly.id === selectedAnomalyId)
+          || selectedGroup.anomalies.find((anomaly) => anomaly.status !== 'resolved')
+          || selectedGroup.anomalies[0];
+        selectedAnomalyId = selected.id;
+        const pageOptions = anomalyPageOptions(selected);
+        if (!pageOptions.some((page) => page.id === selectedAnomalyPageId)) selectedAnomalyPageId = pageOptions[0]?.id || '';
+        const selectedPage = pageOptions.find((page) => page.id === selectedAnomalyPageId) || pageOptions[0];
+        anomalyReview.innerHTML = `<nav class="anomaly-sample-nav" aria-label="异常样卷">${anomalyGroups.map((group) => {
+          const blockingCount = group.anomalies.filter((anomaly) => anomaly.type === '未识别学生' && anomaly.status !== 'resolved').length;
+          const hasMissing = group.anomalies.some((anomaly) => anomaly.type === '缺页');
+          const statusCopy = blockingCount ? `${blockingCount} 页待归属` : (hasMissing ? '仅缺页提示' : '已完成归属');
+          return `<button class="anomaly-sample-card ${group.groupId === selectedGroup.groupId ? 'is-active' : ''}" type="button" data-action="select-anomaly-sample" data-group-id="${escapeHtml(group.groupId)}"><strong>${escapeHtml(group.name)}</strong><span>${group.anomalies.length} 项异常</span><small>${statusCopy}</small></button>`;
+        }).join('')}</nav>
+        <div class="anomaly-workspace ${selected.type === '缺页' ? 'is-missing' : ''}">
+          <aside class="anomaly-student-rail">
+            <h3>当前样卷异常</h3>
+            <nav aria-label="当前样卷异常">${selectedGroup.anomalies.map((anomaly) => {
+              const identityIndex = selectedGroup.anomalies.filter((item) => item.type === '未识别学生').indexOf(anomaly) + 1;
+              const itemName = anomaly.type === '未识别学生' ? `未识别页面 ${identityIndex}` : anomaly.student;
+              return `<button class="anomaly-student-card ${anomaly.id === selected.id ? 'is-active' : ''} ${anomaly.status === 'resolved' ? 'is-resolved' : ''}" type="button" data-action="select-anomaly-student" data-anomaly-id="${anomaly.id}"><strong>${escapeHtml(itemName)}</strong><small>${anomaly.status === 'resolved' ? `已归属 · ${escapeHtml(anomaly.choice || anomaly.student)}` : escapeHtml(anomaly.type)}</small><i>›</i></button>`;
+            }).join('')}</nav>
+          </aside>
+          <section class="anomaly-viewer">
+            ${selected.type === '未识别学生' ? '' : `<div class="anomaly-page-tabs">${pageOptions.map((page) => `<button class="${page.id === selectedPage?.id ? 'is-active' : ''} ${page.missing ? 'is-missing' : ''}" type="button" data-action="select-anomaly-page" data-page-id="${page.id}">${page.missing ? '缺' : ''}第${page.sourcePageNumber}页</button>${page.missing ? '<span class="missing-rescan-inline">请重新扫描缺失页面</span>' : ''}`).join('')}</div>`}
+            <div class="anomaly-document-viewer">${renderStudentDocument(selected, selectedPage)}</div>
           </section>
+          ${selected.type === '缺页' ? '' : `<aside class="anomaly-decision"><span class="anomaly-type">${escapeHtml(selected.type)}</span><h3>${escapeHtml(selected.student)}</h3><p>${escapeHtml(selected.detail)}</p>${renderAnomalyActions(selected)}</aside>`}
         </div>`;
       };
 
@@ -821,79 +1001,130 @@
         sampleCount.textContent = String(groups.filter((group) => group.pages.length > 0).length);
       };
 
+      const renderWorkflowState = () => {
+        const pendingCount = pendingAnomalies().length;
+        sampleList.hidden = stage === 'anomalies';
+        sampleDragHint.hidden = readOnly || stage === 'anomalies';
+        pageHead.hidden = stage === 'anomalies';
+        formMessage.hidden = stage === 'anomalies';
+        backToSamples.hidden = stage !== 'anomalies' || readOnly;
+        document.querySelector('[data-action="add-sample"]').hidden = stage === 'anomalies';
+        const notice = document.querySelector('.scan-notice span');
+        if (!readOnly) {
+          notice.innerHTML = stage === 'anomalies'
+            ? `已确认 <strong>${groups.filter((group) => group.pages.length).length}</strong> 个样卷，请逐一预览并处理异常学生作业`
+            : `本次扫描识别到以下 <strong id="sampleCount">${groups.filter((group) => group.pages.length).length}</strong> 个样卷，确认无误后 AI 开始分析`;
+          sampleCount = document.getElementById('sampleCount');
+        }
+        if (stage === 'anomalies') {
+          confirmButton.disabled = pendingCount > 0;
+          confirmButton.textContent = '确认无误并开始分析';
+          return;
+        }
+        confirmButton.disabled = false;
+        confirmButton.textContent = '确认无误并开始分析';
+      };
+
       const render = () => {
         sampleList.innerHTML = groups.map(renderGroup).join('');
         updateCount();
         renderAnomalySummary();
         renderDeleteDialog();
         renderSubmissionPicker();
-        renderAnomalyDrawer();
-        renderContinueDialog();
+        renderAnomalyReview();
+        renderWorkflowState();
       };
 
       const findGroup = (groupId) => groups.find((group) => group.id === groupId);
 
       document.addEventListener('click', (event) => {
-        const openAnomalyDrawer = event.target.closest('[data-action="open-anomaly-drawer"]');
-        if (openAnomalyDrawer) {
-          anomalyDrawerOpen = true;
-          renderAnomalyDrawer();
+        const openSampleAnomaly = event.target.closest('[data-action="open-sample-anomaly"]');
+        if (openSampleAnomaly && !readOnly) {
+          const targetGroupId = openSampleAnomaly.dataset.groupId;
+          const targetType = openSampleAnomaly.dataset.anomalyType;
+          const targetGroup = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies)
+            .find((group) => group.groupId === targetGroupId);
+          const targetAnomaly = targetGroup?.anomalies.find((anomaly) => anomaly.type === targetType && anomaly.status !== 'resolved');
+          if (!targetAnomaly) return;
+          openIndependentAnomalyPage(targetAnomaly.id);
           return;
         }
-        const closeAnomalyDrawer = event.target.closest('[data-action="close-anomaly-drawer"]');
-        const clickedAnomalyBackdrop = event.target.classList.contains('anomaly-backdrop');
-        if (closeAnomalyDrawer || clickedAnomalyBackdrop) {
-          anomalyDrawerOpen = false;
-          renderAnomalyDrawer();
+        const viewAnomalies = event.target.closest('[data-action="view-anomalies"]');
+        if (viewAnomalies) {
+          openIndependentAnomalyPage();
           return;
         }
-        const returnAnomalyReview = event.target.closest('[data-action="return-anomaly-review"]');
-        if (returnAnomalyReview) {
-          anomalyConfirmOpen = false;
-          anomalyDrawerOpen = true;
-          renderAnomalyDrawer();
-          renderContinueDialog();
+        const selectAnomalySample = event.target.closest('[data-action="select-anomaly-sample"]');
+        if (selectAnomalySample) {
+          selectedAnomalyGroupId = selectAnomalySample.dataset.groupId;
+          const selectedGroup = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies)
+            .find((group) => group.groupId === selectedAnomalyGroupId);
+          const nextAnomaly = FxCollectionFlow.blockingCollectionAnomalies(selectedGroup?.anomalies)[0] || selectedGroup?.anomalies[0];
+          selectedAnomalyId = nextAnomaly?.id || '';
+          selectedAnomalyPageId = anomalyPageOptions(nextAnomaly)[0]?.id || '';
+          resetOwnershipSelection();
+          renderAnomalyReview();
           return;
         }
-        const continueAnalysis = event.target.closest('[data-action="continue-analysis"]');
-        if (continueAnalysis) {
-          anomalyConfirmOpen = false;
-          renderContinueDialog();
-          confirmCollection();
+        const selectAnomalyStudent = event.target.closest('[data-action="select-anomaly-student"]');
+        if (selectAnomalyStudent) {
+          selectedAnomalyId = selectAnomalyStudent.dataset.anomalyId;
+          const selected = anomalies.find((anomaly) => anomaly.id === selectedAnomalyId);
+          selectedAnomalyPageId = anomalyPageOptions(selected)[0]?.id || '';
+          resetOwnershipSelection();
+          renderAnomalyReview();
+          return;
+        }
+        const selectAnomalyPage = event.target.closest('[data-action="select-anomaly-page"]');
+        if (selectAnomalyPage) {
+          selectedAnomalyPageId = selectAnomalyPage.dataset.pageId;
+          renderAnomalyReview();
+          return;
+        }
+        const backToSampleStage = event.target.closest('[data-action="back-to-samples"]');
+        if (backToSampleStage) {
+          stage = 'samples';
+          anomalies = JSON.parse(JSON.stringify(defaultAnomalies));
+          const firstGroup = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies)[0];
+          const firstAnomaly = firstGroup?.anomalies[0];
+          selectedAnomalyGroupId = firstGroup?.groupId || '';
+          selectedAnomalyId = firstAnomaly?.id || '';
+          selectedAnomalyPageId = anomalyPageOptions(firstAnomaly)[0]?.id || '';
+          resetOwnershipSelection();
+          formMessage.textContent = '已返回样卷编辑；再次确认样卷后，异常处理结果将重新计算。';
+          formMessage.classList.remove('is-error');
+          render();
           return;
         }
         if (readOnly) return;
-        const deferAnomalies = event.target.closest('[data-action="defer-anomalies"]');
-        if (deferAnomalies) {
-          anomalyDrawerOpen = false;
-          formMessage.textContent = '已保留未处理异常，可继续分析或稍后返回处理。';
-          formMessage.classList.remove('is-error');
-          renderAnomalyDrawer();
+        const selectOwnerStudent = event.target.closest('[data-action="select-owner-student"]');
+        if (selectOwnerStudent) {
+          selectedOwnershipStudent = selectOwnerStudent.dataset.studentName;
+          renderAnomalyReview();
           return;
         }
         const resolveAnomaly = event.target.closest('[data-action="resolve-anomaly"]');
         if (resolveAnomaly) {
           const anomaly = anomalies.find((item) => item.id === resolveAnomaly.dataset.anomalyId);
           if (!anomaly) return;
-          anomaly.status = 'resolved';
-          anomaly.choice = resolveAnomaly.dataset.choice || anomaly.action;
+          anomalies = FxCollectionFlow.resolveCollectionAnomaly(anomalies, anomaly.id, resolveAnomaly.dataset.choice);
+          resetOwnershipSelection();
           formMessage.textContent = `已处理${anomaly.student}的${anomaly.type}异常。`;
           formMessage.classList.remove('is-error');
+          const anomalyGroups = FxCollectionFlow.groupCollectionAnomalies(groups, anomalies);
+          const currentGroup = anomalyGroups.find((group) => group.groupId === selectedAnomalyGroupId);
+          const currentGroupPending = FxCollectionFlow.blockingCollectionAnomalies(currentGroup?.anomalies)[0];
+          const nextGroup = anomalyGroups.find((group) => group.groupId !== selectedAnomalyGroupId
+            && FxCollectionFlow.blockingCollectionAnomalies(group.anomalies).length);
+          const nextAnomaly = currentGroupPending || FxCollectionFlow.blockingCollectionAnomalies(nextGroup?.anomalies)[0];
+          if (nextAnomaly) {
+            selectedAnomalyGroupId = currentGroupPending ? selectedAnomalyGroupId : nextGroup.groupId;
+            selectedAnomalyId = nextAnomaly.id;
+            selectedAnomalyPageId = anomalyPageOptions(nextAnomaly)[0]?.id || '';
+          } else {
+            selectedAnomalyId = anomaly.id;
+          }
           render();
-          return;
-        }
-        const openAnomalySubmissionPicker = event.target.closest('[data-action="open-anomaly-submission-picker"]');
-        if (openAnomalySubmissionPicker) {
-          anomalyDrawerOpen = false;
-          submissionPicker = {
-            targetGroupId: openAnomalySubmissionPicker.dataset.groupId,
-            anomalyId: openAnomalySubmissionPicker.dataset.anomalyId,
-            selectedPageIds: new Set(),
-            query: '',
-            unassignedOnly: true,
-          };
-          renderAnomalyDrawer();
-          renderSubmissionPicker();
           return;
         }
         const openSubmissionPicker = event.target.closest('[data-action="open-submission-picker"]');
@@ -926,11 +1157,6 @@
         if (addSelectedSubmissions && submissionPicker) {
           const selectedCount = submissionPicker.selectedPageIds.size;
           groups = FxCollectionFlow.addSubmissionPages(groups, submissionPicker.targetGroupId, allSubmissions, [...submissionPicker.selectedPageIds]);
-          const anomaly = anomalies.find((item) => item.id === submissionPicker.anomalyId);
-          if (anomaly && selectedCount) {
-            anomaly.status = 'resolved';
-            anomaly.choice = '已补充页面';
-          }
           submissionPicker = null;
           formMessage.textContent = `已添加 ${selectedCount} 页学生提交。`;
           formMessage.classList.remove('is-error');
@@ -1001,6 +1227,17 @@
       });
 
       document.addEventListener('input', (event) => {
+        const ownerSearchInput = event.target.closest('[data-action="search-owner-students"]');
+        if (ownerSearchInput) {
+          ownershipSearch = ownerSearchInput.value;
+          renderAnomalyReview();
+          requestAnimationFrame(() => {
+            const nextInput = document.querySelector('[data-action="search-owner-students"]');
+            nextInput?.focus();
+            nextInput?.setSelectionRange(ownershipSearch.length, ownershipSearch.length);
+          });
+          return;
+        }
         const searchInput = event.target.closest('[data-action="search-submissions"]');
         if (!searchInput || !submissionPicker) return;
         submissionPicker.query = searchInput.value;
@@ -1125,11 +1362,16 @@
 
       document.getElementById('confirm').addEventListener('click', () => {
         if (readOnly) return;
-        if (pendingAnomalies().length) {
-          anomalyConfirmOpen = true;
-          renderContinueDialog();
+        if (stage === 'samples' && FxCollectionFlow.validGroups(groups).length === 0) {
+          formMessage.textContent = '当前没有可创建的样卷，请先拖入样卷页面。';
+          formMessage.classList.add('is-error');
           return;
         }
+        if (stage === 'samples' && FxCollectionFlow.nextCollectionStep(anomalies) === 'review-anomalies') {
+          openIndependentAnomalyPage();
+          return;
+        }
+        if (stage === 'anomalies' && pendingAnomalies().length) return;
         confirmCollection();
       });
 
@@ -1138,16 +1380,6 @@
         if (submissionPicker) {
           submissionPicker = null;
           renderSubmissionPicker();
-          return;
-        }
-        if (anomalyDrawerOpen) {
-          anomalyDrawerOpen = false;
-          renderAnomalyDrawer();
-          return;
-        }
-        if (anomalyConfirmOpen) {
-          anomalyConfirmOpen = false;
-          renderContinueDialog();
           return;
         }
         if (!pendingSampleDelete) return;

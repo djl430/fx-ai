@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const confirmPage = fs.readFileSync('collection-confirm.html', 'utf8');
+const anomaliesPage = fs.existsSync('collection-anomalies.html') ? fs.readFileSync('collection-anomalies.html', 'utf8') : '';
 const indexPage = fs.readFileSync('index.html', 'utf8');
 const historyPage = fs.readFileSync('collection-history.html', 'utf8');
 const gradingPage = fs.readFileSync('grading-by-question-demo.html', 'utf8');
@@ -16,25 +17,109 @@ test('confirmation page exposes the required group controls', () => {
   assert.match(confirmPage, /本次扫描识别到以下/);
 });
 
-test('collection confirmation contains a focused anomaly workflow without a home list entry', () => {
-  assert.match(confirmPage, /提交异常 <strong id="anomalyCount">5<\/strong> 人/);
-  assert.match(confirmPage, />去处理<\/button>/);
-  assert.match(confirmPage, /<div class="notice-actions__right">[\s\S]*id="anomalySummary"/);
-  assert.match(confirmPage, /data-action="open-anomaly-drawer"/);
-  assert.match(confirmPage, /data-action="resolve-anomaly"/);
-  assert.match(confirmPage, /data-action="continue-analysis"/);
-  assert.match(confirmPage, /未处理异常不会自动归属，也不会进入批改/);
-  assert.doesNotMatch(confirmPage, /anomaly-chip/);
-  assert.doesNotMatch(confirmPage, /sample-risk/);
+test('sample confirmation persists a draft and opens the independent anomaly page', () => {
+  assert.match(confirmPage, /collectionDraftKey\(task\)/);
+  assert.match(confirmPage, /collection-anomalies\.html\?task=/);
+  assert.doesNotMatch(confirmPage, /stage = 'anomalies'/);
+});
+
+test('independent page contains the full-document anomaly workflow without a home list entry', () => {
+  assert.match(anomaliesPage, /anomaly-document-viewer/);
+  assert.match(anomaliesPage, /data-action="select-anomaly-page"/);
+  assert.match(anomaliesPage, /返回修改样卷/);
+  assert.match(anomaliesPage, /data-action="resolve-anomaly"/);
+  assert.match(anomaliesPage, /开始分析/);
+  assert.match(anomaliesPage, /缺页/);
+  assert.match(anomaliesPage, /未识别学生/);
+  assert.doesNotMatch(anomaliesPage, /type:\s*'多页'/);
+  assert.doesNotMatch(anomaliesPage, /重复提交/);
+  assert.doesNotMatch(confirmPage, /data-stage="anomalies"/);
   assert.doesNotMatch(indexPage, /异常待处理/);
+});
+
+test('anomaly review is grouped by sample before student', () => {
+  assert.match(anomaliesPage, /anomaly-sample-nav/);
+  assert.match(anomaliesPage, /data-action="select-anomaly-sample"/);
+  assert.match(anomaliesPage, /未识别学生/);
+  assert.doesNotMatch(anomaliesPage, /type:\s*'多页'/);
+});
+
+test('anomaly sample navigation is horizontal above the workspace', () => {
+  assert.match(anomaliesPage, /\.anomaly-sample-nav\s*\{[^}]*display:\s*flex/s);
+  assert.match(anomaliesPage, /<nav class="anomaly-sample-nav"[\s\S]*?<div class="anomaly-workspace /);
+  assert.doesNotMatch(anomaliesPage, /anomaly-student-rail">[\s\S]*?anomaly-sample-nav/);
+});
+
+test('unrecognized pages use a direct grouped student selector without search', () => {
+  assert.match(anomaliesPage, /优先推荐/);
+  assert.match(anomaliesPage, /全部学生/);
+  assert.doesNotMatch(anomaliesPage, /type="search"/);
+  assert.match(anomaliesPage, /data-action="select-owner-student"/);
+  assert.match(anomaliesPage, /确认归属给/);
+  assert.match(confirmPage, /makeStudentPreviewPages\('identity-wang-1',[^\n]+\[paperTemplates\.homework\[1\]\]\)/);
+  assert.doesNotMatch(confirmPage, /unrecognizedPageCount/);
+});
+
+test('all students are collapsed by default', () => {
+  assert.match(anomaliesPage, /<details class="owner-group owner-all-students">/);
+  assert.match(anomaliesPage, /<summary>全部学生<\/summary>/);
+  assert.doesNotMatch(anomaliesPage, /<details class="owner-group owner-all-students" open>/);
+});
+
+test('missing pages only show rescan guidance and do not block analysis', () => {
+  assert.match(anomaliesPage, /请重新扫描缺失页面/);
+  assert.doesNotMatch(anomaliesPage, /确认缺页并继续/);
+  assert.match(anomaliesPage, /blockingCollectionAnomalies/);
+});
+
+test('anomaly preview removes the document header and right-aligns missing guidance', () => {
+  assert.doesNotMatch(anomaliesPage, /class="anomaly-viewer-head"/);
+  assert.match(anomaliesPage, /missing-rescan-inline[^}]*margin-left:\s*auto/s);
+  assert.match(anomaliesPage, /selected\.type === '缺页' \? '' : renderDecision\(selected\)/);
+});
+
+test('ownership assignment toasts, persists, updates the rail and advances', () => {
+  assert.match(anomaliesPage, /已归属给 \${escapeHtml\(choice\)}/);
+  assert.match(anomaliesPage, /localStorage\.setItem\(draftKey/);
+  assert.match(anomaliesPage, /nextBlockingAnomaly/);
+  assert.match(anomaliesPage, /anomaly\.choice \|\| '未识别学生'/);
+  assert.doesNotMatch(anomaliesPage, /class="anomaly-type"/);
+  assert.doesNotMatch(anomaliesPage, /<h3>未识别<\/h3>/);
+});
+
+test('independent anomaly page creates the batch only after ownership blockers clear', () => {
+  assert.match(anomaliesPage, /blockingCollectionAnomalies\(anomalies\)/);
+  assert.match(anomaliesPage, /fxConfirmedCollectionBatch/);
+  assert.match(anomaliesPage, /confirmHistoryRecord/);
+  assert.match(anomaliesPage, /localStorage\.removeItem\(draftKey\)/);
+  assert.match(anomaliesPage, /index\.html\?collectionCreated=1/);
+});
+
+test('returning from anomaly review restores the task-scoped sample draft', () => {
+  assert.match(anomaliesPage, /collection-confirm\.html\?task=\${encodeURIComponent\(task\)}&resumeCollection=1/);
+  assert.match(confirmPage, /params\.get\('resumeCollection'\) === '1'/);
+  assert.match(confirmPage, /normalizeCollectionDraft/);
+});
+
+test('editable sample confirmation hides the top anomaly summary', () => {
+  assert.match(confirmPage, /if \(!readOnly \|\| !anomalies\.length \|\| stage === 'anomalies'\)/);
 });
 
 test('collection confirmation uses simplified analysis copy', () => {
   assert.match(confirmPage, /确认无误后 AI 开始分析/);
-  assert.match(confirmPage, /<button class="confirm"[^>]*>确认无误并开始分析<\/button>/);
+  assert.match(confirmPage, /确认无误并开始分析/);
+  assert.doesNotMatch(confirmPage, /确认样卷，处理/);
+  assert.match(confirmPage, /confirmButton\.textContent = '确认无误并开始分析'/);
   assert.doesNotMatch(confirmPage, /\.scan-notice::before/);
   assert.doesNotMatch(confirmPage, /\.scan-notice \{[^}]*\b(?:border|background|box-shadow):/);
   assert.doesNotMatch(confirmPage, /确认并开始识别或批改/);
+});
+
+test('history demo contains two pending tasks with different anomaly conditions', () => {
+  assert.match(historyPage, /id:'today-2026'[\s\S]*?anomalyCount:0/);
+  assert.match(historyPage, /id:'today-1942'[\s\S]*?anomalyCount:4/);
+  assert.match(indexPage, /today-2026/);
+  assert.match(indexPage, /today-1942/);
 });
 
 test('confirmation supports compact submission page selection', () => {
@@ -46,9 +131,38 @@ test('confirmation supports compact submission page selection', () => {
   assert.match(confirmPage, /font-size:\s*clamp\(24px, 2\.4vw, 30px\)/);
 });
 
+test('submission picker entry follows the final page in each sample', () => {
+  assert.match(confirmPage, /class="submission-picker-trigger submission-picker-card"/);
+  assert.match(confirmPage, /group\.pages\.map\([\s\S]*?\.join\(''\)[\s\S]*?submission-picker-card/);
+  assert.doesNotMatch(confirmPage, /<div class="sample-head">[\s\S]*?submission-picker-trigger[\s\S]*?<\/div>\s*<div class="pages"/);
+});
+
+test('sample headers expose clickable anomaly type labels', () => {
+  assert.match(confirmPage, /sample-anomaly-tags/);
+  assert.match(confirmPage, /data-action="open-sample-anomaly"/);
+  assert.match(confirmPage, /缺页[^<]*人/);
+  assert.match(confirmPage, /未识别[^<]*页/);
+  assert.match(confirmPage, /data-anomaly-type="未识别学生"/);
+});
+
+test('sample anomaly labels deep-link to the selected anomaly student', () => {
+  assert.match(confirmPage, /openIndependentAnomalyPage\(targetAnomaly\.id\)/);
+  assert.match(confirmPage, /focus=\$\{encodeURIComponent\(anomalyId\)\}/);
+  assert.match(anomaliesPage, /const focusedAnomalyId = params\.get\('focus'\) \|\| ''/);
+  assert.match(anomaliesPage, /const focusedAnomaly = anomalies\.find\(\(anomaly\) => anomaly\.id === focusedAnomalyId\)/);
+  assert.match(anomaliesPage, /let selectedGroupId = focusedAnomaly\?\.groupId \|\| initialGroup\?\.groupId \|\| ''/);
+  assert.match(anomaliesPage, /let selectedAnomalyId = focusedAnomaly\?\.id \|\|/);
+});
+
 test('sample pages wrap instead of scrolling horizontally', () => {
   assert.match(confirmPage, /\.pages\s*\{[^}]*flex-wrap:\s*wrap/s);
   assert.doesNotMatch(confirmPage, /\.pages\s*\{[^}]*overflow-x:\s*auto/s);
+});
+
+test('drag guidance appears once above the sample list', () => {
+  assert.equal((confirmPage.match(/拖动页面调整顺序或归属/g) || []).length, 1);
+  assert.match(confirmPage, /id="sampleDragHint"[^>]*>拖动页面调整顺序或归属<\/p>[\s\S]*<div class="sample-list"/);
+  assert.doesNotMatch(confirmPage, /<span class="hint">[^<]*拖动页面调整顺序或归属/);
 });
 
 test('sample paper content uses stable printed page metadata', () => {
@@ -180,7 +294,7 @@ test('generated task timers update the existing DOM without rerendering the page
 });
 
 test('all toast messages are positioned at the upper center of their page', () => {
-  for (const page of [indexPage, historyPage, gradingPage]) {
+  for (const page of [indexPage, historyPage, gradingPage, anomaliesPage]) {
     assert.match(page, /\.toast\s*\{[^}]*position:\s*fixed[^}]*left:\s*50%[^}]*top:\s*88px[^}]*translateX\(-50%\)/s);
   }
 });

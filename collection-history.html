@@ -26,7 +26,8 @@
   <script>
     (() => {
       const taskSeeds = [
-        { id:'today-1942', title:'今天 19:42 · 六年级3班 · 数学', pages:126, samples:2 },
+        { id:'today-2026', title:'今天 20:26 · 六年级2班 · 数学', pages:92, samples:2, anomalyCount:0 },
+        { id:'today-1942', title:'今天 19:42 · 六年级3班 · 数学', pages:126, samples:2, anomalyCount:4 },
         { id:'today-1618', title:'今天 16:18 · 六年级1班 · 数学', pages:98, samples:2, confirmed:true },
         { id:'yesterday-1835', title:'昨天 18:35 · 八年级3班 · 数学', pages:144, samples:3, confirmed:true },
         { id:'yesterday-1206', title:'昨天 12:06 · 六年级2班 · 数学', pages:112, samples:2, confirmed:true },
@@ -42,7 +43,7 @@
         const confirmed = task.confirmed || historyState.records[task.id]?.status === '已确认';
         const action = confirmed ? '查看结果' : '去确认';
         return `<article class="task ${confirmed ? '' : 'pending-task'}" data-task="${task.id}">
-          <div><div class="task-title">${task.title}</div><div class="task-sub">高扫采集任务</div></div>
+          <div><div class="task-title">${task.title}</div><div class="task-sub">${confirmed ? '高扫采集任务' : task.anomalyCount ? '确认样卷后处理提交异常' : '确认样卷后可直接开始分析'}</div></div>
           <div class="num">${task.pages} 页</div><div class="num">${task.samples} 份样卷</div>
           <span class="pill ${confirmed ? 'done' : 'pending'}">${confirmed ? '已确认' : '待确认'}</span>
           <button class="${confirmed ? 'secondary' : 'primary'}" type="button" data-action="open-history-task" data-confirmed="${confirmed}">${action}</button>

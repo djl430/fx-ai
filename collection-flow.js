@@ -5,6 +5,8 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const normalizeKind = (value) => value === '考试' ? '考试' : '作业';
 
+  const COLLECTION_ANOMALY_TYPES = ['缺页', '未识别学生'];
+
   const normalizeName = (value) => String(value || '').trim() || '未命名样卷';
 
   const validGroups = (groups) => Array.isArray(groups)
@@ -157,6 +159,76 @@
     }).length;
   };
 
+  const supportedCollectionAnomalies = (anomalies) => (Array.isArray(anomalies) ? anomalies : [])
+    .filter((anomaly) => anomaly && COLLECTION_ANOMALY_TYPES.includes(anomaly.type));
+
+  const nextCollectionStep = (anomalies) => supportedCollectionAnomalies(anomalies)
+    .some((anomaly) => anomaly.status !== 'resolved')
+    ? 'review-anomalies'
+    : 'start-analysis';
+
+  const resolveCollectionAnomaly = (anomalies, anomalyId, choice) => supportedCollectionAnomalies(anomalies)
+    .map((anomaly) => {
+      if (anomaly.id !== anomalyId) return { ...anomaly };
+      const normalizedChoice = String(choice || '');
+      const next = { ...anomaly, status: 'resolved', choice: normalizedChoice };
+      if (anomaly.type === '未识别学生' && normalizedChoice) {
+        next.student = normalizedChoice;
+        next.pages = (Array.isArray(anomaly.pages) ? anomaly.pages : []).map((page) => ({
+          ...page,
+          studentName: normalizedChoice,
+          studentId: page.studentId || `assigned-${normalizedChoice}`,
+        }));
+      }
+      return next;
+    });
+
+  const groupCollectionAnomalies = (groups, anomalies) => (Array.isArray(groups) ? groups : [])
+    .map((group) => ({
+      groupId: group?.id,
+      name: normalizeName(group?.name),
+      kind: normalizeKind(group?.kind),
+      anomalies: supportedCollectionAnomalies(anomalies)
+        .filter((anomaly) => anomaly.groupId === group?.id),
+    }))
+    .filter((group) => group.groupId && group.anomalies.length > 0);
+
+  const summarizeCollectionAnomalies = (anomalies, groupId) => {
+    const pending = supportedCollectionAnomalies(anomalies)
+      .filter((item) => item.groupId === groupId && item.status !== 'resolved');
+    const missing = pending.filter((item) => item.type === '缺页');
+    const unrecognized = pending.filter((item) => item.type === '未识别学生');
+    return {
+      missingStudents: new Set(missing.map((item) => item.student).filter(Boolean)).size,
+      unrecognizedPages: unrecognized.length,
+      firstPendingIds: {
+        missing: missing[0]?.id || '',
+        unrecognized: unrecognized[0]?.id || '',
+      },
+    };
+  };
+
+  const blockingCollectionAnomalies = (anomalies) => supportedCollectionAnomalies(anomalies)
+    .filter((item) => item.type === '未识别学生' && item.status !== 'resolved');
+
+  const collectionDraftKey = (taskId) => `fxCollectionDraft:${String(taskId || 'default')}`;
+
+  const normalizeCollectionDraft = (value, expectedTaskId) => {
+    if (!value || value.taskId !== expectedTaskId) return null;
+    if (!Array.isArray(value.groups) || !Array.isArray(value.anomalies)) return null;
+    return {
+      ...value,
+      groups: value.groups.map((group) => ({
+        ...group,
+        pages: Array.isArray(group.pages) ? group.pages.map((page) => ({ ...page })) : [],
+      })),
+      anomalies: value.anomalies.map((anomaly) => ({
+        ...anomaly,
+        pages: Array.isArray(anomaly.pages) ? anomaly.pages.map((page) => ({ ...page })) : [],
+      })),
+    };
+  };
+
   const normalizeTaskListState = (state) => ({
     version: 1,
     deletedTaskIds: [...new Set(Array.isArray(state && state.deletedTaskIds) ? state.deletedTaskIds : [])],
@@ -251,6 +323,14 @@
     normalizeHistoryState,
     confirmHistoryRecord,
     pendingHistoryCount,
+    supportedCollectionAnomalies,
+    nextCollectionStep,
+    resolveCollectionAnomaly,
+    groupCollectionAnomalies,
+    summarizeCollectionAnomalies,
+    blockingCollectionAnomalies,
+    collectionDraftKey,
+    normalizeCollectionDraft,
     normalizeTaskListState,
     markTaskDeleted,
     markTaskConfirmed,
