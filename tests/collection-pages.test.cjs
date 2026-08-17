@@ -365,3 +365,30 @@ test('grading page exposes a four-state sticky result navigation rail', () => {
   assert.match(gradingPage, /aria-current/);
   assert.match(gradingPage, /groupsScroll\.scrollTop \+ groupsScroll\.clientHeight >= groupsScroll\.scrollHeight - 2/);
 });
+
+test('grading page switches between synchronized question and student modes', () => {
+  assert.doesNotMatch(gradingPage, /student-trace-preview\.html/);
+  assert.match(gradingPage, /data-grading-view="question"[^>]*aria-selected="true"/);
+  assert.match(gradingPage, /data-grading-view="student"/);
+  assert.match(gradingPage, /id="questionWorkspace"/);
+  assert.match(gradingPage, /id="studentWorkspace"[^>]*hidden/);
+  assert.match(gradingPage, /function setGradingView/);
+  assert.match(gradingPage, /student\.result = result/);
+  assert.match(gradingPage, /renderAll\(\)/);
+});
+
+test('student grading mode provides a roster, centered paper, and structured tools', () => {
+  assert.match(gradingPage, /id="studentList"/);
+  assert.match(gradingPage, /id="studentPaper"/);
+  assert.match(gradingPage, /id="studentQuestionTools"/);
+  assert.match(gradingPage, /id="confirmStudent"/);
+  assert.match(gradingPage, /data-student-result/);
+  assert.match(gradingPage, /data-student-score/);
+  assert.match(gradingPage, /function renderStudentWorkspace/);
+});
+
+test('grading result rail contains only four functional lines', () => {
+  assert.equal((gradingPage.match(/data-result-target=/g) || []).length, 4);
+  assert.doesNotMatch(gradingPage, /\.result-rail::before/);
+  assert.doesNotMatch(gradingPage, /repeating-linear-gradient\(to bottom, #cbd2de/);
+});
