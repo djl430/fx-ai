@@ -347,3 +347,20 @@ test('exam grading supports both direct score input and card click cycling', () 
   assert.match(gradingPage, /const nextScore = numericScore <= 0 \? max : Math\.max\(0, Math\.round\(\(numericScore - 0\.5\) \* 2\) \/ 2\);/);
   assert.match(gradingPage, /data-score-editor.*stopPropagation/s);
 });
+
+test('grading page removes the diagnosis entry and modal', () => {
+  assert.doesNotMatch(gradingPage, />错因诊断</);
+  assert.doesNotMatch(gradingPage, /id="diagnosisModal"/);
+  assert.doesNotMatch(gradingPage, /diagnosis:\s*document\.getElementById/);
+});
+
+test('grading page exposes a four-state sticky result navigation rail', () => {
+  assert.match(gradingPage, /id="resultRail"/);
+  assert.match(gradingPage, /\.result-rail\s*\{[^}]*position:\s*absolute/s);
+  for (const result of ['correct', 'partial', 'wrong', 'ungraded']) {
+    assert.match(gradingPage, new RegExp(`data-result-target="${result}"`));
+  }
+  assert.match(gradingPage, /scrollTo\(\{[\s\S]*behavior:\s*"smooth"/);
+  assert.match(gradingPage, /groupsScroll\.addEventListener\("scroll"/);
+  assert.match(gradingPage, /aria-current/);
+});
