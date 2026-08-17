@@ -363,4 +363,5 @@ test('grading page exposes a four-state sticky result navigation rail', () => {
   assert.match(gradingPage, /scrollTo\(\{[\s\S]*behavior:\s*"smooth"/);
   assert.match(gradingPage, /groupsScroll\.addEventListener\("scroll"/);
   assert.match(gradingPage, /aria-current/);
+  assert.match(gradingPage, /groupsScroll\.scrollTop \+ groupsScroll\.clientHeight >= groupsScroll\.scrollHeight - 2/);
 });

@@ -340,6 +340,7 @@
     }
 
     .answer-zone {
+      position: relative;
       display: grid;
       grid-template-rows: auto minmax(0,1fr) auto;
       background: rgba(247,249,253,.72);
@@ -363,8 +364,96 @@
 
     .groups-scroll {
       overflow: auto;
-      padding: 20px;
+      padding: 20px 62px 20px 20px;
       scrollbar-width: thin;
+    }
+
+    .result-rail {
+      position: absolute;
+      z-index: 12;
+      top: 68px;
+      right: 12px;
+      bottom: 70px;
+      width: 38px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: flex-end;
+      padding: 10px 0;
+      border: 1px solid rgba(223,229,240,.72);
+      border-radius: 20px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 10px 24px rgba(45,64,104,.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .result-rail::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      right: 8px;
+      bottom: 12px;
+      width: 7px;
+      background: repeating-linear-gradient(to bottom, #cbd2de 0 1px, transparent 1px 8px);
+      opacity: .78;
+      pointer-events: none;
+    }
+
+    .result-rail__button {
+      position: relative;
+      z-index: 1;
+      width: 38px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 7px 0 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .result-rail__tick {
+      width: 12px;
+      height: 2px;
+      border-radius: 999px;
+      background: #b7c0ce;
+      transition: width .18s ease, background-color .18s ease, box-shadow .18s ease;
+    }
+
+    .result-rail__button:hover .result-rail__tick,
+    .result-rail__button:focus-visible .result-rail__tick,
+    .result-rail__button.is-active .result-rail__tick {
+      width: 27px;
+      background: #263244;
+      box-shadow: 0 0 0 1px rgba(38,50,68,.04);
+    }
+
+    .result-rail__button:focus-visible { outline: none; }
+
+    .result-rail__tooltip {
+      position: absolute;
+      right: 42px;
+      top: 50%;
+      transform: translate(4px,-50%);
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.96);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(45,64,104,.1);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+
+    .result-rail__button:hover .result-rail__tooltip,
+    .result-rail__button:focus-visible .result-rail__tooltip {
+      opacity: 1;
+      transform: translate(0,-50%);
     }
 
     .group-section {
@@ -776,19 +865,14 @@
     .preview-question { margin: 25px 0; font-family: "Songti SC", serif; line-height: 1.8; }
     .teacher-mark { margin: 8px 0 0 52px; color: #db4d59; font-family: "Kaiti SC", "STKaiti", serif; font-size: 20px; transform: rotate(-1deg); }
 
-    .diagnosis-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-    .diagnosis-card { padding: 18px; border: 1px solid var(--line); border-radius: 15px; background: white; }
-    .diagnosis-card strong { display: block; font-size: 27px; margin-bottom: 4px; }
-    .diagnosis-card span { color: var(--muted); font-size: 11px; }
-    .diagnosis-list { margin-top: 16px; display: grid; gap: 10px; }
-    .diagnosis-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 12px; background: white; border: 1px solid var(--line); font-size: 12px; }
-    .diagnosis-row b { color: var(--brand); }
-
     @media (max-width: 1180px) {
       body { overflow: auto; }
       .app-shell { height: auto; min-height: 100vh; }
       .app { height: auto; min-height: 100vh; }
       .workspace { grid-template-columns: 170px 270px minmax(480px,1fr); min-height: 760px; }
+      .groups-scroll { padding-right: 52px; }
+      .result-rail { right: 8px; width: 34px; }
+      .result-rail__button { width: 34px; }
     }
 
     @media (max-width: 900px) {
@@ -813,8 +897,7 @@
       .answer-toolbar { align-items: flex-start; }
       .density-label { display: none; }
       .student-grid { --columns: 2 !important; }
-      .groups-scroll { padding: 12px; }
-      .diagnosis-grid { grid-template-columns: 1fr; }
+      .groups-scroll { padding: 12px 46px 12px 12px; }
     }
     /* 批改符号统一使用仓库内资源，确保 GitHub 页面可正常加载 */
     .mark-icon.correct,
@@ -897,7 +980,6 @@
         </div>
         <div class="top-actions">
           <a class="button ghost" href="./student-trace-preview.html">预览学生留痕</a>
-          <button class="button ghost" type="button">错因诊断</button>
         </div>
       </header>
 
@@ -946,6 +1028,12 @@
             </div>
           </div>
           <div class="groups-scroll" id="groupsScroll"></div>
+          <nav class="result-rail" id="resultRail" aria-label="批改结果快速定位">
+            <button class="result-rail__button is-active" type="button" data-result-target="correct" aria-label="定位到正确模块" aria-current="true"><span class="result-rail__tick"></span><span class="result-rail__tooltip">正确</span></button>
+            <button class="result-rail__button" type="button" data-result-target="partial" aria-label="定位到半对模块"><span class="result-rail__tick"></span><span class="result-rail__tooltip">半对</span></button>
+            <button class="result-rail__button" type="button" data-result-target="wrong" aria-label="定位到错误模块"><span class="result-rail__tick"></span><span class="result-rail__tooltip">错误</span></button>
+            <button class="result-rail__button" type="button" data-result-target="ungraded" aria-label="定位到未批改模块"><span class="result-rail__tick"></span><span class="result-rail__tooltip">未批改</span></button>
+          </nav>
           <div class="question-confirm-bar">
             <button class="button primary" type="button" id="confirmQuestion">确认本题批改</button>
           </div>
@@ -971,27 +1059,6 @@
           <div class="teacher-mark">✓　配方过程完整。</div>
           <div class="preview-question">3. 写出函数 y = x² − 4x + 3 的顶点坐标。<br>学生作答：（2，−1）</div>
           <div class="teacher-mark">×　符号检查：常数项应为 −1。</div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="modal-backdrop" id="diagnosisModal" aria-hidden="true">
-    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="diagnosisTitle">
-      <div class="modal-head">
-        <h2 id="diagnosisTitle">班级错因诊断</h2>
-        <button class="modal-close" type="button" aria-label="关闭">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="diagnosis-grid">
-          <div class="diagnosis-card"><strong>78%</strong><span>班级平均正确率</span></div>
-          <div class="diagnosis-card"><strong>3 类</strong><span>高频错误模式</span></div>
-          <div class="diagnosis-card"><strong>8 人</strong><span>建议重点关注</span></div>
-        </div>
-        <div class="diagnosis-list">
-          <div class="diagnosis-row"><span>对称轴公式符号使用错误</span><b>12 人</b></div>
-          <div class="diagnosis-row"><span>配方过程缺少等式变形</span><b>9 人</b></div>
-          <div class="diagnosis-row"><span>顶点坐标横纵坐标混淆</span><b>6 人</b></div>
         </div>
       </div>
     </section>
@@ -1236,6 +1303,7 @@
 
       const questionList = document.getElementById("questionList");
       const groupsScroll = document.getElementById("groupsScroll");
+      const resultRail = document.getElementById("resultRail");
       const metricCard = document.querySelector(".metric-card");
       const metricLabel = document.getElementById("metricLabel");
       const accuracyValue = document.getElementById("accuracyValue");
@@ -1376,6 +1444,56 @@
         confirmQuestionButton.textContent = isExam ? "确认本题赋分" : "确认本题批改";
       }
 
+      let resultRailFrame = 0;
+
+      function setActiveResultRail(result) {
+        resultRail.querySelectorAll("[data-result-target]").forEach((button) => {
+          const active = button.dataset.resultTarget === result;
+          button.classList.toggle("is-active", active);
+          if (active) button.setAttribute("aria-current", "true");
+          else button.removeAttribute("aria-current");
+        });
+      }
+
+      function syncResultRail() {
+        const sections = [...groupsScroll.querySelectorAll(".group-section[data-result]")];
+        if (!sections.length) return;
+        const nearBottom = groupsScroll.scrollTop + groupsScroll.clientHeight >= groupsScroll.scrollHeight - 2;
+        if (nearBottom) {
+          setActiveResultRail(sections.at(-1).dataset.result);
+          return;
+        }
+        const scrollRect = groupsScroll.getBoundingClientRect();
+        const marker = scrollRect.top + Math.min(140, scrollRect.height * .28);
+        let current = sections[0];
+        sections.forEach((section) => {
+          if (section.getBoundingClientRect().top <= marker) current = section;
+        });
+        setActiveResultRail(current.dataset.result);
+      }
+
+      function bindResultRail() {
+        resultRail.querySelectorAll("[data-result-target]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const target = groupsScroll.querySelector(`.group-section[data-result="${button.dataset.resultTarget}"]`);
+            if (!target) return;
+            const top = groupsScroll.scrollTop
+              + target.getBoundingClientRect().top
+              - groupsScroll.getBoundingClientRect().top
+              - 12;
+            groupsScroll.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+            setActiveResultRail(button.dataset.resultTarget);
+          });
+        });
+        groupsScroll.addEventListener("scroll", () => {
+          if (resultRailFrame) return;
+          resultRailFrame = requestAnimationFrame(() => {
+            resultRailFrame = 0;
+            syncResultRail();
+          });
+        }, { passive: true });
+      }
+
       function renderGroups() {
         const question = activeQuestion();
         if (isSimilarityGrouping && question.groups) {
@@ -1399,6 +1517,7 @@
         }).join("");
 
         bindPaperInteractions();
+        syncResultRail();
       }
 
       function renderSimilarityGroups(question) {
@@ -1439,6 +1558,7 @@
 
         bindPaperInteractions();
         bindGroupActions();
+        syncResultRail();
       }
 
       function bindGroupActions() {
@@ -1632,8 +1752,7 @@
       });
 
       const modals = {
-        preview: document.getElementById("previewModal"),
-        diagnosis: document.getElementById("diagnosisModal")
+        preview: document.getElementById("previewModal")
       };
 
       function setModal(modal, open) {
@@ -1651,6 +1770,7 @@
         if (event.key === "Escape") document.querySelectorAll(".modal-backdrop.open").forEach(modal => setModal(modal, false));
       });
 
+      bindResultRail();
       renderAll();
     })();
   </script>
