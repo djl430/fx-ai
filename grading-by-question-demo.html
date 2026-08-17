@@ -114,6 +114,40 @@
 
     .top-actions { display: flex; gap: 10px; flex: none; }
 
+    .grading-mode-switch {
+      display: inline-flex;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #f3f6fc;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .grading-mode-button {
+      min-height: 30px;
+      padding: 0 13px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .grading-mode-button:hover { color: var(--brand-dark); }
+    .grading-mode-button.active {
+      color: #fff;
+      background: var(--brand-dark);
+      box-shadow: 0 5px 12px rgba(48,69,126,.18);
+    }
+
+    .grading-mode-button:focus-visible {
+      outline: 3px solid rgba(79,102,216,.25);
+      outline-offset: 2px;
+    }
+
     .button {
       min-height: 32px;
       display: inline-flex;
@@ -380,22 +414,6 @@
       justify-content: space-around;
       align-items: flex-end;
       padding: 10px 0;
-      border: 1px solid rgba(223,229,240,.72);
-      border-radius: 20px;
-      background: rgba(255,255,255,.82);
-      box-shadow: 0 10px 24px rgba(45,64,104,.08);
-      backdrop-filter: blur(8px);
-    }
-
-    .result-rail::before {
-      content: "";
-      position: absolute;
-      top: 12px;
-      right: 8px;
-      bottom: 12px;
-      width: 7px;
-      background: repeating-linear-gradient(to bottom, #cbd2de 0 1px, transparent 1px 8px);
-      opacity: .78;
       pointer-events: none;
     }
 
@@ -411,6 +429,7 @@
       border: 0;
       background: transparent;
       cursor: pointer;
+      pointer-events: auto;
     }
 
     .result-rail__tick {
@@ -865,6 +884,232 @@
     .preview-question { margin: 25px 0; font-family: "Songti SC", serif; line-height: 1.8; }
     .teacher-mark { margin: 8px 0 0 52px; color: #db4d59; font-family: "Kaiti SC", "STKaiti", serif; font-size: 20px; transform: rotate(-1deg); }
 
+    .student-workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 190px minmax(620px,1fr) 360px;
+      background: #eef2f8;
+    }
+
+    .student-workspace[hidden] { display: none; }
+
+    .student-roster {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0,1fr);
+      border-right: 1px solid var(--line);
+      background: rgba(247,249,253,.96);
+    }
+
+    .student-roster__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 18px 14px 10px;
+    }
+
+    .student-roster__head strong { font-size: 14px; }
+    .student-roster__head span { color: var(--muted); font-size: 10px; }
+
+    .student-list {
+      overflow: auto;
+      padding: 0 10px 16px;
+      scrollbar-width: thin;
+    }
+
+    .student-list-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+      padding: 11px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .student-list-item:hover { border-color: var(--line); background: #fff; }
+    .student-list-item.active {
+      border-color: #cdd6ff;
+      background: var(--brand-soft);
+      box-shadow: inset 3px 0 0 var(--brand);
+    }
+
+    .student-list-item strong { display: block; font-size: 13px; }
+    .student-list-item small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .student-list-item small.is-confirmed { color: var(--green); font-weight: 800; }
+    .student-list-item b { color: var(--brand-dark); font-size: 12px; }
+
+    .student-paper-stage {
+      min-width: 0;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(79,102,216,.08), transparent 26%),
+        linear-gradient(135deg, rgba(255,255,255,.4), transparent 46%),
+        #e7edf6;
+      scrollbar-width: thin;
+    }
+
+    .student-paper {
+      width: min(720px,100%);
+      min-height: 980px;
+      position: relative;
+      padding: 34px 42px 54px;
+      border: 1px solid #e6ddce;
+      border-radius: 10px;
+      background:
+        linear-gradient(90deg, transparent 0 62px, rgba(216,83,83,.1) 62px 63px, transparent 63px),
+        repeating-linear-gradient(to bottom, transparent 0 39px, rgba(75,90,120,.05) 39px 40px),
+        #fffdfa;
+      box-shadow: 0 22px 55px rgba(35,45,78,.16);
+      font-family: "Songti SC", "STSong", serif;
+    }
+
+    .student-paper::before {
+      content: "学生作业原卷";
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      color: #a4a099;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 9px;
+      letter-spacing: .14em;
+    }
+
+    .student-paper-head {
+      margin-bottom: 24px;
+      padding: 0 0 18px 30px;
+      border-bottom: 1px solid #d8d7d1;
+    }
+
+    .student-paper-head__meta { display: flex; justify-content: space-between; gap: 20px; color: #5f6470; font-size: 12px; }
+    .student-paper-head h2 { margin: 18px 0 0; text-align: center; font-size: 19px; letter-spacing: .08em; }
+
+    .student-paper-question {
+      position: relative;
+      margin: 0 0 26px;
+      padding: 0 54px 18px 30px;
+      border-bottom: 1px dashed rgba(120,130,150,.24);
+    }
+
+    .student-paper-question strong { font-size: 15px; }
+    .student-paper-question p { margin: 7px 0; color: #696e78; font-size: 12px; }
+    .student-paper-answer { color: #30343d; font-family: "Kaiti SC", "STKaiti", serif; font-size: 19px; line-height: 1.65; }
+    .student-paper-answer.is-empty { color: #aaa69d; font-family: inherit; font-size: 13px; }
+
+    .student-paper-mark {
+      position: absolute;
+      top: 1px;
+      right: 2px;
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      transform: rotate(-7deg);
+    }
+
+    .student-paper-mark .mark-icon,
+    .student-paper-mark .mark-icon.correct,
+    .student-paper-mark .mark-icon.partial,
+    .student-paper-mark .mark-icon.wrong { width: 36px; height: 36px; }
+
+    .student-paper-score {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      min-width: 52px;
+      padding: 5px 7px;
+      border: 1px solid rgba(219,77,89,.34);
+      border-radius: 999px;
+      color: #cf3f4c;
+      background: rgba(255,255,255,.82);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      transform: rotate(-4deg);
+    }
+
+    .student-tool-panel {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0,1fr) auto;
+      border-left: 1px solid var(--line);
+      background: rgba(255,255,255,.97);
+    }
+
+    .student-tool-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .student-tool-head span { display: block; color: var(--muted); font-size: 10px; }
+    .student-tool-head strong { display: block; margin-top: 3px; font-size: 14px; }
+    .student-tool-head > b { color: var(--brand-dark); font-size: 11px; }
+
+    .student-question-tools {
+      overflow: auto;
+      padding: 4px 14px 18px;
+      scrollbar-width: thin;
+    }
+
+    .student-question-tool {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .student-question-tool__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .student-question-tool__head strong { font-size: 13px; }
+    .student-question-tool__head span { color: var(--muted); font-size: 10px; }
+    .student-tool-answer { margin: 8px 0 0; color: #4f5870; font-size: 12px; line-height: 1.5; }
+    .student-tool-answer.is-empty { color: #a1aabc; }
+
+    .student-result-options {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .student-result-option {
+      min-height: 30px;
+      padding: 0 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 800;
+      transition: .16s ease;
+    }
+
+    .student-result-option:hover { transform: translateY(-1px); border-color: #c6d0e4; }
+    .student-result-option.active { color: var(--brand-dark); border-color: #aebdf3; background: var(--brand-soft); }
+    .student-result-option.active[data-student-result="correct"] { color: var(--green); border-color: #a9ddc7; background: var(--green-soft); }
+    .student-result-option.active[data-student-result="partial"] { color: var(--amber); border-color: #efd39e; background: var(--amber-soft); }
+    .student-result-option.active[data-student-result="wrong"] { color: var(--red); border-color: #efbbc1; background: var(--red-soft); }
+
+    .student-score-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+    .student-score-row input { width: 58px; height: 32px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: #fff; }
+
+    .student-tool-footer { padding: 12px 14px; border-top: 1px solid var(--line); background: rgba(250,252,255,.96); }
+    .student-tool-footer .button { width: 100%; }
+
     @media (max-width: 1180px) {
       body { overflow: auto; }
       .app-shell { height: auto; min-height: 100vh; }
@@ -873,6 +1118,7 @@
       .groups-scroll { padding-right: 52px; }
       .result-rail { right: 8px; width: 34px; }
       .result-rail__button { width: 34px; }
+      .student-workspace { min-width: 1050px; }
     }
 
     @media (max-width: 900px) {
@@ -894,6 +1140,8 @@
       h1 { font-size: 18px; }
       .top-actions { width: 100%; }
       .top-actions .button { flex: 1; padding: 0 9px; }
+      .grading-mode-switch { width: 100%; }
+      .grading-mode-button { flex: 1; }
       .answer-toolbar { align-items: flex-start; }
       .density-label { display: none; }
       .student-grid { --columns: 2 !important; }
@@ -979,11 +1227,14 @@
           </div>
         </div>
         <div class="top-actions">
-          <a class="button ghost" href="./student-trace-preview.html">预览学生留痕</a>
+          <div class="grading-mode-switch" role="tablist" aria-label="批改方式">
+            <button class="grading-mode-button active" type="button" role="tab" data-grading-view="question" aria-selected="true">按题批改</button>
+            <button class="grading-mode-button" type="button" role="tab" data-grading-view="student" aria-selected="false">按学生批改</button>
+          </div>
         </div>
       </header>
 
-      <section class="workspace">
+      <section class="workspace" id="questionWorkspace">
         <aside class="rail" aria-label="题号导航">
           <nav class="question-list" id="questionList"></nav>
           <div class="rail-footer">
@@ -1038,6 +1289,34 @@
             <button class="button primary" type="button" id="confirmQuestion">确认本题批改</button>
           </div>
         </section>
+      </section>
+
+      <section class="student-workspace" id="studentWorkspace" aria-label="按学生批改" hidden>
+        <aside class="student-roster">
+          <div class="student-roster__head">
+            <strong>学生列表</strong>
+            <span id="studentProgress"></span>
+          </div>
+          <nav class="student-list" id="studentList" aria-label="选择学生"></nav>
+        </aside>
+
+        <main class="student-paper-stage" aria-label="当前学生作业">
+          <article class="student-paper" id="studentPaper"></article>
+        </main>
+
+        <aside class="student-tool-panel" aria-label="结构化批改工具">
+          <header class="student-tool-head">
+            <div>
+              <span>结构化批改</span>
+              <strong id="studentToolName"></strong>
+            </div>
+            <b id="studentToolSummary"></b>
+          </header>
+          <div class="student-question-tools" id="studentQuestionTools"></div>
+          <footer class="student-tool-footer">
+            <button class="button primary" id="confirmStudent" type="button">确认本学生批改</button>
+          </footer>
+        </aside>
       </section>
     </main>
   </div>
@@ -1304,6 +1583,15 @@
       const questionList = document.getElementById("questionList");
       const groupsScroll = document.getElementById("groupsScroll");
       const resultRail = document.getElementById("resultRail");
+      const questionWorkspace = document.getElementById("questionWorkspace");
+      const studentWorkspace = document.getElementById("studentWorkspace");
+      const studentList = document.getElementById("studentList");
+      const studentProgress = document.getElementById("studentProgress");
+      const studentPaper = document.getElementById("studentPaper");
+      const studentQuestionTools = document.getElementById("studentQuestionTools");
+      const studentToolName = document.getElementById("studentToolName");
+      const studentToolSummary = document.getElementById("studentToolSummary");
+      const confirmStudent = document.getElementById("confirmStudent");
       const metricCard = document.querySelector(".metric-card");
       const metricLabel = document.getElementById("metricLabel");
       const accuracyValue = document.getElementById("accuracyValue");
@@ -1443,6 +1731,183 @@
         basisList.innerHTML = basisItems.map((item, index) => `<li class="${index === 0 ? "is-primary" : ""}">${item}</li>`).join("");
         confirmQuestionButton.textContent = isExam ? "确认本题赋分" : "确认本题批改";
       }
+
+      let gradingView = "question";
+      const studentCompletion = new Set();
+      const studentNames = [...new Set(questions.flatMap((question) => question.students.map((student) => student.name)))];
+      let activeStudentName = studentNames[0] || "";
+
+      function studentAttempt(question, name = activeStudentName) {
+        return question.students.find((student) => student.name === name) || null;
+      }
+
+      function studentAccuracy(name) {
+        const attempts = questions
+          .map((question) => ({ question, student: studentAttempt(question, name) }))
+          .filter(({ student }) => Boolean(student));
+        if (!attempts.length) return 0;
+        if (isExam) {
+          const totals = attempts.reduce((sum, { question }) => sum + maxScore(question), 0);
+          const scores = attempts.reduce((sum, { question, student }) => sum + studentScore(student, question), 0);
+          return totals ? Math.round(scores / totals * 100) : 0;
+        }
+        const points = attempts.reduce((total, { student }) => (
+          total + (student.result === "correct" ? 1 : student.result === "partial" ? .5 : 0)
+        ), 0);
+        return Math.round(points / attempts.length * 100);
+      }
+
+      function renderStudentList() {
+        studentProgress.textContent = `${studentCompletion.size}/${studentNames.length} 已确认`;
+        studentList.innerHTML = studentNames.map((name) => `
+          <button class="student-list-item ${name === activeStudentName ? "active" : ""}" type="button" data-student-name="${name}">
+            <span>
+              <strong>${name}</strong>
+              <small class="${studentCompletion.has(name) ? "is-confirmed" : ""}">${studentCompletion.has(name) ? "✓ 已确认" : "○ 未确认"}</small>
+            </span>
+            <b>${studentAccuracy(name)}%</b>
+          </button>
+        `).join("");
+      }
+
+      function renderStudentPaper() {
+        studentPaper.innerHTML = `
+          <header class="student-paper-head">
+            <div class="student-paper-head__meta">
+              <span>${className}</span>
+              <span>姓名：<b>${activeStudentName}</b></span>
+            </div>
+            <h2>${taskTitle}</h2>
+          </header>
+          ${questions.map((question) => {
+            const student = studentAttempt(question);
+            const resultMark = student && student.result !== "ungraded"
+              ? isExam
+                ? `<span class="student-paper-score">${formatScore(studentScore(student, question))}/${maxScore(question)}</span>`
+                : `<span class="student-paper-mark"><span class="mark-icon ${student.result}"></span></span>`
+              : "";
+            return `
+              <section class="student-paper-question">
+                <strong>第 ${question.id} 题 · ${question.title}</strong>
+                <p>${question.type}</p>
+                <div class="student-paper-answer ${student ? "" : "is-empty"}">学生作答：${student?.answer || "暂无作答"}</div>
+                ${resultMark}
+              </section>
+            `;
+          }).join("")}
+        `;
+      }
+
+      function renderStudentTools() {
+        studentToolName.textContent = activeStudentName;
+        studentToolSummary.textContent = `${isExam ? "得分率" : "正确率"} ${studentAccuracy(activeStudentName)}%`;
+        studentQuestionTools.innerHTML = questions.map((question) => {
+          const student = studentAttempt(question);
+          if (!student) {
+            return `
+              <section class="student-question-tool">
+                <div class="student-question-tool__head"><strong>第 ${question.id} 题</strong><span>${question.title}</span></div>
+                <p class="student-tool-answer is-empty">暂无作答</p>
+              </section>
+            `;
+          }
+          const controls = isExam
+            ? `<label class="student-score-row">得分 <input type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" data-student-score data-question-id="${question.id}"> / ${maxScore(question)} 分</label>`
+            : `<div class="student-result-options">${order.map((result) => `
+                <button class="student-result-option ${student.result === result ? "active" : ""}" type="button" data-student-result="${result}" data-question-id="${question.id}">${labels[result].name}</button>
+              `).join("")}</div>`;
+          return `
+            <section class="student-question-tool">
+              <div class="student-question-tool__head"><strong>第 ${question.id} 题</strong><span>${question.title}</span></div>
+              <p class="student-tool-answer">答案：${student.answer}</p>
+              ${controls}
+            </section>
+          `;
+        }).join("");
+      }
+
+      function renderStudentWorkspace() {
+        renderStudentList();
+        renderStudentPaper();
+        renderStudentTools();
+        confirmStudent.textContent = studentCompletion.has(activeStudentName) ? "✓ 已确认，可继续检查" : "确认本学生批改";
+      }
+
+      function updateStudentResult(questionId, result) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const student = question?.students.find((item) => item.name === activeStudentName);
+        if (!student || !labels[result]) return;
+        student.result = result;
+        if (isExam) student.score = defaultScoreForResult(result, question);
+        studentCompletion.delete(activeStudentName);
+        renderStudentWorkspace();
+      }
+
+      function setGradingView(view) {
+        gradingView = view === "student" ? "student" : "question";
+        questionWorkspace.hidden = gradingView !== "question";
+        studentWorkspace.hidden = gradingView !== "student";
+        document.querySelectorAll("[data-grading-view]").forEach((button) => {
+          const active = button.dataset.gradingView === gradingView;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-selected", String(active));
+        });
+        if (gradingView === "question") renderAll();
+        else renderStudentWorkspace();
+      }
+
+      document.querySelectorAll("[data-grading-view]").forEach((button) => {
+        button.addEventListener("click", () => setGradingView(button.dataset.gradingView));
+      });
+
+      studentList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-student-name]");
+        if (!button) return;
+        activeStudentName = button.dataset.studentName;
+        renderStudentWorkspace();
+      });
+
+      studentQuestionTools.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-student-result]");
+        if (!button) return;
+        updateStudentResult(button.dataset.questionId, button.dataset.studentResult);
+        showToast(`${activeStudentName} · 第 ${button.dataset.questionId} 题已标记为${labels[button.dataset.studentResult].name}`);
+      });
+
+      studentQuestionTools.addEventListener("change", (event) => {
+        const input = event.target.closest("[data-student-score]");
+        if (!input) return;
+        const question = questions.find((item) => item.id === Number(input.dataset.questionId));
+        const student = question?.students.find((item) => item.name === activeStudentName);
+        if (!student || input.value === "") {
+          renderStudentWorkspace();
+          return;
+        }
+        const parsed = Number(input.value);
+        if (!Number.isFinite(parsed)) {
+          renderStudentWorkspace();
+          return;
+        }
+        const max = maxScore(question);
+        student.score = Math.max(0, Math.min(max, Math.round(parsed * 2) / 2));
+        student.result = student.score === max ? "correct" : student.score === 0 ? "wrong" : "partial";
+        studentCompletion.delete(activeStudentName);
+        renderStudentWorkspace();
+        showToast(`${activeStudentName} · 第 ${question.id} 题已更新为 ${formatScore(student.score)} 分`);
+      });
+
+      confirmStudent.addEventListener("click", () => {
+        studentCompletion.add(activeStudentName);
+        const confirmedName = activeStudentName;
+        const currentIndex = studentNames.indexOf(activeStudentName);
+        const nextStudent = studentNames.find((name, index) => index > currentIndex && !studentCompletion.has(name))
+          || studentNames.find((name) => !studentCompletion.has(name));
+        if (nextStudent) activeStudentName = nextStudent;
+        renderStudentWorkspace();
+        showToast(nextStudent
+          ? `已确认 ${confirmedName}，自动进入 ${nextStudent}`
+          : `全部 ${studentNames.length} 名学生已确认`);
+      });
 
       let resultRailFrame = 0;
 
@@ -1771,7 +2236,7 @@
       });
 
       bindResultRail();
-      renderAll();
+      setGradingView("question");
     })();
   </script>
 </body>

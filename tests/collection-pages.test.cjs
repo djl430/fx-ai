@@ -392,3 +392,12 @@ test('grading result rail contains only four functional lines', () => {
   assert.doesNotMatch(gradingPage, /\.result-rail::before/);
   assert.doesNotMatch(gradingPage, /repeating-linear-gradient\(to bottom, #cbd2de/);
 });
+
+test('task cards expose grading, insights, and review actions', () => {
+  assert.match(indexPage, /class="task-actions"/);
+  assert.match(indexPage, /data-action="open-task"[^>]*data-task-id="\$\{task\.id\}"[^>]*>批改</);
+  assert.match(indexPage, /data-action="open-insights"[^>]*data-task-id="\$\{task\.id\}"[^>]*>学情</);
+  assert.match(indexPage, /data-action="open-review"[^>]*data-task-id="\$\{task\.id\}"[^>]*>讲评</);
+  assert.match(indexPage, /action\.dataset\.action === "open-insights"/);
+  assert.match(indexPage, /action\.dataset\.action === "open-review"/);
+});
