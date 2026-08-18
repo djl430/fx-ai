@@ -318,6 +318,14 @@ test('grading demo renders generated task title and class context from query par
   assert.match(gradingPage, /gradingTaskTitle/);
 });
 
+test('list and grading pages resolve original task names from the shared catalog', () => {
+  assert.match(indexPage, /FxCollectionFlow\.gradingTaskContext\("cluster-homework"\)/);
+  assert.match(indexPage, /FxCollectionFlow\.gradingTaskContext\("similar-homework"\)/);
+  assert.match(indexPage, /FxCollectionFlow\.gradingTaskContext\("quiz"\)/);
+  assert.match(gradingPage, /FxCollectionFlow\.gradingTaskContext\(taskId\)/);
+  assert.match(gradingPage, /params\.get\("taskTitle"\) \|\| taskContext\.title/);
+});
+
 test('grading header hides the task metadata line', () => {
   assert.doesNotMatch(gradingPage, /id="gradingTaskMeta"/);
   assert.doesNotMatch(gradingPage, /getElementById\("gradingTaskMeta"\)/);

@@ -2,6 +2,25 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const flow = require('../collection-flow.js');
 
+test('shares the original grading task names between list and grading pages', () => {
+  assert.deepEqual(flow.gradingTaskContext('cluster-homework'), {
+    title: '总复习 1·数与代数｜正比例与反比例',
+    className: '六年级 · 扫描作业',
+    kind: '作业',
+  });
+  assert.deepEqual(flow.gradingTaskContext('similar-homework'), {
+    title: '小数乘法计算专项作业（相似作答分组批改）',
+    className: '六年级 2 班',
+    kind: '作业',
+  });
+  assert.deepEqual(flow.gradingTaskContext('quiz'), {
+    title: '一次函数随堂检测',
+    className: '八年级 3 班',
+    kind: '考试',
+  });
+  assert.equal(flow.gradingTaskContext('unknown'), null);
+});
+
 test('keeps only non-empty sample groups', () => {
   const groups = flow.validGroups([
     { name: '分数乘法练习', kind: '作业', pages: [{ id: 'p1' }] },

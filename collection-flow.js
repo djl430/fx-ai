@@ -5,6 +5,29 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const normalizeKind = (value) => value === '考试' ? '考试' : '作业';
 
+  const GRADING_TASK_CONTEXTS = Object.freeze({
+    'cluster-homework': Object.freeze({
+      title: '总复习 1·数与代数｜正比例与反比例',
+      className: '六年级 · 扫描作业',
+      kind: '作业',
+    }),
+    'similar-homework': Object.freeze({
+      title: '小数乘法计算专项作业（相似作答分组批改）',
+      className: '六年级 2 班',
+      kind: '作业',
+    }),
+    quiz: Object.freeze({
+      title: '一次函数随堂检测',
+      className: '八年级 3 班',
+      kind: '考试',
+    }),
+  });
+
+  const gradingTaskContext = (taskId) => {
+    const context = GRADING_TASK_CONTEXTS[String(taskId || '')];
+    return context ? { ...context } : null;
+  };
+
   const COLLECTION_ANOMALY_TYPES = ['缺页', '未识别学生'];
 
   const normalizeName = (value) => String(value || '').trim() || '未命名样卷';
@@ -310,6 +333,7 @@
 
   return {
     normalizeKind,
+    gradingTaskContext,
     normalizeName,
     validGroups,
     buildTasks,

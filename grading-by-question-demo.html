@@ -1690,8 +1690,12 @@
       const isExam = params.get("mode") === "exam";
       const usesPaperDirectGrading = taskId === "cluster-homework" && !isExam;
       const variant = params.get("variant");
-      const taskTitle = params.get("taskTitle") || (taskId === "quiz" ? "一次函数随堂检测" : isExam ? "数学期中质量检测" : "二次函数单元作业");
-      const className = params.get("className") || (taskId === "quiz" ? "八年级 3 班" : isExam ? "八年级 5 班" : "九年级 2 班");
+      const taskContext = FxCollectionFlow.gradingTaskContext(taskId) || {
+        title: isExam ? "数学期中质量检测" : "二次函数单元作业",
+        className: isExam ? "八年级 5 班" : "九年级 2 班",
+      };
+      const taskTitle = params.get("taskTitle") || taskContext.title;
+      const className = params.get("className") || taskContext.className;
       const isSimilarityGrouping = variant === "similar";
       document.title = isExam ? "飞象智批 · 试卷批改 Demo" : isSimilarityGrouping ? "飞象智批 · 形似作答分组 Demo" : "飞象智批 · 按题批改 Demo";
       document.getElementById("gradingTaskTitle").textContent = taskTitle;
