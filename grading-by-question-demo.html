@@ -2238,7 +2238,7 @@
             : [];
         return `
           <aside class="student-answer-peek" id="studentAnswerPeek-${question.id}" role="note">
-            <span class="student-answer-peek__label">标准答案</span>
+            <span class="student-answer-peek__label">答案</span>
             <strong>${question.answer}</strong>
             ${scoringPoints.length ? `<ul>${scoringPoints.map((point) => `<li>${point}</li>`).join("")}</ul>` : ""}
           </aside>

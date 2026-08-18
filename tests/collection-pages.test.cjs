@@ -546,10 +546,11 @@ test('student confirmation buttons reuse question grading button shape and color
   assert.doesNotMatch(gradingPage, /\.student-review-footer \.button\s*\{[^}]*#2585f4/s);
 });
 
-test('first homework shows a standard answer card beside the active paper question', () => {
+test('first homework shows an answer card beside the active paper question', () => {
   assert.match(gradingPage, /function studentAnswerPeekMarkup/);
   assert.match(gradingPage, /class="student-answer-peek"/);
-  assert.match(gradingPage, />标准答案</);
+  assert.match(gradingPage, /student-answer-peek__label">答案</);
+  assert.doesNotMatch(gradingPage, /student-answer-peek__label">标准答案</);
   assert.match(gradingPage, /role="note"/);
   assert.match(gradingPage, /aria-describedby="studentAnswerPeek-/);
   assert.match(gradingPage, /开口向上/);
