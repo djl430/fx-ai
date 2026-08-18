@@ -386,7 +386,9 @@ test('question snapshot card removes redundant zoom copy', () => {
 });
 
 test('question grading swaps overall AI basis for student basis on hover', () => {
-  assert.match(gradingPage, /id="basisScope">本题整体<\/span>/);
+  assert.doesNotMatch(gradingPage, /id="basisScope"/);
+  assert.doesNotMatch(gradingPage, /class="basis-scope"/);
+  assert.match(gradingPage, /function setBasisContent\(items, individual = false\)/);
   assert.match(gradingPage, /function renderOverallBasis\(question\)/);
   assert.match(gradingPage, /function renderStudentBasis\(studentId\)/);
   assert.match(gradingPage, /data-student-card="\$\{student\.id\}"/);

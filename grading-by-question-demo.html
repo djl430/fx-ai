@@ -445,25 +445,6 @@
       font-weight: 900;
       letter-spacing: .02em;
     }
-    .basis-scope {
-      max-width: 92px;
-      margin-left: auto;
-      padding: 4px 8px;
-      overflow: hidden;
-      border: 1px solid #d9e1fb;
-      border-radius: 999px;
-      color: #68779d;
-      background: rgba(255,255,255,.78);
-      font-size: 10px;
-      font-weight: 750;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .basis-card.is-individual .basis-scope {
-      color: var(--brand-dark);
-      border-color: #bfcaf3;
-      background: #fff;
-    }
     .basis-list {
       margin: 0;
       padding-left: 20px;
@@ -1718,7 +1699,6 @@
             <div class="basis-card__head">
               <span class="basis-card__icon" aria-hidden="true">✦</span>
               <div class="assist-label">AI 批改依据</div>
-              <span class="basis-scope" id="basisScope">本题整体</span>
             </div>
             <ul class="basis-list" id="basisList"></ul>
           </section>
@@ -2152,7 +2132,6 @@
       const answerValue = document.getElementById("answerValue");
       const explanationText = document.getElementById("explanationText");
       const basisCard = document.querySelector(".basis-card");
-      const basisScope = document.getElementById("basisScope");
       const basisList = document.getElementById("basisList");
       const explanationDetails = document.getElementById("explanationDetails");
       const questionSnapshotButton = document.getElementById("questionSnapshotButton");
@@ -2381,8 +2360,7 @@
         });
       }
 
-      function setBasisContent(items, scope, individual = false) {
-        basisScope.textContent = scope;
+      function setBasisContent(items, individual = false) {
         basisCard.classList.toggle("is-individual", individual);
         basisList.innerHTML = items.map((item, index) =>
           `<li class="${index === 0 ? "is-primary" : ""}">${escapeSnapshotXml(item)}</li>`
@@ -2390,10 +2368,7 @@
       }
 
       function renderOverallBasis(question) {
-        setBasisContent(
-          [`AI按“${isExam ? "得分点" : "结果"} + 关键过程”联合判断`, ...question.basis],
-          "本题整体"
-        );
+        setBasisContent([`AI按“${isExam ? "得分点" : "结果"} + 关键过程”联合判断`, ...question.basis]);
       }
 
       function renderStudentBasis(studentId) {
@@ -2425,7 +2400,7 @@
           ...(group?.reason ? [`主要差异：${group.reason}`] : []),
           ...(group?.basis ? [group.basis] : [])
         ];
-        setBasisContent(items, student.name, true);
+        setBasisContent(items, true);
       }
 
       function renderAssistant() {
