@@ -891,7 +891,7 @@
     .student-workspace {
       min-height: 0;
       display: grid;
-      grid-template-columns: 190px minmax(620px,1fr) 360px;
+      grid-template-columns: 190px minmax(980px,1fr);
       background: #eef2f8;
     }
 
@@ -953,9 +953,33 @@
       box-shadow: 0 10px 22px rgba(63,142,245,.22);
     }
 
+    .student-review {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0,1fr) auto;
+      background: #eef2f8;
+    }
+
+    .student-page-stack {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+
+    .student-page-row {
+      min-height: 980px;
+      display: grid;
+      grid-template-columns: minmax(620px,1fr) 360px;
+      align-items: stretch;
+    }
+
+    .student-page-row + .student-page-row { border-top: 12px solid #d9e1ed; }
+
     .student-paper-stage {
       min-width: 0;
-      overflow: auto;
+      overflow: visible;
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -1050,7 +1074,7 @@
     .student-tool-panel {
       min-height: 0;
       display: grid;
-      grid-template-rows: auto minmax(0,1fr) auto;
+      grid-template-rows: auto minmax(0,1fr);
       border-left: 1px solid var(--line);
       background: rgba(255,255,255,.97);
     }
@@ -1066,9 +1090,8 @@
     .student-tool-page { color: #20293d; font-size: 14px; }
 
     .student-question-tools {
-      overflow: auto;
+      overflow: visible;
       padding: 0 26px 24px;
-      scrollbar-width: thin;
     }
 
     .student-question-tool {
@@ -1157,8 +1180,8 @@
     .student-score-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 11px; }
     .student-score-row input { width: 58px; height: 32px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: #fff; }
 
-    .student-tool-footer { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--line); background: rgba(255,255,255,.98); }
-    .student-tool-footer .button { min-width: 126px; border-radius: 999px; background: #2585f4; box-shadow: 0 9px 20px rgba(37,133,244,.2); }
+    .student-review-footer { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--line); background: rgba(255,255,255,.98); }
+    .student-review-footer .button { min-width: 126px; border-radius: 999px; background: #2585f4; box-shadow: 0 9px 20px rgba(37,133,244,.2); }
 
     @media (max-width: 1180px) {
       body { overflow: auto; }
@@ -1168,7 +1191,7 @@
       .groups-scroll { padding-right: 52px; }
       .result-rail { right: 8px; width: 34px; }
       .result-rail__button { width: 34px; }
-      .student-workspace { min-width: 1050px; }
+      .student-workspace { min-width: 1170px; }
     }
 
     @media (max-width: 900px) {
@@ -1348,19 +1371,12 @@
           </footer>
         </aside>
 
-        <main class="student-paper-stage" aria-label="当前学生作业">
-          <article class="student-paper" id="studentPaper"></article>
-        </main>
-
-        <aside class="student-tool-panel" aria-label="结构化批改工具">
-          <header class="student-tool-head">
-            <strong class="student-tool-page">1/1</strong>
-          </header>
-          <div class="student-question-tools" id="studentQuestionTools"></div>
-          <footer class="student-tool-footer">
+        <section class="student-review" aria-label="当前学生作业与批改工具">
+          <div class="student-page-stack" id="studentPageStack"></div>
+          <footer class="student-review-footer">
             <button class="button primary" id="confirmStudent" type="button">确认本学生批改</button>
           </footer>
-        </aside>
+        </section>
       </section>
     </main>
   </div>
@@ -1626,8 +1642,7 @@
       const questionWorkspace = document.getElementById("questionWorkspace");
       const studentWorkspace = document.getElementById("studentWorkspace");
       const studentList = document.getElementById("studentList");
-      const studentPaper = document.getElementById("studentPaper");
-      const studentQuestionTools = document.getElementById("studentQuestionTools");
+      const studentPageStack = document.getElementById("studentPageStack");
       const confirmStudent = document.getElementById("confirmStudent");
       const confirmAllStudents = document.getElementById("confirmAllStudents");
       const metricCard = document.querySelector(".metric-card");
@@ -1807,8 +1822,17 @@
         `).join("");
       }
 
-      function renderStudentPaper() {
-        studentPaper.innerHTML = `
+      function studentPages() {
+        const size = isExam ? 2 : 3;
+        const pages = [];
+        for (let index = 0; index < questions.length; index += size) {
+          pages.push(questions.slice(index, index + size));
+        }
+        return pages;
+      }
+
+      function studentPaperMarkup(pageQuestions) {
+        return `
           <header class="student-paper-head">
             <div class="student-paper-head__meta">
               <span>${className}</span>
@@ -1816,7 +1840,7 @@
             </div>
             <h2>${taskTitle}</h2>
           </header>
-          ${questions.map((question) => {
+          ${pageQuestions.map((question) => {
             const student = studentAttempt(question);
             const resultMark = student && student.result !== "ungraded"
               ? isExam
@@ -1889,8 +1913,8 @@
         `;
       }
 
-      function renderStudentTools() {
-        studentQuestionTools.innerHTML = questions.map((question) => {
+      function studentToolsMarkup(pageQuestions) {
+        return pageQuestions.map((question) => {
           const student = studentAttempt(question);
           if (!student) {
             return `
@@ -1954,10 +1978,26 @@
         }).join("");
       }
 
+      function renderStudentPages() {
+        const pages = studentPages();
+        studentPageStack.innerHTML = pages.map((pageQuestions, index) => `
+          <section class="student-page-row" data-student-page="${index + 1}">
+            <main class="student-paper-stage" aria-label="第 ${index + 1} 页学生作业">
+              <article class="student-paper">${studentPaperMarkup(pageQuestions)}</article>
+            </main>
+            <aside class="student-tool-panel" aria-label="第 ${index + 1} 页结构化批改工具">
+              <header class="student-tool-head">
+                <strong class="student-tool-page">${index + 1}/${pages.length}</strong>
+              </header>
+              <div class="student-question-tools">${studentToolsMarkup(pageQuestions)}</div>
+            </aside>
+          </section>
+        `).join("");
+      }
+
       function renderStudentWorkspace() {
         renderStudentList();
-        renderStudentPaper();
-        renderStudentTools();
+        renderStudentPages();
         confirmStudent.textContent = studentCompletion.has(activeStudentName) ? "✓ 已确认，可继续检查" : "确认批改";
         confirmAllStudents.textContent = studentCompletion.size === studentNames.length ? "✓ 已确认全部批改" : "一键确认批改";
       }
@@ -1995,9 +2035,10 @@
         if (!button) return;
         activeStudentName = button.dataset.studentName;
         renderStudentWorkspace();
+        studentPageStack.scrollTop = 0;
       });
 
-      studentQuestionTools.addEventListener("click", (event) => {
+      studentPageStack.addEventListener("click", (event) => {
         const partButton = event.target.closest("[data-student-part-result]");
         if (partButton) {
           updateStudentPartResult(partButton.dataset.questionId, partButton.dataset.partIndex, partButton.dataset.studentPartResult);
@@ -2016,7 +2057,7 @@
         showToast(`${activeStudentName} · 第 ${button.dataset.questionId} 题已标记为${labels[button.dataset.studentResult].name}`);
       });
 
-      studentQuestionTools.addEventListener("change", (event) => {
+      studentPageStack.addEventListener("change", (event) => {
         const input = event.target.closest("[data-student-score]");
         if (!input) return;
         const question = questions.find((item) => item.id === Number(input.dataset.questionId));

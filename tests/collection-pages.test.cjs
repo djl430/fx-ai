@@ -384,8 +384,9 @@ test('grading page switches between synchronized question and student modes', ()
 
 test('student grading mode provides a roster, centered paper, and structured tools', () => {
   assert.match(gradingPage, /id="studentList"/);
-  assert.match(gradingPage, /id="studentPaper"/);
-  assert.match(gradingPage, /id="studentQuestionTools"/);
+  assert.match(gradingPage, /id="studentPageStack"/);
+  assert.match(gradingPage, /class="student-paper"/);
+  assert.match(gradingPage, /class="student-question-tools"/);
   assert.match(gradingPage, /id="confirmStudent"/);
   assert.match(gradingPage, /data-student-result/);
   assert.match(gradingPage, /data-student-score/);
@@ -400,9 +401,24 @@ test('student roster omits the summary header', () => {
   assert.match(gradingPage, /\.student-list\s*\{[^}]*padding:\s*12px 10px 16px/s);
 });
 
+test('student grading pairs every paper page with its tools in one scroll stack', () => {
+  assert.match(gradingPage, /id="studentPageStack"/);
+  assert.match(gradingPage, /class="student-page-row"/);
+  assert.match(gradingPage, /function studentPages/);
+  assert.match(gradingPage, /function renderStudentPages/);
+  assert.match(gradingPage, /data-student-page/);
+  assert.match(gradingPage, /studentPageStack\.addEventListener\("click"/);
+});
+
+test('student confirmation lives in the overall review footer', () => {
+  assert.match(gradingPage, /class="student-review-footer"[\s\S]*id="confirmStudent"/);
+  assert.doesNotMatch(gradingPage, /class="student-tool-footer"/);
+  assert.match(gradingPage, /\.student-review\s*\{[^}]*grid-template-rows:\s*minmax\(0,1fr\) auto/s);
+});
+
 test('student grading matches the reference interaction', () => {
   assert.match(gradingPage, /id="confirmAllStudents"[^>]*>一键确认批改</);
-  assert.match(gradingPage, /class="student-tool-page"[^>]*>1\/1</);
+  assert.match(gradingPage, /class="student-tool-page">\$\{index \+ 1\}\/\$\{pages\.length\}</);
   assert.match(gradingPage, /data-student-result="correct"/);
   assert.match(gradingPage, /data-student-result="wrong"/);
   assert.match(gradingPage, /data-student-bulk-result="correct"/);
