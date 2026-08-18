@@ -13,7 +13,7 @@
 ## File Structure
 
 - Modify `grading-by-question-demo.html`: authentic question templates, choice-answer normalization, inline response/mark markup, and paper-specific CSS.
-- Modify `tests/collection-pages.test.cjs`: regression checks for question types, options, in-place answers, and inline grading marks.
+- Modify `tests/collection-pages.test.cjs`: regression checks for question types, options, in-place answers, inline grading marks, and student confirmation button parity.
 
 ### Task 1: Add failing paper-content tests
 
@@ -40,13 +40,20 @@ test('first homework places grading marks beside student responses', () => {
   assert.match(gradingPage, /\.student-paper-mark\.is-inline/);
   assert.match(gradingPage, /usesPaperDirectGrading\s*\?\s*firstHomeworkPaperQuestionMarkup/);
 });
+
+test('student confirmation buttons reuse question grading button shape and color', () => {
+  assert.match(gradingPage, /\.student-roster__footer \.button\s*\{[^}]*min-height:\s*38px[^}]*border-radius:\s*10px/s);
+  assert.match(gradingPage, /\.student-review-footer \.button\s*\{[^}]*min-height:\s*38px[^}]*border-radius:\s*10px/s);
+  assert.doesNotMatch(gradingPage, /\.student-roster__footer \.button\s*\{[^}]*#73c9f3/s);
+  assert.doesNotMatch(gradingPage, /\.student-review-footer \.button\s*\{[^}]*#2585f4/s);
+});
 ```
 
 - [ ] **Step 2: Verify the tests fail for missing authentic paper helpers**
 
 Run: `node --test --test-name-pattern='first homework paper|places grading marks' tests/collection-pages.test.cjs`
 
-Expected: FAIL because the dedicated renderer, option content, response wrapper, and inline mark class do not exist.
+Expected: FAIL because the dedicated renderer, option content, response wrapper, inline mark class, and matching student button styles do not exist.
 
 ### Task 2: Implement authentic question paper rendering
 
@@ -120,7 +127,25 @@ function firstHomeworkPaperQuestionMarkup(question, student, resultMark) {
 
 Generate the first task mark as `<span class="student-paper-mark is-inline">…</span>` and call the task-specific renderer only when `usesPaperDirectGrading` is true. Generic tasks continue to render the existing top-right mark and generic content.
 
-- [ ] **Step 5: Verify the focused tests pass**
+- [ ] **Step 5: Match student-view confirmation buttons to question grading**
+
+```css
+.student-roster__footer .button {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 10px;
+}
+
+.student-review-footer .button {
+  min-width: 178px;
+  min-height: 38px;
+  border-radius: 10px;
+}
+```
+
+These geometry-only rules allow both buttons to inherit the shared `.button.primary` deep-blue gradient and shadow.
+
+- [ ] **Step 6: Verify the focused tests pass**
 
 Run: `node --test --test-name-pattern='first homework paper|places grading marks' tests/collection-pages.test.cjs`
 
