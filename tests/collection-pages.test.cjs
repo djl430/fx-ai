@@ -473,6 +473,27 @@ test('student confirmation buttons reuse question grading button shape and color
   assert.doesNotMatch(gradingPage, /\.student-review-footer \.button\s*\{[^}]*#2585f4/s);
 });
 
+test('first homework shows a standard answer card beside the active paper question', () => {
+  assert.match(gradingPage, /function studentAnswerPeekMarkup/);
+  assert.match(gradingPage, /class="student-answer-peek"/);
+  assert.match(gradingPage, />标准答案</);
+  assert.match(gradingPage, /role="note"/);
+  assert.match(gradingPage, /aria-describedby="studentAnswerPeek-/);
+  assert.match(gradingPage, /开口向上/);
+  assert.match(gradingPage, /对称轴 x = 2/);
+  assert.match(gradingPage, /顶点（2，−1）/);
+});
+
+test('answer peek follows hover focus and recent paper grading', () => {
+  assert.match(gradingPage, /\.student-paper-question\[data-student-paper-question\]:hover \.student-answer-peek/);
+  assert.match(gradingPage, /\.student-paper-question\[data-student-paper-question\]:focus-visible \.student-answer-peek/);
+  assert.match(gradingPage, /\.student-paper-question\.is-answer-pinned \.student-answer-peek/);
+  assert.match(gradingPage, /function pinStudentPaperAnswer/);
+  assert.match(gradingPage, /setTimeout\([\s\S]*1600/);
+  assert.match(gradingPage, /focus\(\{ preventScroll: true \}\)/);
+  assert.match(gradingPage, /@media \(max-width: 1400px\)[\s\S]*\.student-answer-peek/);
+});
+
 test('question grading uses the one-click confirmation label', () => {
   assert.match(gradingPage, /id="confirmAll">一键确认批改</);
   assert.match(gradingPage, /confirmAllButton\.textContent = isExam \? "确认全部题目赋分" : "一键确认批改"/);

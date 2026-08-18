@@ -1154,6 +1154,66 @@
     .student-paper-mark.is-inline .mark-icon.partial,
     .student-paper-mark.is-inline .mark-icon.wrong { width: 29px; height: 29px; }
 
+    .student-answer-peek {
+      position: absolute;
+      top: 0;
+      right: calc(100% + 22px);
+      z-index: 8;
+      width: 188px;
+      padding: 13px 14px;
+      border: 1px solid #d8dfef;
+      border-radius: 12px;
+      color: #34405a;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 14px 34px rgba(39,57,99,.16);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity .14s ease, transform .14s ease;
+    }
+
+    .student-answer-peek::after {
+      content: "";
+      position: absolute;
+      top: 18px;
+      right: -7px;
+      border-width: 7px 0 7px 7px;
+      border-style: solid;
+      border-color: transparent transparent transparent #fff;
+    }
+
+    .student-answer-peek__label {
+      display: block;
+      color: var(--brand);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .student-answer-peek strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .student-answer-peek ul {
+      margin: 8px 0 0;
+      padding: 8px 0 0 16px;
+      border-top: 1px solid var(--line);
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .student-paper-question[data-student-paper-question]:hover .student-answer-peek,
+    .student-paper-question[data-student-paper-question]:focus-visible .student-answer-peek,
+    .student-paper-question.is-answer-pinned .student-answer-peek {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
     .student-paper-score {
       position: absolute;
       top: 2px;
@@ -1286,6 +1346,24 @@
       min-height: 38px;
       border-radius: 10px;
       box-shadow: 0 12px 26px rgba(79,102,216,.20);
+    }
+
+    @media (max-width: 1400px) {
+      .student-answer-peek {
+        top: -8px;
+        right: auto;
+        left: 12px;
+        width: 230px;
+        transform: translateY(-100%) translateY(-6px);
+      }
+
+      .student-answer-peek::after { display: none; }
+
+      .student-paper-question[data-student-paper-question]:hover .student-answer-peek,
+      .student-paper-question[data-student-paper-question]:focus-visible .student-answer-peek,
+      .student-paper-question.is-answer-pinned .student-answer-peek {
+        transform: translateY(-100%);
+      }
     }
 
     @media (max-width: 1180px) {
@@ -1895,6 +1973,7 @@
       const studentCompletion = new Set();
       const studentNames = [...new Set(questions.flatMap((question) => question.students.map((student) => student.name)))];
       let activeStudentName = studentNames[0] || "";
+      let studentAnswerPinTimer = null;
 
       function studentAttempt(question, name = activeStudentName) {
         return question.students.find((student) => student.name === name) || null;
@@ -1992,6 +2071,21 @@
         }
       }
 
+      function studentAnswerPeekMarkup(question) {
+        const scoringPoints = question.id === 4
+          ? ["x＜2 时递减", "x＞2 时递增"]
+          : question.id === 6
+            ? ["开口向上", "对称轴 x = 2", "顶点（2，−1）"]
+            : [];
+        return `
+          <aside class="student-answer-peek" id="studentAnswerPeek-${question.id}" role="note">
+            <span class="student-answer-peek__label">标准答案</span>
+            <strong>${question.answer}</strong>
+            ${scoringPoints.length ? `<ul>${scoringPoints.map((point) => `<li>${point}</li>`).join("")}</ul>` : ""}
+          </aside>
+        `;
+      }
+
       function studentPaperMarkup(pageQuestions) {
         return `
           <header class="student-paper-head">
@@ -2005,7 +2099,7 @@
             const student = studentAttempt(question);
             const currentResult = student?.result || "ungraded";
             const directGradingAttributes = usesPaperDirectGrading
-              ? `data-student-paper-question="${question.id}" role="button" tabindex="0" aria-label="第${question.id}题，当前${labels[currentResult].name}，点击切换批改结果"`
+              ? `data-student-paper-question="${question.id}" role="button" tabindex="0" aria-label="第${question.id}题，当前${labels[currentResult].name}，点击切换批改结果" aria-describedby="studentAnswerPeek-${question.id}"`
               : "";
             const resultMark = student && student.result !== "ungraded"
               ? isExam
@@ -2014,8 +2108,11 @@
                   ? `<span class="student-paper-mark is-inline"><span class="mark-icon ${student.result}"></span></span>`
                   : `<span class="student-paper-mark"><span class="mark-icon ${student.result}"></span></span>`
               : "";
-            const paperQuestionContent = usesPaperDirectGrading
+            const directPaperQuestionContent = usesPaperDirectGrading
               ? firstHomeworkPaperQuestionMarkup(question, student, resultMark)
+              : "";
+            const paperQuestionContent = usesPaperDirectGrading
+              ? `${directPaperQuestionContent}${studentAnswerPeekMarkup(question)}`
               : `
                 <strong>第 ${question.id} 题 · ${question.title}</strong>
                 <p>${question.type}</p>
@@ -2192,6 +2289,15 @@
         renderStudentWorkspace();
       }
 
+      function pinStudentPaperAnswer(questionId) {
+        window.clearTimeout(studentAnswerPinTimer);
+        studentPageStack.querySelectorAll(".is-answer-pinned").forEach((item) => item.classList.remove("is-answer-pinned"));
+        const question = studentPageStack.querySelector(`[data-student-paper-question="${questionId}"]`);
+        if (!question) return;
+        question.classList.add("is-answer-pinned");
+        studentAnswerPinTimer = window.setTimeout(() => question.classList.remove("is-answer-pinned"), 1600);
+      }
+
       function cycleStudentPaperResult(questionId) {
         const question = questions.find((item) => item.id === Number(questionId));
         const student = question?.students.find((item) => item.name === activeStudentName);
@@ -2203,6 +2309,7 @@
           partial: "correct"
         }[student.result] || "correct";
         updateStudentResult(questionId, nextResult);
+        pinStudentPaperAnswer(questionId);
         showToast(`${activeStudentName} · 第 ${questionId} 题已标记为${labels[nextResult].name}`);
       }
 
@@ -2260,7 +2367,9 @@
         const paperQuestion = event.target.closest("[data-student-paper-question]");
         if (!paperQuestion) return;
         event.preventDefault();
-        cycleStudentPaperResult(paperQuestion.dataset.studentPaperQuestion);
+        const questionId = paperQuestion.dataset.studentPaperQuestion;
+        cycleStudentPaperResult(questionId);
+        studentPageStack.querySelector(`[data-student-paper-question="${questionId}"]`)?.focus({ preventScroll: true });
       });
 
       studentPageStack.addEventListener("change", (event) => {
