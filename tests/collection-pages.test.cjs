@@ -448,6 +448,31 @@ test('first homework omits structured tools and highlights paper questions', () 
   assert.match(gradingPage, /\.student-paper-question\[data-student-paper-question\]:focus-visible/);
 });
 
+test('first homework paper renders type-appropriate question content', () => {
+  assert.match(gradingPage, /function firstHomeworkPaperQuestionMarkup/);
+  assert.match(gradingPage, /二次函数 y = 2x² − 4x \+ 1 的图像开口方向是/);
+  for (const option of ['A. 向下', 'B. 向上', 'C. 向左', 'D. 向右']) {
+    assert.match(gradingPage, new RegExp(option.replace('.', '\\.')));
+  }
+  assert.match(gradingPage, /function studentChoiceSelection/);
+  assert.match(gradingPage, /求函数 y = x² − 4x \+ 3 的对称轴/);
+  assert.match(gradingPage, /写出函数在对称轴两侧的增减性/);
+});
+
+test('first homework places grading marks beside student responses', () => {
+  assert.match(gradingPage, /class="student-paper-response/);
+  assert.match(gradingPage, /student-paper-mark is-inline/);
+  assert.match(gradingPage, /\.student-paper-mark\.is-inline/);
+  assert.match(gradingPage, /usesPaperDirectGrading\s*\?\s*firstHomeworkPaperQuestionMarkup/);
+});
+
+test('student confirmation buttons reuse question grading button shape and color', () => {
+  assert.match(gradingPage, /\.student-roster__footer \.button\s*\{[^}]*min-height:\s*38px[^}]*border-radius:\s*10px/s);
+  assert.match(gradingPage, /\.student-review-footer \.button\s*\{[^}]*min-height:\s*38px[^}]*border-radius:\s*10px/s);
+  assert.doesNotMatch(gradingPage, /\.student-roster__footer \.button\s*\{[^}]*#73c9f3/s);
+  assert.doesNotMatch(gradingPage, /\.student-review-footer \.button\s*\{[^}]*#2585f4/s);
+});
+
 test('question grading uses the one-click confirmation label', () => {
   assert.match(gradingPage, /id="confirmAll">一键确认批改</);
   assert.match(gradingPage, /confirmAllButton\.textContent = isExam \? "确认全部题目赋分" : "一键确认批改"/);
