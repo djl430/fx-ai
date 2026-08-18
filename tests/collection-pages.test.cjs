@@ -366,14 +366,16 @@ test('grading page removes the diagnosis entry and modal', () => {
   assert.doesNotMatch(gradingPage, /diagnosis:\s*document\.getElementById/);
 });
 
-test('grading page exposes a four-state sticky result navigation rail', () => {
-  assert.match(gradingPage, /id="resultRail"/);
-  assert.match(gradingPage, /\.result-rail\s*\{[^}]*position:\s*absolute/s);
-  for (const result of ['correct', 'partial', 'wrong', 'ungraded']) {
-    assert.match(gradingPage, new RegExp(`data-result-target="${result}"`));
+test('grading page exposes a four-state top result navigation', () => {
+  assert.match(gradingPage, /<div class="answer-toolbar">[\s\S]*?<nav class="result-navigation" id="resultNavigation"[\s\S]*?<div class="density-control"/);
+  const labels = { correct: '正确', partial: '半对', wrong: '错误', ungraded: '未批改' };
+  for (const [result, label] of Object.entries(labels)) {
+    assert.match(gradingPage, new RegExp(`class="result-navigation__button[^\"]*"[^>]*data-result-target="${result}"[^>]*>${label}<`));
   }
   assert.match(gradingPage, /scrollTo\(\{[\s\S]*behavior:\s*"smooth"/);
   assert.match(gradingPage, /groupsScroll\.addEventListener\("scroll"/);
+  assert.match(gradingPage, /function setActiveResultNavigation/);
+  assert.match(gradingPage, /function syncResultNavigation/);
   assert.match(gradingPage, /aria-current/);
   assert.match(gradingPage, /groupsScroll\.scrollTop \+ groupsScroll\.clientHeight >= groupsScroll\.scrollHeight - 2/);
 });
@@ -571,15 +573,14 @@ test('question grading uses the one-click confirmation label', () => {
   assert.match(gradingPage, /isExam \? "✓ 已确认全部题目赋分" : "✓ 已确认全部批改"/);
 });
 
-test('grading result rail contains only four functional lines', () => {
-  assert.equal((gradingPage.match(/data-result-target=/g) || []).length, 4);
-  assert.doesNotMatch(gradingPage, /\.result-rail::before/);
-  assert.doesNotMatch(gradingPage, /repeating-linear-gradient\(to bottom, #cbd2de/);
-});
-
-test('grading result rail is compact and vertically centered', () => {
-  assert.match(gradingPage, /\.result-rail\s*\{[^}]*top:\s*50%[^}]*bottom:\s*auto[^}]*height:\s*84px[^}]*gap:\s*4px[^}]*transform:\s*translateY\(-50%\)/s);
-  assert.match(gradingPage, /\.result-rail__button\s*\{[^}]*height:\s*18px/s);
+test('grading result navigation replaces the side rail', () => {
+  assert.equal((gradingPage.match(/<button class="result-navigation__button[^>]*data-result-target=/g) || []).length, 4);
+  assert.doesNotMatch(gradingPage, /class="result-rail/);
+  assert.doesNotMatch(gradingPage, /\.result-rail/);
+  assert.doesNotMatch(gradingPage, /id="resultRail"/);
+  assert.match(gradingPage, /\.result-navigation\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*repeat\(4,\s*minmax\(72px,\s*1fr\)\)/s);
+  assert.match(gradingPage, /\.result-navigation__button\.is-active::after/);
+  assert.match(gradingPage, /\.groups-scroll\s*\{[^}]*padding:\s*20px/s);
 });
 
 test('task cards expose grading, insights, and review actions', () => {
