@@ -379,6 +379,19 @@ test('question grading shows a clickable stem snapshot above the answer', () => 
   assert.match(gradingPage, /二次函数 y = 2x² − 4x \+ 1 的图像开口方向/);
 });
 
+test('question grading swaps overall AI basis for student basis on hover', () => {
+  assert.match(gradingPage, /id="basisScope">本题整体<\/span>/);
+  assert.match(gradingPage, /function renderOverallBasis\(question\)/);
+  assert.match(gradingPage, /function renderStudentBasis\(studentId\)/);
+  assert.match(gradingPage, /data-student-card="\$\{student\.id\}"/);
+  assert.match(gradingPage, /card\.addEventListener\("mouseenter", \(\) => renderStudentBasis\(card\.dataset\.studentCard\)\)/);
+  assert.match(gradingPage, /card\.addEventListener\("mouseleave", \(\) => renderOverallBasis\(activeQuestion\(\)\)\)/);
+  assert.match(gradingPage, /card\.addEventListener\("focusin", \(\) => renderStudentBasis\(card\.dataset\.studentCard\)\)/);
+  assert.match(gradingPage, /card\.addEventListener\("focusout"/);
+  assert.match(gradingPage, /basisCard\.classList\.toggle\("is-individual", individual\)/);
+  assert.match(gradingPage, /renderStudentBasis\(studentId\);/);
+});
+
 test('grading page exposes a four-state top result navigation', () => {
   assert.match(gradingPage, /<div class="answer-toolbar">[\s\S]*?<nav class="result-navigation" id="resultNavigation"[\s\S]*?<div class="density-control"/);
   const labels = { correct: '正确', partial: '半对', wrong: '错误', ungraded: '未批改' };
