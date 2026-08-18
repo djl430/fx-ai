@@ -418,6 +418,11 @@ test('grading result rail contains only four functional lines', () => {
   assert.doesNotMatch(gradingPage, /repeating-linear-gradient\(to bottom, #cbd2de/);
 });
 
+test('grading result rail is compact and vertically centered', () => {
+  assert.match(gradingPage, /\.result-rail\s*\{[^}]*top:\s*50%[^}]*bottom:\s*auto[^}]*height:\s*84px[^}]*gap:\s*4px[^}]*transform:\s*translateY\(-50%\)/s);
+  assert.match(gradingPage, /\.result-rail__button\s*\{[^}]*height:\s*18px/s);
+});
+
 test('task cards expose grading, insights, and review actions', () => {
   assert.match(indexPage, /class="task-actions"/);
   assert.match(indexPage, /data-action="open-task"[^>]*data-task-id="\$\{task\.id\}"[^>]*>批改</);
