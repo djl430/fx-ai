@@ -388,6 +388,20 @@ test('student grading mode provides a roster, centered paper, and structured too
   assert.match(gradingPage, /function renderStudentWorkspace/);
 });
 
+test('student grading matches the reference interaction', () => {
+  assert.match(gradingPage, /id="confirmAllStudents"[^>]*>一键确认批改</);
+  assert.match(gradingPage, /class="student-tool-page"[^>]*>1\/1</);
+  assert.match(gradingPage, /data-student-result="correct"/);
+  assert.match(gradingPage, /data-student-result="wrong"/);
+  assert.match(gradingPage, /data-student-bulk-result="correct"/);
+  assert.match(gradingPage, /data-student-bulk-result="wrong"/);
+  assert.match(gradingPage, /data-student-part-result/);
+  assert.match(gradingPage, /function studentQuestionParts/);
+  assert.match(gradingPage, /function updateStudentPartResult/);
+  assert.match(gradingPage, /function confirmAllGradingResults/);
+  assert.match(gradingPage, /confirmAllStudents\.addEventListener/);
+});
+
 test('grading result rail contains only four functional lines', () => {
   assert.equal((gradingPage.match(/data-result-target=/g) || []).length, 4);
   assert.doesNotMatch(gradingPage, /\.result-rail::before/);

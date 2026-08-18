@@ -898,7 +898,7 @@
     .student-roster {
       min-height: 0;
       display: grid;
-      grid-template-rows: auto minmax(0,1fr);
+      grid-template-rows: auto minmax(0,1fr) auto;
       border-right: 1px solid var(--line);
       background: rgba(247,249,253,.96);
     }
@@ -947,6 +947,20 @@
     .student-list-item small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
     .student-list-item small.is-confirmed { color: var(--green); font-weight: 800; }
     .student-list-item b { color: var(--brand-dark); font-size: 12px; }
+
+    .student-roster__footer {
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.94);
+    }
+
+    .student-roster__footer .button {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 999px;
+      background: linear-gradient(135deg,#73c9f3,#3f8ef5);
+      box-shadow: 0 10px 22px rgba(63,142,245,.22);
+    }
 
     .student-paper-stage {
       min-width: 0;
@@ -1053,32 +1067,75 @@
     .student-tool-head {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 15px 16px;
+      min-height: 68px;
+      padding: 0 26px;
       border-bottom: 1px solid var(--line);
     }
 
-    .student-tool-head span { display: block; color: var(--muted); font-size: 10px; }
-    .student-tool-head strong { display: block; margin-top: 3px; font-size: 14px; }
-    .student-tool-head > b { color: var(--brand-dark); font-size: 11px; }
+    .student-tool-page { color: #20293d; font-size: 14px; }
 
     .student-question-tools {
       overflow: auto;
-      padding: 4px 14px 18px;
+      padding: 0 26px 24px;
       scrollbar-width: thin;
     }
 
     .student-question-tool {
-      padding: 14px 0;
+      padding: 23px 0 21px;
       border-bottom: 1px solid var(--line);
     }
 
     .student-question-tool__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .student-question-tool__head strong { font-size: 13px; }
-    .student-question-tool__head span { color: var(--muted); font-size: 10px; }
-    .student-tool-answer { margin: 8px 0 0; color: #4f5870; font-size: 12px; line-height: 1.5; }
+    .student-question-tool__head > strong { color: #1e2738; font-size: 13px; }
+    .student-tool-answer { margin: 15px 0 0; color: #252d3d; font-size: 13px; line-height: 1.6; }
     .student-tool-answer.is-empty { color: #a1aabc; }
+
+    .student-judge-group { display: flex; align-items: center; gap: 4px; }
+
+    .student-judge-button {
+      min-width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 8px;
+      border: 0;
+      border-radius: 999px;
+      color: #253044;
+      background: transparent;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: 800;
+      transition: .16s ease;
+    }
+
+    .student-judge-button:hover { background: #f3f6fb; }
+    .student-judge-button.is-active[data-student-result="correct"],
+    .student-judge-button.is-active[data-student-bulk-result="correct"],
+    .student-judge-button.is-active[data-student-part-result="correct"] {
+      color: #1dbd6d;
+      box-shadow: inset 0 0 0 2px #35c97b;
+      background: #edfff5;
+    }
+
+    .student-judge-button.is-active[data-student-result="wrong"],
+    .student-judge-button.is-active[data-student-bulk-result="wrong"],
+    .student-judge-button.is-active[data-student-part-result="wrong"] {
+      color: #ff565a;
+      box-shadow: inset 0 0 0 2px #ff6468;
+      background: #fff4f4;
+    }
+
+    .student-judge-button.with-label { width: auto; padding-inline: 7px 9px; border-radius: 8px; font-size: 12px; }
+    .student-judge-button.with-label i { font-style: normal; font-size: 20px; line-height: 1; }
+    .student-tool-menu { width: 28px; height: 28px; margin-left: 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font-size: 17px; letter-spacing: .08em; }
+    .student-tool-menu:hover { background: #f3f6fb; }
+
+    .student-part-list { display: grid; gap: 5px; margin-top: 12px; padding-left: 48px; }
+    .student-part-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; }
+    .student-part-row > span { color: #31394a; font-size: 13px; }
+    .student-part-row .student-judge-button { height: 30px; min-width: 30px; }
 
     .student-result-options {
       display: grid;
@@ -1109,8 +1166,8 @@
     .student-score-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 11px; }
     .student-score-row input { width: 58px; height: 32px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: #fff; }
 
-    .student-tool-footer { padding: 12px 14px; border-top: 1px solid var(--line); background: rgba(250,252,255,.96); }
-    .student-tool-footer .button { width: 100%; }
+    .student-tool-footer { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--line); background: rgba(255,255,255,.98); }
+    .student-tool-footer .button { min-width: 126px; border-radius: 999px; background: #2585f4; box-shadow: 0 9px 20px rgba(37,133,244,.2); }
 
     @media (max-width: 1180px) {
       body { overflow: auto; }
@@ -1300,6 +1357,9 @@
             <span id="studentProgress"></span>
           </div>
           <nav class="student-list" id="studentList" aria-label="选择学生"></nav>
+          <footer class="student-roster__footer">
+            <button class="button primary" id="confirmAllStudents" type="button">一键确认批改</button>
+          </footer>
         </aside>
 
         <main class="student-paper-stage" aria-label="当前学生作业">
@@ -1308,11 +1368,7 @@
 
         <aside class="student-tool-panel" aria-label="结构化批改工具">
           <header class="student-tool-head">
-            <div>
-              <span>结构化批改</span>
-              <strong id="studentToolName"></strong>
-            </div>
-            <b id="studentToolSummary"></b>
+            <strong class="student-tool-page">1/1</strong>
           </header>
           <div class="student-question-tools" id="studentQuestionTools"></div>
           <footer class="student-tool-footer">
@@ -1591,9 +1647,8 @@
       const studentProgress = document.getElementById("studentProgress");
       const studentPaper = document.getElementById("studentPaper");
       const studentQuestionTools = document.getElementById("studentQuestionTools");
-      const studentToolName = document.getElementById("studentToolName");
-      const studentToolSummary = document.getElementById("studentToolSummary");
       const confirmStudent = document.getElementById("confirmStudent");
+      const confirmAllStudents = document.getElementById("confirmAllStudents");
       const metricCard = document.querySelector(".metric-card");
       const metricLabel = document.getElementById("metricLabel");
       const accuracyValue = document.getElementById("accuracyValue");
@@ -1800,29 +1855,120 @@
         `;
       }
 
+      function studentQuestionParts(question, student) {
+        const isCompound = !isExam && (question.answer.includes("；") || question.id === 4);
+        if (!isCompound) return [];
+        const expected = question.answer.split(/[；，]/).map((part) => part.trim()).filter(Boolean);
+        const answers = String(student.answer || "").split(/[；，]/).map((part) => part.trim()).filter(Boolean);
+        if (!Array.isArray(student.partResults) || student.partResults.length !== expected.length) {
+          student.partResults = expected.map((_, index) => {
+            if (student.result === "correct" || student.result === "wrong" || student.result === "ungraded") return student.result;
+            return index === 0 ? "correct" : "wrong";
+          });
+        }
+        return expected.map((expectedAnswer, index) => ({
+          label: `空${index + 1}`,
+          answer: answers[index] || expectedAnswer,
+          result: student.partResults[index]
+        }));
+      }
+
+      function syncStudentResultFromParts(student) {
+        if (student.partResults.every((result) => result === "correct")) student.result = "correct";
+        else if (student.partResults.every((result) => result === "wrong")) student.result = "wrong";
+        else if (student.partResults.every((result) => result === "ungraded")) student.result = "ungraded";
+        else student.result = "partial";
+      }
+
+      function updateStudentPartResult(questionId, partIndex, result) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const student = question?.students.find((item) => item.name === activeStudentName);
+        if (!student || !["correct", "wrong"].includes(result)) return;
+        studentQuestionParts(question, student);
+        student.partResults[Number(partIndex)] = result;
+        syncStudentResultFromParts(student);
+        studentCompletion.delete(activeStudentName);
+        renderStudentWorkspace();
+      }
+
+      function updateStudentBulkResult(questionId, result) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const student = question?.students.find((item) => item.name === activeStudentName);
+        if (!student || !["correct", "wrong"].includes(result)) return;
+        const parts = studentQuestionParts(question, student);
+        student.partResults = parts.map(() => result);
+        student.result = result;
+        studentCompletion.delete(activeStudentName);
+        renderStudentWorkspace();
+      }
+
+      function judgeButtons(question, student, attribute = "data-student-result") {
+        return `
+          <button class="student-judge-button ${student.result === "correct" ? "is-active" : ""}" type="button" ${attribute}="correct" data-question-id="${question.id}" aria-label="第${question.id}题正确">✓</button>
+          <button class="student-judge-button ${student.result === "wrong" ? "is-active" : ""}" type="button" ${attribute}="wrong" data-question-id="${question.id}" aria-label="第${question.id}题错误">×</button>
+        `;
+      }
+
       function renderStudentTools() {
-        studentToolName.textContent = activeStudentName;
-        studentToolSummary.textContent = `${isExam ? "得分率" : "正确率"} ${studentAccuracy(activeStudentName)}%`;
         studentQuestionTools.innerHTML = questions.map((question) => {
           const student = studentAttempt(question);
           if (!student) {
             return `
               <section class="student-question-tool">
-                <div class="student-question-tool__head"><strong>第 ${question.id} 题</strong><span>${question.title}</span></div>
+                <div class="student-question-tool__head"><strong>题${question.id}</strong><button class="student-tool-menu" type="button" aria-label="更多操作">···</button></div>
                 <p class="student-tool-answer is-empty">暂无作答</p>
               </section>
             `;
           }
-          const controls = isExam
-            ? `<label class="student-score-row">得分 <input type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" data-student-score data-question-id="${question.id}"> / ${maxScore(question)} 分</label>`
-            : `<div class="student-result-options">${order.map((result) => `
-                <button class="student-result-option ${student.result === result ? "active" : ""}" type="button" data-student-result="${result}" data-question-id="${question.id}">${labels[result].name}</button>
-              `).join("")}</div>`;
+
+          if (isExam) {
+            return `
+              <section class="student-question-tool">
+                <div class="student-question-tool__head"><strong>题${question.id}</strong><button class="student-tool-menu" type="button" aria-label="更多操作">···</button></div>
+                <p class="student-tool-answer">答案：${student.answer}</p>
+                <label class="student-score-row">得分 <input type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" data-student-score data-question-id="${question.id}"> / ${maxScore(question)} 分</label>
+              </section>
+            `;
+          }
+
+          const parts = studentQuestionParts(question, student);
+          if (parts.length) {
+            const allCorrect = student.partResults.every((result) => result === "correct");
+            const allWrong = student.partResults.every((result) => result === "wrong");
+            return `
+              <section class="student-question-tool">
+                <div class="student-question-tool__head">
+                  <strong>题${question.id}</strong>
+                  <div class="student-judge-group">
+                    <button class="student-judge-button with-label ${allCorrect ? "is-active" : ""}" type="button" data-student-bulk-result="correct" data-question-id="${question.id}"><i>✓</i><span>全对</span></button>
+                    <button class="student-judge-button with-label ${allWrong ? "is-active" : ""}" type="button" data-student-bulk-result="wrong" data-question-id="${question.id}"><i>×</i><span>全错</span></button>
+                    <button class="student-tool-menu" type="button" aria-label="更多操作">···</button>
+                  </div>
+                </div>
+                <div class="student-part-list">${parts.map((part, index) => `
+                  <div class="student-part-row">
+                    <span>${part.label}</span>
+                    <div class="student-judge-group">
+                      <button class="student-judge-button ${part.result === "correct" ? "is-active" : ""}" type="button" data-student-part-result="correct" data-question-id="${question.id}" data-part-index="${index}" aria-label="${part.label}正确">✓</button>
+                      <button class="student-judge-button ${part.result === "wrong" ? "is-active" : ""}" type="button" data-student-part-result="wrong" data-question-id="${question.id}" data-part-index="${index}" aria-label="${part.label}错误">×</button>
+                    </div>
+                  </div>
+                `).join("")}</div>
+                <p class="student-tool-answer">答案：${student.answer}</p>
+              </section>
+            `;
+          }
+
           return `
             <section class="student-question-tool">
-              <div class="student-question-tool__head"><strong>第 ${question.id} 题</strong><span>${question.title}</span></div>
+              <div class="student-question-tool__head">
+                <strong>题${question.id}</strong>
+                <div class="student-judge-group">
+                  ${judgeButtons(question, student)}
+                  <button class="student-tool-menu" type="button" aria-label="更多操作">···</button>
+                </div>
+              </div>
               <p class="student-tool-answer">答案：${student.answer}</p>
-              ${controls}
             </section>
           `;
         }).join("");
@@ -1832,7 +1978,8 @@
         renderStudentList();
         renderStudentPaper();
         renderStudentTools();
-        confirmStudent.textContent = studentCompletion.has(activeStudentName) ? "✓ 已确认，可继续检查" : "确认本学生批改";
+        confirmStudent.textContent = studentCompletion.has(activeStudentName) ? "✓ 已确认，可继续检查" : "确认批改";
+        confirmAllStudents.textContent = studentCompletion.size === studentNames.length ? "✓ 已确认全部批改" : "一键确认批改";
       }
 
       function updateStudentResult(questionId, result) {
@@ -1840,6 +1987,7 @@
         const student = question?.students.find((item) => item.name === activeStudentName);
         if (!student || !labels[result]) return;
         student.result = result;
+        delete student.partResults;
         if (isExam) student.score = defaultScoreForResult(result, question);
         studentCompletion.delete(activeStudentName);
         renderStudentWorkspace();
@@ -1870,6 +2018,18 @@
       });
 
       studentQuestionTools.addEventListener("click", (event) => {
+        const partButton = event.target.closest("[data-student-part-result]");
+        if (partButton) {
+          updateStudentPartResult(partButton.dataset.questionId, partButton.dataset.partIndex, partButton.dataset.studentPartResult);
+          showToast(`${activeStudentName} · 第 ${partButton.dataset.questionId} 题${Number(partButton.dataset.partIndex) + 1}空已更新`);
+          return;
+        }
+        const bulkButton = event.target.closest("[data-student-bulk-result]");
+        if (bulkButton) {
+          updateStudentBulkResult(bulkButton.dataset.questionId, bulkButton.dataset.studentBulkResult);
+          showToast(`${activeStudentName} · 第 ${bulkButton.dataset.questionId} 题已设为${bulkButton.dataset.studentBulkResult === "correct" ? "全对" : "全错"}`);
+          return;
+        }
         const button = event.target.closest("[data-student-result]");
         if (!button) return;
         updateStudentResult(button.dataset.questionId, button.dataset.studentResult);
@@ -1909,6 +2069,11 @@
         showToast(nextStudent
           ? `已确认 ${confirmedName}，自动进入 ${nextStudent}`
           : `全部 ${studentNames.length} 名学生已确认`);
+      });
+
+      confirmAllStudents.addEventListener("click", () => {
+        confirmAllGradingResults();
+        renderStudentWorkspace();
       });
 
       let resultRailFrame = 0;
@@ -2047,6 +2212,7 @@
         const studentsInGroup = question.students.filter(student => student.groupId === groupId);
         studentsInGroup.forEach(student => {
           student.result = result;
+          delete student.partResults;
           const paper = groupsScroll.querySelector(`.answer-paper[data-student="${student.id}"]`);
           if (paper) renderCardResult(paper.closest(".student-card"), paper, student, question);
         });
@@ -2136,6 +2302,7 @@
 
         const oldResult = student.result;
         student.result = cycle[oldResult];
+        delete student.partResults;
         renderCardResult(paper.closest(".student-card"), paper, student, question);
         showToast(`${student.name}：${labels[oldResult].name} → ${labels[student.result].name}`);
       }
@@ -2182,7 +2349,8 @@
         });
       });
 
-      confirmAllButton.addEventListener("click", () => {
+      function confirmAllGradingResults() {
+        studentNames.forEach((name) => studentCompletion.add(name));
         questions.forEach((question) => {
           question.status = "completed";
           gradingProgress = FxCollectionFlow.markQuestionCompleted(gradingProgress, gradingProgressKey, question.id);
@@ -2192,7 +2360,9 @@
         persistTaskCompletionIfReady();
         showTaskCompletion();
         showToast(`已确认全部 ${questions.length} 道题的${isExam ? "赋分" : "批改"}结果`);
-      });
+      }
+
+      confirmAllButton.addEventListener("click", confirmAllGradingResults);
 
       confirmQuestionButton.addEventListener("click", () => {
         const currentIndex = questions.findIndex(question => question.id === activeQuestionId);
