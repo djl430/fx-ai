@@ -568,3 +568,11 @@ test('task cards expose grading, insights, and review actions', () => {
   assert.match(indexPage, /action\.dataset\.action === "open-insights"/);
   assert.match(indexPage, /action\.dataset\.action === "open-review"/);
 });
+
+test('tasks hide all actions while AI analysis is in progress', () => {
+  assert.match(indexPage, /const isAnalyzing = task\.status === "AI分析中" \|\| listTag === "AI分析中"/);
+  assert.match(indexPage, /function taskActionButtons\(task\)/);
+  assert.match(indexPage, /const taskActions = isAnalyzing \? "" : taskActionButtons\(task\)/);
+  assert.match(indexPage, /<span class="task-actions"[^>]*>\s*\$\{taskActions\}\s*<\/span>/);
+  assert.match(indexPage, /actions\.innerHTML = task\.status === "AI分析中" \? "" : taskActionButtons\(task\)/);
+});
