@@ -111,52 +111,52 @@
       text-overflow: ellipsis;
     }
 
-    .grading-mode-switch {
-      display: inline-flex;
-      padding: 3px;
-      border: 1px solid var(--line);
-      border-radius: 11px;
-      background: #f3f6fc;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
-    }
-
     .grading-mode-dock {
-      padding: 12px 10px 9px;
+      padding: 12px 10px;
       border-bottom: 1px solid var(--line);
       background: rgba(255,255,255,.58);
     }
 
-    .grading-mode-switch--rail { width: 100%; }
-    .grading-mode-switch--rail .grading-mode-button {
-      min-width: 0;
-      flex: 1;
-      padding-inline: 4px;
-      font-size: 11px;
+    .grading-mode-select-wrap {
+      position: relative;
+      display: block;
     }
 
-    .grading-mode-button {
-      min-height: 30px;
-      padding: 0 13px;
-      border: 0;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--muted);
+    .grading-mode-select-wrap::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      width: 7px;
+      height: 7px;
+      border-right: 2px solid #7380a1;
+      border-bottom: 2px solid #7380a1;
+      pointer-events: none;
+      transform: translateY(-70%) rotate(45deg);
+    }
+
+    .grading-mode-select {
+      appearance: none;
+      width: 100%;
+      min-height: 38px;
+      padding: 0 36px 0 12px;
+      border: 1px solid #d4dced;
+      border-radius: 10px;
+      color: var(--brand-dark);
+      background: rgba(255,255,255,.94);
       font-size: 12px;
       font-weight: 800;
       cursor: pointer;
-      transition: .18s ease;
+      box-shadow: 0 4px 12px rgba(45,64,104,.05);
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
 
-    .grading-mode-button:hover { color: var(--brand-dark); }
-    .grading-mode-button.active {
-      color: #fff;
-      background: var(--brand-dark);
-      box-shadow: 0 5px 12px rgba(48,69,126,.18);
-    }
-
-    .grading-mode-button:focus-visible {
+    .grading-mode-select:hover { border-color: #b9c5e0; background: #fff; }
+    .grading-mode-select:focus-visible {
       outline: 3px solid rgba(79,102,216,.25);
       outline-offset: 2px;
+      border-color: #9dacda;
+      box-shadow: 0 7px 18px rgba(45,64,104,.09);
     }
 
     .button {
@@ -1576,10 +1576,12 @@
       <section class="workspace" id="questionWorkspace">
         <aside class="rail" aria-label="题号导航">
           <div class="grading-mode-dock">
-            <div class="grading-mode-switch grading-mode-switch--rail" role="tablist" aria-label="批改方式">
-              <button class="grading-mode-button active" type="button" role="tab" data-grading-view="question" aria-selected="true">按题批改</button>
-              <button class="grading-mode-button" type="button" role="tab" data-grading-view="student" aria-selected="false">按学生批改</button>
-            </div>
+            <label class="grading-mode-select-wrap">
+              <select class="grading-mode-select" data-grading-view-select aria-label="批改方式">
+                <option value="question" data-grading-view-option="question">按题批改</option>
+                <option value="student" data-grading-view-option="student">按学生批改</option>
+              </select>
+            </label>
           </div>
           <nav class="question-list" id="questionList"></nav>
           <div class="rail-footer">
@@ -1639,10 +1641,12 @@
       <section class="student-workspace" id="studentWorkspace" aria-label="按学生批改" hidden>
         <aside class="student-roster">
           <div class="grading-mode-dock">
-            <div class="grading-mode-switch grading-mode-switch--rail" role="tablist" aria-label="批改方式">
-              <button class="grading-mode-button active" type="button" role="tab" data-grading-view="question" aria-selected="true">按题批改</button>
-              <button class="grading-mode-button" type="button" role="tab" data-grading-view="student" aria-selected="false">按学生批改</button>
-            </div>
+            <label class="grading-mode-select-wrap">
+              <select class="grading-mode-select" data-grading-view-select aria-label="批改方式">
+                <option value="question" data-grading-view-option="question">按题批改</option>
+                <option value="student" data-grading-view-option="student">按学生批改</option>
+              </select>
+            </label>
           </div>
           <nav class="student-list" id="studentList" aria-label="选择学生"></nav>
           <footer class="student-roster__footer">
@@ -1998,11 +2002,11 @@
       const explanationDetails = document.getElementById("explanationDetails");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
       const confirmAllButton = document.getElementById("confirmAll");
-      document.querySelectorAll('[data-grading-view="question"]').forEach((button) => {
-        button.textContent = isExam ? "按题赋分" : "按题批改";
+      document.querySelectorAll('[data-grading-view-option="question"]').forEach((option) => {
+        option.textContent = isExam ? "按题赋分" : "按题批改";
       });
-      document.querySelectorAll('[data-grading-view="student"]').forEach((button) => {
-        button.textContent = isExam ? "按学生赋分" : "按学生批改";
+      document.querySelectorAll('[data-grading-view-option="student"]').forEach((option) => {
+        option.textContent = isExam ? "按学生赋分" : "按学生批改";
       });
       studentWorkspace.setAttribute("aria-label", isExam ? "按学生赋分" : "按学生批改");
       confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "一键确认批改";
@@ -2525,17 +2529,15 @@
         gradingView = view === "student" ? "student" : "question";
         questionWorkspace.hidden = gradingView !== "question";
         studentWorkspace.hidden = gradingView !== "student";
-        document.querySelectorAll("[data-grading-view]").forEach((button) => {
-          const active = button.dataset.gradingView === gradingView;
-          button.classList.toggle("active", active);
-          button.setAttribute("aria-selected", String(active));
+        document.querySelectorAll("[data-grading-view-select]").forEach((select) => {
+          select.value = gradingView;
         });
         if (gradingView === "question") renderAll();
         else renderStudentWorkspace();
       }
 
-      document.querySelectorAll("[data-grading-view]").forEach((button) => {
-        button.addEventListener("click", () => setGradingView(button.dataset.gradingView));
+      document.querySelectorAll("[data-grading-view-select]").forEach((select) => {
+        select.addEventListener("change", () => setGradingView(select.value));
       });
 
       studentList.addEventListener("click", (event) => {

@@ -378,26 +378,30 @@ test('grading page exposes a four-state sticky result navigation rail', () => {
   assert.match(gradingPage, /groupsScroll\.scrollTop \+ groupsScroll\.clientHeight >= groupsScroll\.scrollHeight - 2/);
 });
 
-test('grading page switches between synchronized question and student modes', () => {
+test('grading page switches between synchronized question and student dropdowns', () => {
   assert.doesNotMatch(gradingPage, /student-trace-preview\.html/);
-  assert.match(gradingPage, /data-grading-view="question"[^>]*aria-selected="true"/);
-  assert.match(gradingPage, /data-grading-view="student"/);
+  assert.match(gradingPage, /data-grading-view-select/);
+  assert.match(gradingPage, /<option value="question"[^>]*>按题批改<\/option>/);
+  assert.match(gradingPage, /<option value="student"[^>]*>按学生批改<\/option>/);
+  assert.doesNotMatch(gradingPage, /data-grading-view="question"/);
   assert.match(gradingPage, /id="questionWorkspace"/);
   assert.match(gradingPage, /id="studentWorkspace"[^>]*hidden/);
   assert.match(gradingPage, /\.workspace\[hidden\]\s*\{\s*display:\s*none/);
   assert.match(gradingPage, /function setGradingView/);
+  assert.match(gradingPage, /document\.querySelectorAll\("\[data-grading-view-select\]"\)\.forEach\(\(select\)/);
+  assert.match(gradingPage, /select\.value = gradingView/);
+  assert.match(gradingPage, /select\.addEventListener\("change", \(\) => setGradingView\(select\.value\)\)/);
   assert.match(gradingPage, /student\.result = result/);
   assert.match(gradingPage, /renderAll\(\)/);
 });
 
-test('grading mode tabs live above both question and student navigation lists', () => {
+test('grading mode dropdowns live above both question and student navigation lists', () => {
   assert.doesNotMatch(gradingPage, /<div class="top-actions">/);
-  assert.equal((gradingPage.match(/role="tablist" aria-label="批改方式"/g) || []).length, 2);
-  assert.match(gradingPage, /<aside class="rail"[^>]*>\s*<div class="grading-mode-dock">[\s\S]*?<nav class="question-list"/);
-  assert.match(gradingPage, /<aside class="student-roster">\s*<div class="grading-mode-dock">[\s\S]*?<nav class="student-list"/);
-  assert.match(gradingPage, /\.grading-mode-switch--rail\s*\{[^}]*width:\s*100%/s);
-  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="question"\]'\)\.forEach/);
-  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="student"\]'\)\.forEach/);
+  assert.equal((gradingPage.match(/<select class="grading-mode-select"[^>]*aria-label="批改方式"/g) || []).length, 2);
+  assert.match(gradingPage, /<aside class="rail"[^>]*>\s*<div class="grading-mode-dock">[\s\S]*?<select class="grading-mode-select"[\s\S]*?<nav class="question-list"/);
+  assert.match(gradingPage, /<aside class="student-roster">\s*<div class="grading-mode-dock">[\s\S]*?<select class="grading-mode-select"[\s\S]*?<nav class="student-list"/);
+  assert.match(gradingPage, /\.grading-mode-select-wrap\s*\{[^}]*position:\s*relative/s);
+  assert.match(gradingPage, /\.grading-mode-select\s*\{[^}]*appearance:\s*none[^}]*width:\s*100%/s);
 });
 
 test('student grading mode provides a roster, centered paper, and structured tools', () => {
@@ -442,8 +446,8 @@ test('exam student paper does not format an already formatted score twice', () =
 test('exam student workspace uses scoring labels and total points', () => {
   assert.match(gradingPage, /function studentExamTotal\(name\)/);
   assert.match(gradingPage, /isExam \? `\$\{studentExamTotal\(name\)\} 分` : `\$\{studentAccuracy\(name\)\}%`/);
-  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="question"\]'\)\.forEach[\s\S]*button\.textContent = isExam \? "按题赋分" : "按题批改"/s);
-  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="student"\]'\)\.forEach[\s\S]*button\.textContent = isExam \? "按学生赋分" : "按学生批改"/s);
+  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view-option="question"\]'\)\.forEach[\s\S]*option\.textContent = isExam \? "按题赋分" : "按题批改"/s);
+  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view-option="student"\]'\)\.forEach[\s\S]*option\.textContent = isExam \? "按学生赋分" : "按学生批改"/s);
   assert.match(gradingPage, /confirmStudent\.textContent = studentCompletion\.has\(activeStudentName\)[\s\S]*确认本学生赋分/s);
   assert.match(gradingPage, /confirmAllStudents\.textContent = studentCompletion\.size === studentNames\.length[\s\S]*一键确认赋分/s);
 });
