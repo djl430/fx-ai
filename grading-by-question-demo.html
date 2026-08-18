@@ -938,6 +938,9 @@
     .student-list-item small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
     .student-list-item small.is-confirmed { color: var(--green); font-weight: 800; }
     .student-list-item b { color: var(--brand-dark); font-size: 12px; }
+    .student-list-item b.is-high { color: var(--green); }
+    .student-list-item b.is-mid { color: var(--amber); }
+    .student-list-item b.is-low { color: var(--red); }
 
     .student-roster__footer {
       padding: 12px 14px;
@@ -2073,11 +2076,15 @@
         return isExam ? `${averageExamScore(question)}/${maxScore(question)}分` : `${question.accuracy}%`;
       }
 
+      function accuracyClass(accuracy) {
+        if (accuracy >= 80) return "is-high";
+        if (accuracy >= 60) return "is-mid";
+        return "is-low";
+      }
+
       function metricClass(question) {
         if (isExam) return "is-score";
-        if (question.accuracy >= 80) return "is-high";
-        if (question.accuracy >= 60) return "is-mid";
-        return "is-low";
+        return accuracyClass(question.accuracy);
       }
 
       function renderQuestions() {
@@ -2158,7 +2165,7 @@
               <strong>${name}</strong>
               <small class="${studentCompletion.has(name) ? "is-confirmed" : ""}">${studentCompletion.has(name) ? "✓ 已确认" : "○ 未确认"}</small>
             </span>
-            <b>${isExam ? `${studentExamTotal(name)} 分` : `${studentAccuracy(name)}%`}</b>
+            <b class="${isExam ? "is-score" : accuracyClass(studentAccuracy(name))}">${isExam ? `${studentExamTotal(name)} 分` : `${studentAccuracy(name)}%`}</b>
           </button>
         `).join("");
       }

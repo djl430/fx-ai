@@ -438,6 +438,18 @@ test('student roster omits the summary header', () => {
   assert.match(gradingPage, /\.student-list\s*\{[^}]*padding:\s*12px 10px 16px/s);
 });
 
+test('student accuracy reuses the question grading color thresholds', () => {
+  assert.match(gradingPage, /function accuracyClass\(accuracy\)/);
+  assert.match(gradingPage, /if \(accuracy >= 80\) return "is-high"/);
+  assert.match(gradingPage, /if \(accuracy >= 60\) return "is-mid"/);
+  assert.match(gradingPage, /return "is-low"/);
+  assert.match(gradingPage, /return accuracyClass\(question\.accuracy\)/);
+  assert.match(gradingPage, /class="\$\{isExam \? "is-score" : accuracyClass\(studentAccuracy\(name\)\)\}"/);
+  assert.match(gradingPage, /\.student-list-item b\.is-high\s*\{\s*color:\s*var\(--green\)/);
+  assert.match(gradingPage, /\.student-list-item b\.is-mid\s*\{\s*color:\s*var\(--amber\)/);
+  assert.match(gradingPage, /\.student-list-item b\.is-low\s*\{\s*color:\s*var\(--red\)/);
+});
+
 test('student grading pairs every paper page with its tools in one scroll stack', () => {
   assert.match(gradingPage, /id="studentPageStack"/);
   assert.match(gradingPage, /class="student-page-row"/);
