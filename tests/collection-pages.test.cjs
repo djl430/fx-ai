@@ -379,6 +379,12 @@ test('question grading shows a clickable stem snapshot above the answer', () => 
   assert.match(gradingPage, /二次函数 y = 2x² − 4x \+ 1 的图像开口方向/);
 });
 
+test('question snapshot card removes redundant zoom copy', () => {
+  assert.match(gradingPage, /<section class="assist-card question-snapshot-card">[\s\S]*?<div class="assist-label">题干<\/div>[\s\S]*?id="questionSnapshotThumbnail"/);
+  assert.doesNotMatch(gradingPage, />点击放大<\/span>/);
+  assert.doesNotMatch(gradingPage, />查看大图<\/span>/);
+});
+
 test('question grading swaps overall AI basis for student basis on hover', () => {
   assert.match(gradingPage, /id="basisScope">本题整体<\/span>/);
   assert.match(gradingPage, /function renderOverallBasis\(question\)/);

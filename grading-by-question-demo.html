@@ -375,12 +375,6 @@
       padding: 0 2px 9px;
     }
 
-    .question-snapshot-card__hint {
-      color: #8b96ab;
-      font-size: 10px;
-      font-weight: 650;
-    }
-
     .question-snapshot-button {
       position: relative;
       width: 100%;
@@ -414,24 +408,6 @@
       background: #fffdf8;
     }
 
-    .question-snapshot-zoom {
-      position: absolute;
-      right: 8px;
-      bottom: 8px;
-      min-width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      padding: 0 8px;
-      border: 1px solid rgba(255,255,255,.82);
-      border-radius: 8px;
-      color: #fff;
-      background: rgba(34,50,85,.78);
-      box-shadow: 0 5px 14px rgba(24,35,59,.18);
-      font-size: 10px;
-      font-weight: 750;
-      backdrop-filter: blur(5px);
-    }
     .basis-card {
       padding: 16px 16px 18px;
       border-color: #dce4ff;
@@ -1722,12 +1698,10 @@
 
           <section class="assist-card question-snapshot-card">
             <div class="question-snapshot-card__head">
-              <div class="assist-label">题干截图</div>
-              <span class="question-snapshot-card__hint">点击放大</span>
+              <div class="assist-label">题干</div>
             </div>
             <button class="question-snapshot-button" id="questionSnapshotButton" type="button" data-modal="questionSnapshot" aria-label="放大查看题干截图">
               <img class="question-snapshot-thumbnail" id="questionSnapshotThumbnail" alt="题干截图" />
-              <span class="question-snapshot-zoom" aria-hidden="true">查看大图</span>
             </button>
           </section>
 
