@@ -392,6 +392,14 @@ test('student grading mode provides a roster, centered paper, and structured too
   assert.match(gradingPage, /function renderStudentWorkspace/);
 });
 
+test('student roster omits the summary header', () => {
+  assert.doesNotMatch(gradingPage, /class="student-roster__head"/);
+  assert.doesNotMatch(gradingPage, /id="studentProgress"/);
+  assert.doesNotMatch(gradingPage, /const studentProgress =/);
+  assert.match(gradingPage, /\.student-roster\s*\{[^}]*grid-template-rows:\s*minmax\(0,1fr\) auto/s);
+  assert.match(gradingPage, /\.student-list\s*\{[^}]*padding:\s*12px 10px 16px/s);
+});
+
 test('student grading matches the reference interaction', () => {
   assert.match(gradingPage, /id="confirmAllStudents"[^>]*>一键确认批改</);
   assert.match(gradingPage, /class="student-tool-page"[^>]*>1\/1</);

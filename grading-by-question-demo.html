@@ -900,25 +900,14 @@
     .student-roster {
       min-height: 0;
       display: grid;
-      grid-template-rows: auto minmax(0,1fr) auto;
+      grid-template-rows: minmax(0,1fr) auto;
       border-right: 1px solid var(--line);
       background: rgba(247,249,253,.96);
     }
 
-    .student-roster__head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 18px 14px 10px;
-    }
-
-    .student-roster__head strong { font-size: 14px; }
-    .student-roster__head span { color: var(--muted); font-size: 10px; }
-
     .student-list {
       overflow: auto;
-      padding: 0 10px 16px;
+      padding: 12px 10px 16px;
       scrollbar-width: thin;
     }
 
@@ -1353,10 +1342,6 @@
 
       <section class="student-workspace" id="studentWorkspace" aria-label="按学生批改" hidden>
         <aside class="student-roster">
-          <div class="student-roster__head">
-            <strong>学生列表</strong>
-            <span id="studentProgress"></span>
-          </div>
           <nav class="student-list" id="studentList" aria-label="选择学生"></nav>
           <footer class="student-roster__footer">
             <button class="button primary" id="confirmAllStudents" type="button">一键确认批改</button>
@@ -1641,7 +1626,6 @@
       const questionWorkspace = document.getElementById("questionWorkspace");
       const studentWorkspace = document.getElementById("studentWorkspace");
       const studentList = document.getElementById("studentList");
-      const studentProgress = document.getElementById("studentProgress");
       const studentPaper = document.getElementById("studentPaper");
       const studentQuestionTools = document.getElementById("studentQuestionTools");
       const confirmStudent = document.getElementById("confirmStudent");
@@ -1812,7 +1796,6 @@
       }
 
       function renderStudentList() {
-        studentProgress.textContent = `${studentCompletion.size}/${studentNames.length} 已确认`;
         studentList.innerHTML = studentNames.map((name) => `
           <button class="student-list-item ${name === activeStudentName ? "active" : ""}" type="button" data-student-name="${name}">
             <span>
