@@ -975,6 +975,14 @@
       align-items: stretch;
     }
 
+    .student-page-row[data-paper-direct="true"] {
+      grid-template-columns: minmax(0,1fr);
+    }
+
+    .student-page-row[data-paper-direct="true"] .student-paper-stage {
+      padding-inline: clamp(32px, 8vw, 140px);
+    }
+
     .student-page-row + .student-page-row { border-top: 12px solid #d9e1ed; }
 
     .student-paper-stage {
@@ -1031,6 +1039,27 @@
       margin: 0 0 26px;
       padding: 0 54px 18px 30px;
       border-bottom: 1px dashed rgba(120,130,150,.24);
+    }
+
+    .student-paper-question[data-student-paper-question] {
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom-color: rgba(120,130,150,.24);
+      border-radius: 10px;
+      transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .student-paper-question[data-student-paper-question]:hover,
+    .student-paper-question[data-student-paper-question]:focus-visible {
+      outline: none;
+      border-color: #aebdf3;
+      background: rgba(237,241,255,.72);
+      box-shadow: inset 4px 0 0 var(--brand), 0 8px 22px rgba(52,72,134,.12);
+    }
+
+    .student-paper-question[data-student-paper-question]:active {
+      background: rgba(226,232,255,.9);
+      box-shadow: inset 4px 0 0 var(--brand), 0 3px 10px rgba(52,72,134,.12);
     }
 
     .student-paper-question strong { font-size: 15px; }
@@ -1409,6 +1438,7 @@
       const params = new URLSearchParams(window.location.search);
       const taskId = params.get("taskId") || "";
       const isExam = params.get("mode") === "exam";
+      const usesPaperDirectGrading = taskId === "cluster-homework" && !isExam;
       const variant = params.get("variant");
       const taskTitle = params.get("taskTitle") || (isExam ? "数学期中质量检测" : "二次函数单元作业");
       const className = params.get("className") || (isExam ? "八年级 5 班" : "九年级 2 班");
@@ -1842,13 +1872,17 @@
           </header>
           ${pageQuestions.map((question) => {
             const student = studentAttempt(question);
+            const currentResult = student?.result || "ungraded";
+            const directGradingAttributes = usesPaperDirectGrading
+              ? `data-student-paper-question="${question.id}" role="button" tabindex="0" aria-label="第${question.id}题，当前${labels[currentResult].name}，点击切换批改结果"`
+              : "";
             const resultMark = student && student.result !== "ungraded"
               ? isExam
                 ? `<span class="student-paper-score">${formatScore(studentScore(student, question))}/${maxScore(question)}</span>`
                 : `<span class="student-paper-mark"><span class="mark-icon ${student.result}"></span></span>`
               : "";
             return `
-              <section class="student-paper-question">
+              <section class="student-paper-question" ${directGradingAttributes}>
                 <strong>第 ${question.id} 题 · ${question.title}</strong>
                 <p>${question.type}</p>
                 <div class="student-paper-answer ${student ? "" : "is-empty"}">学生作答：${student?.answer || "暂无作答"}</div>
@@ -1978,19 +2012,26 @@
         }).join("");
       }
 
+      function studentToolPanelMarkup(pageQuestions, index, pages) {
+        if (usesPaperDirectGrading) return "";
+        return `
+          <aside class="student-tool-panel" aria-label="第 ${index + 1} 页结构化批改工具">
+            <header class="student-tool-head">
+              <strong class="student-tool-page">${index + 1}/${pages.length}</strong>
+            </header>
+            <div class="student-question-tools">${studentToolsMarkup(pageQuestions)}</div>
+          </aside>
+        `;
+      }
+
       function renderStudentPages() {
         const pages = studentPages();
         studentPageStack.innerHTML = pages.map((pageQuestions, index) => `
-          <section class="student-page-row" data-student-page="${index + 1}">
+          <section class="student-page-row" data-student-page="${index + 1}" data-paper-direct="${usesPaperDirectGrading}">
             <main class="student-paper-stage" aria-label="第 ${index + 1} 页学生作业">
               <article class="student-paper">${studentPaperMarkup(pageQuestions)}</article>
             </main>
-            <aside class="student-tool-panel" aria-label="第 ${index + 1} 页结构化批改工具">
-              <header class="student-tool-head">
-                <strong class="student-tool-page">${index + 1}/${pages.length}</strong>
-              </header>
-              <div class="student-question-tools">${studentToolsMarkup(pageQuestions)}</div>
-            </aside>
+            ${studentToolPanelMarkup(pageQuestions, index, pages)}
           </section>
         `).join("");
       }
@@ -2011,6 +2052,20 @@
         if (isExam) student.score = defaultScoreForResult(result, question);
         studentCompletion.delete(activeStudentName);
         renderStudentWorkspace();
+      }
+
+      function cycleStudentPaperResult(questionId) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const student = question?.students.find((item) => item.name === activeStudentName);
+        if (!usesPaperDirectGrading || !student) return;
+        const nextResult = {
+          ungraded: "correct",
+          correct: "wrong",
+          wrong: "partial",
+          partial: "correct"
+        }[student.result] || "correct";
+        updateStudentResult(questionId, nextResult);
+        showToast(`${activeStudentName} · 第 ${questionId} 题已标记为${labels[nextResult].name}`);
       }
 
       function setGradingView(view) {
@@ -2039,6 +2094,11 @@
       });
 
       studentPageStack.addEventListener("click", (event) => {
+        const paperQuestion = event.target.closest("[data-student-paper-question]");
+        if (paperQuestion) {
+          cycleStudentPaperResult(paperQuestion.dataset.studentPaperQuestion);
+          return;
+        }
         const partButton = event.target.closest("[data-student-part-result]");
         if (partButton) {
           updateStudentPartResult(partButton.dataset.questionId, partButton.dataset.partIndex, partButton.dataset.studentPartResult);
@@ -2055,6 +2115,14 @@
         if (!button) return;
         updateStudentResult(button.dataset.questionId, button.dataset.studentResult);
         showToast(`${activeStudentName} · 第 ${button.dataset.questionId} 题已标记为${labels[button.dataset.studentResult].name}`);
+      });
+
+      studentPageStack.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const paperQuestion = event.target.closest("[data-student-paper-question]");
+        if (!paperQuestion) return;
+        event.preventDefault();
+        cycleStudentPaperResult(paperQuestion.dataset.studentPaperQuestion);
       });
 
       studentPageStack.addEventListener("change", (event) => {

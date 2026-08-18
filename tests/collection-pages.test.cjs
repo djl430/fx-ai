@@ -430,6 +430,24 @@ test('student grading matches the reference interaction', () => {
   assert.match(gradingPage, /confirmAllStudents\.addEventListener/);
 });
 
+test('first homework grades directly on paper questions', () => {
+  assert.match(gradingPage, /const usesPaperDirectGrading = taskId === "cluster-homework" && !isExam/);
+  assert.match(gradingPage, /data-student-paper-question/);
+  assert.match(gradingPage, /function cycleStudentPaperResult/);
+  assert.match(gradingPage, /correct:\s*"wrong"/);
+  assert.match(gradingPage, /wrong:\s*"partial"/);
+  assert.match(gradingPage, /partial:\s*"correct"/);
+  assert.match(gradingPage, /studentPageStack\.addEventListener\("keydown"/);
+});
+
+test('first homework omits structured tools and highlights paper questions', () => {
+  assert.match(gradingPage, /function studentToolPanelMarkup/);
+  assert.match(gradingPage, /if \(usesPaperDirectGrading\) return "";/);
+  assert.match(gradingPage, /\.student-page-row\[data-paper-direct="true"\]/);
+  assert.match(gradingPage, /\.student-paper-question\[data-student-paper-question\]:hover/);
+  assert.match(gradingPage, /\.student-paper-question\[data-student-paper-question\]:focus-visible/);
+});
+
 test('question grading uses the one-click confirmation label', () => {
   assert.match(gradingPage, /id="confirmAll">一键确认批改</);
   assert.match(gradingPage, /confirmAllButton\.textContent = isExam \? "确认全部题目赋分" : "一键确认批改"/);
