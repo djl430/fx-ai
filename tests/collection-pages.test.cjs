@@ -393,6 +393,38 @@ test('student grading mode provides a roster, centered paper, and structured too
   assert.match(gradingPage, /function renderStudentWorkspace/);
 });
 
+test('third assignment defines a dedicated four-type exam paper', () => {
+  assert.match(gradingPage, /if \(isExam && taskId === "quiz"\)/);
+  assert.match(gradingPage, /title: "函数值判断"[\s\S]*type: "选择题/);
+  assert.match(gradingPage, /title: "正比例函数判断"[\s\S]*type: "判断题/);
+  assert.match(gradingPage, /title: "待定系数"[\s\S]*type: "填空题/);
+  assert.match(gradingPage, /title: "一次函数应用"[\s\S]*type: "解答题/);
+  assert.match(gradingPage, /function maxScore\(question\) \{[\s\S]*question\.maxScore/s);
+  assert.match(gradingPage, /const size = isExam \? 2 : 3/);
+});
+
+test('exam student scoring uses judgments for objective questions and scores for subjective questions', () => {
+  assert.match(gradingPage, /function isObjectiveQuestion\(question\)/);
+  assert.match(gradingPage, /question\.type\.startsWith\("选择题"\)/);
+  assert.match(gradingPage, /question\.type\.startsWith\("判断题"\)/);
+  assert.match(gradingPage, /if \(isObjectiveQuestion\(question\)\)/);
+  assert.match(gradingPage, /class="student-exam-judge-button[^\n]*data-student-result="correct"/);
+  assert.match(gradingPage, /class="student-exam-judge-button[^\n]*data-student-result="wrong"/);
+  assert.match(gradingPage, />对<\/span>/);
+  assert.match(gradingPage, />错<\/span>/);
+  assert.match(gradingPage, /class="student-exam-score-summary"/);
+  assert.match(gradingPage, /class="student-subjective-score"[\s\S]*data-student-score/s);
+});
+
+test('exam student workspace uses scoring labels and total points', () => {
+  assert.match(gradingPage, /function studentExamTotal\(name\)/);
+  assert.match(gradingPage, /isExam \? `\$\{studentExamTotal\(name\)\} 分` : `\$\{studentAccuracy\(name\)\}%`/);
+  assert.match(gradingPage, /questionViewButton\.textContent = isExam \? "按题赋分" : "按题批改"/);
+  assert.match(gradingPage, /studentViewButton\.textContent = isExam \? "按学生赋分" : "按学生批改"/);
+  assert.match(gradingPage, /confirmStudent\.textContent = studentCompletion\.has\(activeStudentName\)[\s\S]*确认本学生赋分/s);
+  assert.match(gradingPage, /confirmAllStudents\.textContent = studentCompletion\.size === studentNames\.length[\s\S]*一键确认赋分/s);
+});
+
 test('student roster omits the summary header', () => {
   assert.doesNotMatch(gradingPage, /class="student-roster__head"/);
   assert.doesNotMatch(gradingPage, /id="studentProgress"/);

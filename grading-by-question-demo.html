@@ -1340,6 +1340,85 @@
     .student-score-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 11px; }
     .student-score-row input { width: 58px; height: 32px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: #fff; }
 
+    .student-exam-tool__meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .student-exam-type {
+      max-width: 112px;
+      overflow: hidden;
+      padding: 3px 7px;
+      border-radius: 999px;
+      color: #67738d;
+      background: #f1f4f9;
+      font-size: 9px;
+      font-weight: 750;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .student-exam-objective {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .student-exam-judge-group { display: inline-flex; align-items: center; gap: 8px; }
+
+    .student-exam-judge-button {
+      min-width: 64px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: #536079;
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      transition: .16s ease;
+    }
+
+    .student-exam-judge-button i { font-style: normal; font-size: 18px; line-height: 1; }
+    .student-exam-judge-button:hover { border-color: #bec9dc; transform: translateY(-1px); }
+    .student-exam-judge-button.is-active[data-student-result="correct"] { color: var(--green); border-color: #83d7b4; background: var(--green-soft); box-shadow: inset 0 0 0 1px rgba(35,153,107,.1); }
+    .student-exam-judge-button.is-active[data-student-result="wrong"] { color: var(--red); border-color: #ef9ca4; background: var(--red-soft); box-shadow: inset 0 0 0 1px rgba(217,86,98,.08); }
+
+    .student-exam-score-summary {
+      color: #26395f;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .student-subjective-score {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 14px;
+      padding: 11px 12px;
+      border: 1px solid #e4e9f2;
+      border-radius: 11px;
+      color: #526079;
+      background: #f8faff;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .student-subjective-score__editor { display: inline-flex; align-items: center; gap: 6px; color: #2b3650; }
+    .student-subjective-score input { width: 64px; height: 34px; padding: 0 8px; border: 1px solid #cbd5e6; border-radius: 8px; color: #172341; background: #fff; font-weight: 850; text-align: center; }
+    .student-subjective-score input:focus { outline: 3px solid rgba(79,102,216,.16); border-color: #8192dc; }
+
     .student-review-footer { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--line); background: rgba(255,255,255,.98); }
     .student-review-footer .button {
       min-width: 178px;
@@ -1594,8 +1673,8 @@
       const isExam = params.get("mode") === "exam";
       const usesPaperDirectGrading = taskId === "cluster-homework" && !isExam;
       const variant = params.get("variant");
-      const taskTitle = params.get("taskTitle") || (isExam ? "数学期中质量检测" : "二次函数单元作业");
-      const className = params.get("className") || (isExam ? "八年级 5 班" : "九年级 2 班");
+      const taskTitle = params.get("taskTitle") || (taskId === "quiz" ? "一次函数随堂检测" : isExam ? "数学期中质量检测" : "二次函数单元作业");
+      const className = params.get("className") || (taskId === "quiz" ? "八年级 3 班" : isExam ? "八年级 5 班" : "九年级 2 班");
       const isSimilarityGrouping = variant === "similar";
       document.title = isExam ? "飞象智批 · 试卷批改 Demo" : isSimilarityGrouping ? "飞象智批 · 形似作答分组 Demo" : "飞象智批 · 按题批改 Demo";
       document.getElementById("gradingTaskTitle").textContent = taskTitle;
@@ -1640,6 +1719,63 @@
           responses: ["向上；x=2；(2,-1)", "向上，x=2", "向下；x=2；(2,-1)", "向上；x=−2；(−2,-1)", "三个结论全对", "只写了顶点(2,-1)", "未作答", "向上；x=2；(2,-1)", "字迹模糊", "向上；x=2；(2,1)", "向下；x=−2", "向上，顶点(2,-1)", "x=2；(2,-1)", "未完成", "向上；x=2；(2,-1)", "向上；x=2"]
         }
       ];
+
+      if (isExam && taskId === "quiz") {
+        questions = [
+          {
+            id: 1, title: "函数值判断", type: "选择题 · 一次函数求值", maxScore: 4, accuracy: 86, status: "pending", answer: "B（7）",
+            explanation: "把 x = 3 代入 y = 2x + 1，得到 y = 7，因此选择 B。",
+            basis: ["识别并代入自变量 x = 3。", "计算结果为 7，选项与标准答案一致。"],
+            responses: ["B", "B（7）", "C", "B", "7", "B", "A", "B", "未作答", "B", "B", "D", "B", "7", "B", "C"]
+          },
+          {
+            id: 2, title: "正比例函数判断", type: "判断题 · 函数概念", maxScore: 4, accuracy: 78, status: "pending", answer: "错误",
+            explanation: "y = 3x + 2 的常数项不为 0，是一次函数但不是正比例函数，所以判断为错误。",
+            basis: ["正比例函数必须形如 y = kx。", "常数项 2 不为 0，因此原判断错误。"],
+            responses: ["错误", "×", "正确", "错误", "错", "错误", "√", "错误", "未判断", "错误", "错", "正确", "错误", "×", "错误", "正确"]
+          },
+          {
+            id: 3, title: "图像经过象限", type: "选择题 · 图像性质", maxScore: 4, accuracy: 72, status: "pending", answer: "C（一、二、四象限）",
+            explanation: "y = -2x + 3 中 k < 0、b > 0，图像经过第一、二、四象限。",
+            basis: ["斜率为负，函数随 x 增大而减小。", "与 y 轴正半轴相交，排除经过第三象限的选项。"],
+            responses: ["C", "C", "B", "C", "一、二、四", "C", "A", "D", "未作答", "C", "C", "B", "C", "一二四", "C", "A"]
+          },
+          {
+            id: 4, title: "一次函数增减性", type: "判断题 · 增减性", maxScore: 4, accuracy: 81, status: "pending", answer: "正确",
+            explanation: "一次函数 y = 5x - 2 的斜率 5 > 0，函数值随 x 增大而增大。",
+            basis: ["找到一次项系数 k = 5。", "k > 0 时函数单调递增。"],
+            responses: ["正确", "√", "错误", "正确", "对", "正确", "×", "正确", "未判断", "正确", "对", "错误", "正确", "√", "正确", "错误"]
+          },
+          {
+            id: 5, title: "待定系数", type: "填空题 · 待定系数法", maxScore: 6, accuracy: 69, status: "pending", answer: "k = 2，b = -1",
+            explanation: "把点（1，1）和（2，3）分别代入 y = kx + b，联立两式可得 k = 2，b = -1。",
+            basis: ["两个点均需代入解析式。", "k 与 b 各 3 分，可根据完成情况给中间分。"],
+            responses: ["k=2，b=-1", "2，-1", "k=2", "k=1，b=0", "2x-1", "k=2，b=-1", "未作答", "k=-2，b=1", "k=2，b=-1", "2，1", "k=2", "k=2，b=-1", "算到k=2", "k=1", "2x-1", "未完成"]
+          },
+          {
+            id: 6, title: "图像交点", type: "填空题 · 两直线交点", maxScore: 6, accuracy: 63, status: "pending", answer: "（2，3）",
+            explanation: "联立 y = x + 1 与 y = -x + 5，解得 x = 2、y = 3，所以交点为（2，3）。",
+            basis: ["联立两条直线解析式求 x。", "横纵坐标各 3 分，顺序颠倒需扣分。"],
+            responses: ["（2，3）", "2，3", "（3，2）", "x=2", "（2，3）", "未作答", "（-2，3）", "（2，3）", "2", "（2，3）", "（3，2）", "（2，3）", "x=2，y=3", "未完成", "（2，3）", "（2，-3）"]
+          },
+          {
+            id: 7, title: "一次函数解析式", type: "解答题 · 待定系数法", maxScore: 8, accuracy: 61, status: "pending", answer: "y = 2x + 1",
+            explanation: "设解析式为 y = kx + b，代入两个已知点求出 k = 2、b = 1，写出 y = 2x + 1。",
+            basis: ["设元与代入过程 2 分。", "求出 k、b 各 2 分，写出完整解析式 2 分。"],
+            responses: ["设y=kx+b，解得k=2，b=1，所以y=2x+1", "y=2x+1", "k=2", "y=2x-1", "列式正确，计算错", "y=2x+1", "未作答", "y=x+2", "过程完整", "2x+1", "只列方程", "y=2x+1", "k=2，b=1", "未完成", "y=2x+1", "y=-2x+1"]
+          },
+          {
+            id: 8, title: "一次函数应用", type: "解答题 · 方案计费", maxScore: 10, accuracy: 56, status: "pending", answer: "y = 5x + 8；10 千米需 58 元",
+            explanation: "起步费用为 8 元，每千米增加 5 元，因此 y = 5x + 8；代入 x = 10 得 y = 58。",
+            basis: ["根据题意建立函数关系式 6 分。", "代入路程并计算费用 4 分。"],
+            responses: ["y=5x+8，x=10时y=58", "58元", "y=5x+8", "y=8x+5", "列式正确，结果58", "y=5x+8；58元", "未作答", "50元", "5×10+8=58", "y=5x+8", "只写58", "y=5x+8；58元", "关系式正确", "未完成", "58元", "y=5x-8"]
+          }
+        ];
+      }
+
+      function isObjectiveQuestion(question) {
+        return question.type.startsWith("选择题") || question.type.startsWith("判断题");
+      }
 
       if (isSimilarityGrouping && !isExam) {
         questions = [
@@ -1777,7 +1913,7 @@
       }
 
       const resultPattern = ["correct", "correct", "correct", "partial", "correct", "partial", "wrong", "wrong", "ungraded", "correct", "partial", "correct", "correct", "wrong", "ungraded", "correct"];
-      const shiftedPatterns = [0, 1, 0, 2, 0, 3];
+      const shiftedPatterns = [0, 1, 0, 2, 0, 3, 1, 2];
 
       questions.forEach((question, qIndex) => {
         if (question.groups) {
@@ -1793,12 +1929,15 @@
           return;
         }
         const shift = shiftedPatterns[qIndex];
-        question.students = students.map((name, index) => ({
-          id: `${question.id}-${index}`,
-          name,
-          answer: question.responses[index],
-          result: resultPattern[(index + shift) % resultPattern.length]
-        }));
+        question.students = students.map((name, index) => {
+          const initialResult = resultPattern[(index + shift) % resultPattern.length];
+          return {
+            id: `${question.id}-${index}`,
+            name,
+            answer: question.responses[index],
+            result: isExam && isObjectiveQuestion(question) && initialResult === "partial" ? "wrong" : initialResult
+          };
+        });
       });
 
       const labels = {
@@ -1838,6 +1977,11 @@
       const explanationDetails = document.getElementById("explanationDetails");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
       const confirmAllButton = document.getElementById("confirmAll");
+      const questionViewButton = document.querySelector('[data-grading-view="question"]');
+      const studentViewButton = document.querySelector('[data-grading-view="student"]');
+      questionViewButton.textContent = isExam ? "按题赋分" : "按题批改";
+      studentViewButton.textContent = isExam ? "按学生赋分" : "按学生批改";
+      studentWorkspace.setAttribute("aria-label", isExam ? "按学生赋分" : "按学生批改");
       confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "一键确认批改";
 
       const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
@@ -1878,7 +2022,7 @@
       if (questions.every((question) => question.status === "completed")) showTaskCompletion();
 
       function maxScore(question) {
-        return [3, 6].includes(question.id) ? 6 : 4;
+        return Number(question.maxScore) || ([3, 6].includes(question.id) ? 6 : 4);
       }
 
       function avgScore(question) {
@@ -1995,6 +2139,18 @@
         return Math.round(points / attempts.length * 100);
       }
 
+      function studentExamTotal(name) {
+        const total = questions.reduce((sum, question) => {
+          const student = studentAttempt(question, name);
+          if (!student) return sum;
+          const score = typeof student.score === "number"
+            ? student.score
+            : defaultScoreForResult(student.result, question);
+          return sum + (typeof score === "number" ? score : 0);
+        }, 0);
+        return formatScore(total);
+      }
+
       function renderStudentList() {
         studentList.innerHTML = studentNames.map((name) => `
           <button class="student-list-item ${name === activeStudentName ? "active" : ""}" type="button" data-student-name="${name}">
@@ -2002,7 +2158,7 @@
               <strong>${name}</strong>
               <small class="${studentCompletion.has(name) ? "is-confirmed" : ""}">${studentCompletion.has(name) ? "✓ 已确认" : "○ 未确认"}</small>
             </span>
-            <b>${studentAccuracy(name)}%</b>
+            <b>${isExam ? `${studentExamTotal(name)} 分` : `${studentAccuracy(name)}%`}</b>
           </button>
         `).join("");
       }
@@ -2195,11 +2351,32 @@
           }
 
           if (isExam) {
+            if (isObjectiveQuestion(question)) {
+              return `
+                <section class="student-question-tool student-exam-tool">
+                  <div class="student-question-tool__head">
+                    <div class="student-exam-tool__meta"><strong>题${question.id}</strong><span class="student-exam-type">${question.type.split(" · ")[0]}</span></div>
+                    <span class="student-exam-score-summary">${studentScore(student, question)}/${maxScore(question)} 分</span>
+                  </div>
+                  <div class="student-exam-objective">
+                    <div class="student-exam-judge-group">
+                      <button class="student-exam-judge-button ${student.result === "correct" ? "is-active" : ""}" type="button" data-student-result="correct" data-question-id="${question.id}" aria-label="第${question.id}题判对"><i>✓</i><span>对</span></button>
+                      <button class="student-exam-judge-button ${student.result === "wrong" ? "is-active" : ""}" type="button" data-student-result="wrong" data-question-id="${question.id}" aria-label="第${question.id}题判错"><i>×</i><span>错</span></button>
+                    </div>
+                    <button class="student-tool-menu" type="button" aria-label="更多操作">···</button>
+                  </div>
+                  <p class="student-tool-answer">答案：${student.answer}</p>
+                </section>
+              `;
+            }
             return `
-              <section class="student-question-tool">
-                <div class="student-question-tool__head"><strong>题${question.id}</strong><button class="student-tool-menu" type="button" aria-label="更多操作">···</button></div>
+              <section class="student-question-tool student-exam-tool">
+                <div class="student-question-tool__head">
+                  <div class="student-exam-tool__meta"><strong>题${question.id}</strong><span class="student-exam-type">${question.type.split(" · ")[0]}</span></div>
+                  <span class="student-exam-score-summary">${studentScore(student, question)}/${maxScore(question)} 分</span>
+                </div>
                 <p class="student-tool-answer">答案：${student.answer}</p>
-                <label class="student-score-row">得分 <input type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" data-student-score data-question-id="${question.id}"> / ${maxScore(question)} 分</label>
+                <label class="student-subjective-score"><span>老师赋分</span><span class="student-subjective-score__editor"><input type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" data-student-score data-question-id="${question.id}" aria-label="第${question.id}题得分"> / ${maxScore(question)} 分</span></label>
               </section>
             `;
           }
@@ -2250,7 +2427,7 @@
       function studentToolPanelMarkup(pageQuestions, index, pages) {
         if (usesPaperDirectGrading) return "";
         return `
-          <aside class="student-tool-panel" aria-label="第 ${index + 1} 页结构化批改工具">
+          <aside class="student-tool-panel" aria-label="第 ${index + 1} 页${isExam ? "结构化赋分" : "结构化批改"}工具">
             <header class="student-tool-head">
               <strong class="student-tool-page">${index + 1}/${pages.length}</strong>
             </header>
@@ -2274,8 +2451,12 @@
       function renderStudentWorkspace() {
         renderStudentList();
         renderStudentPages();
-        confirmStudent.textContent = studentCompletion.has(activeStudentName) ? "✓ 已确认，可继续检查" : "确认批改";
-        confirmAllStudents.textContent = studentCompletion.size === studentNames.length ? "✓ 已确认全部批改" : "一键确认批改";
+        confirmStudent.textContent = studentCompletion.has(activeStudentName)
+          ? isExam ? "✓ 已确认赋分，可继续检查" : "✓ 已确认，可继续检查"
+          : isExam ? "确认本学生赋分" : "确认批改";
+        confirmAllStudents.textContent = studentCompletion.size === studentNames.length
+          ? isExam ? "✓ 已确认全部赋分" : "✓ 已确认全部批改"
+          : isExam ? "一键确认赋分" : "一键确认批改";
       }
 
       function updateStudentResult(questionId, result) {
