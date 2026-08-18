@@ -382,6 +382,16 @@ test('grading page switches between synchronized question and student modes', ()
   assert.match(gradingPage, /renderAll\(\)/);
 });
 
+test('grading mode tabs live above both question and student navigation lists', () => {
+  assert.doesNotMatch(gradingPage, /<div class="top-actions">/);
+  assert.equal((gradingPage.match(/role="tablist" aria-label="批改方式"/g) || []).length, 2);
+  assert.match(gradingPage, /<aside class="rail"[^>]*>\s*<div class="grading-mode-dock">[\s\S]*?<nav class="question-list"/);
+  assert.match(gradingPage, /<aside class="student-roster">\s*<div class="grading-mode-dock">[\s\S]*?<nav class="student-list"/);
+  assert.match(gradingPage, /\.grading-mode-switch--rail\s*\{[^}]*width:\s*100%/s);
+  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="question"\]'\)\.forEach/);
+  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="student"\]'\)\.forEach/);
+});
+
 test('student grading mode provides a roster, centered paper, and structured tools', () => {
   assert.match(gradingPage, /id="studentList"/);
   assert.match(gradingPage, /id="studentPageStack"/);
@@ -424,8 +434,8 @@ test('exam student paper does not format an already formatted score twice', () =
 test('exam student workspace uses scoring labels and total points', () => {
   assert.match(gradingPage, /function studentExamTotal\(name\)/);
   assert.match(gradingPage, /isExam \? `\$\{studentExamTotal\(name\)\} 分` : `\$\{studentAccuracy\(name\)\}%`/);
-  assert.match(gradingPage, /questionViewButton\.textContent = isExam \? "按题赋分" : "按题批改"/);
-  assert.match(gradingPage, /studentViewButton\.textContent = isExam \? "按学生赋分" : "按学生批改"/);
+  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="question"\]'\)\.forEach[\s\S]*button\.textContent = isExam \? "按题赋分" : "按题批改"/s);
+  assert.match(gradingPage, /document\.querySelectorAll\('\[data-grading-view="student"\]'\)\.forEach[\s\S]*button\.textContent = isExam \? "按学生赋分" : "按学生批改"/s);
   assert.match(gradingPage, /confirmStudent\.textContent = studentCompletion\.has\(activeStudentName\)[\s\S]*确认本学生赋分/s);
   assert.match(gradingPage, /confirmAllStudents\.textContent = studentCompletion\.size === studentNames\.length[\s\S]*一键确认赋分/s);
 });
@@ -434,7 +444,7 @@ test('student roster omits the summary header', () => {
   assert.doesNotMatch(gradingPage, /class="student-roster__head"/);
   assert.doesNotMatch(gradingPage, /id="studentProgress"/);
   assert.doesNotMatch(gradingPage, /const studentProgress =/);
-  assert.match(gradingPage, /\.student-roster\s*\{[^}]*grid-template-rows:\s*minmax\(0,1fr\) auto/s);
+  assert.match(gradingPage, /\.student-roster\s*\{[^}]*grid-template-rows:\s*auto minmax\(0,1fr\) auto/s);
   assert.match(gradingPage, /\.student-list\s*\{[^}]*padding:\s*12px 10px 16px/s);
 });
 

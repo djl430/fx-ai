@@ -111,8 +111,6 @@
       text-overflow: ellipsis;
     }
 
-    .top-actions { display: flex; gap: 10px; flex: none; }
-
     .grading-mode-switch {
       display: inline-flex;
       padding: 3px;
@@ -120,6 +118,20 @@
       border-radius: 11px;
       background: #f3f6fc;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .grading-mode-dock {
+      padding: 12px 10px 9px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.58);
+    }
+
+    .grading-mode-switch--rail { width: 100%; }
+    .grading-mode-switch--rail .grading-mode-button {
+      min-width: 0;
+      flex: 1;
+      padding-inline: 4px;
+      font-size: 11px;
     }
 
     .grading-mode-button {
@@ -205,7 +217,7 @@
 
     .rail {
       display: grid;
-      grid-template-rows: minmax(0,1fr) auto;
+      grid-template-rows: auto minmax(0,1fr) auto;
       border-right: 1px solid var(--line);
       background: rgba(247, 249, 253, .95);
     }
@@ -900,7 +912,7 @@
     .student-roster {
       min-height: 0;
       display: grid;
-      grid-template-rows: minmax(0,1fr) auto;
+      grid-template-rows: auto minmax(0,1fr) auto;
       border-right: 1px solid var(--line);
       background: rgba(247,249,253,.96);
     }
@@ -1476,10 +1488,6 @@
 
     @media (max-width: 620px) {
       h1 { font-size: 18px; }
-      .top-actions { width: 100%; }
-      .top-actions .button { flex: 1; padding: 0 9px; }
-      .grading-mode-switch { width: 100%; }
-      .grading-mode-button { flex: 1; }
       .answer-toolbar { align-items: flex-start; }
       .density-label { display: none; }
       .student-grid { --columns: 2 !important; }
@@ -1563,16 +1571,16 @@
             <strong id="gradingTaskTitle">二次函数单元作业</strong>
           </div>
         </div>
-        <div class="top-actions">
-          <div class="grading-mode-switch" role="tablist" aria-label="批改方式">
-            <button class="grading-mode-button active" type="button" role="tab" data-grading-view="question" aria-selected="true">按题批改</button>
-            <button class="grading-mode-button" type="button" role="tab" data-grading-view="student" aria-selected="false">按学生批改</button>
-          </div>
-        </div>
       </header>
 
       <section class="workspace" id="questionWorkspace">
         <aside class="rail" aria-label="题号导航">
+          <div class="grading-mode-dock">
+            <div class="grading-mode-switch grading-mode-switch--rail" role="tablist" aria-label="批改方式">
+              <button class="grading-mode-button active" type="button" role="tab" data-grading-view="question" aria-selected="true">按题批改</button>
+              <button class="grading-mode-button" type="button" role="tab" data-grading-view="student" aria-selected="false">按学生批改</button>
+            </div>
+          </div>
           <nav class="question-list" id="questionList"></nav>
           <div class="rail-footer">
             <button class="button primary" type="button" id="confirmAll">一键确认批改</button>
@@ -1630,6 +1638,12 @@
 
       <section class="student-workspace" id="studentWorkspace" aria-label="按学生批改" hidden>
         <aside class="student-roster">
+          <div class="grading-mode-dock">
+            <div class="grading-mode-switch grading-mode-switch--rail" role="tablist" aria-label="批改方式">
+              <button class="grading-mode-button active" type="button" role="tab" data-grading-view="question" aria-selected="true">按题批改</button>
+              <button class="grading-mode-button" type="button" role="tab" data-grading-view="student" aria-selected="false">按学生批改</button>
+            </div>
+          </div>
           <nav class="student-list" id="studentList" aria-label="选择学生"></nav>
           <footer class="student-roster__footer">
             <button class="button primary" id="confirmAllStudents" type="button">一键确认批改</button>
@@ -1980,10 +1994,12 @@
       const explanationDetails = document.getElementById("explanationDetails");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
       const confirmAllButton = document.getElementById("confirmAll");
-      const questionViewButton = document.querySelector('[data-grading-view="question"]');
-      const studentViewButton = document.querySelector('[data-grading-view="student"]');
-      questionViewButton.textContent = isExam ? "按题赋分" : "按题批改";
-      studentViewButton.textContent = isExam ? "按学生赋分" : "按学生批改";
+      document.querySelectorAll('[data-grading-view="question"]').forEach((button) => {
+        button.textContent = isExam ? "按题赋分" : "按题批改";
+      });
+      document.querySelectorAll('[data-grading-view="student"]').forEach((button) => {
+        button.textContent = isExam ? "按学生赋分" : "按学生批改";
+      });
       studentWorkspace.setAttribute("aria-label", isExam ? "按学生赋分" : "按学生批改");
       confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "一键确认批改";
 
