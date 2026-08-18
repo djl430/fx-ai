@@ -569,6 +569,12 @@ test('task cards expose grading, insights, and review actions', () => {
   assert.match(indexPage, /action\.dataset\.action === "open-review"/);
 });
 
+test('grading action uses the same visual style as insights and review', () => {
+  assert.match(indexPage, /class="task-action"[^>]*data-action="open-task"/);
+  assert.doesNotMatch(indexPage, /class="task-action primary"/);
+  assert.doesNotMatch(indexPage, /\.task-action\.primary\s*\{/);
+});
+
 test('tasks hide all actions while AI analysis is in progress', () => {
   assert.match(indexPage, /const isAnalyzing = task\.status === "AI分析中" \|\| listTag === "AI分析中"/);
   assert.match(indexPage, /function taskActionButtons\(task\)/);
