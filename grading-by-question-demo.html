@@ -117,47 +117,85 @@
       background: rgba(255,255,255,.58);
     }
 
-    .grading-mode-select-wrap {
+    .grading-mode-dropdown {
       position: relative;
-      display: block;
+      display: inline-block;
+      min-width: 126px;
     }
 
-    .grading-mode-select-wrap::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: 14px;
-      width: 7px;
-      height: 7px;
-      border-right: 2px solid #7380a1;
-      border-bottom: 2px solid #7380a1;
-      pointer-events: none;
-      transform: translateY(-70%) rotate(45deg);
-    }
-
-    .grading-mode-select {
-      appearance: none;
+    .grading-mode-trigger {
       width: 100%;
-      min-height: 38px;
-      padding: 0 36px 0 12px;
-      border: 1px solid #d4dced;
-      border-radius: 10px;
-      color: var(--brand-dark);
-      background: rgba(255,255,255,.94);
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 13px 0 15px;
+      border: 0;
+      border-radius: 18px;
+      color: #202b40;
+      background: #f0f1f3;
       font-size: 12px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(45,64,104,.05);
-      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+      transition: background .18s ease, box-shadow .18s ease;
     }
 
-    .grading-mode-select:hover { border-color: #b9c5e0; background: #fff; }
-    .grading-mode-select:focus-visible {
-      outline: 3px solid rgba(79,102,216,.25);
+    .grading-mode-trigger:hover { background: #e8ebef; }
+    .grading-mode-trigger:focus-visible {
+      outline: 3px solid rgba(79,102,216,.22);
       outline-offset: 2px;
-      border-color: #9dacda;
-      box-shadow: 0 7px 18px rgba(45,64,104,.09);
     }
+
+    .grading-mode-trigger__arrow {
+      width: 7px;
+      height: 7px;
+      flex: none;
+      border-top: 2px solid #5473d8;
+      border-left: 2px solid #5473d8;
+      transform: translateY(2px) rotate(45deg);
+      transition: transform .18s ease;
+    }
+
+    .grading-mode-dropdown.is-open .grading-mode-trigger__arrow {
+      transform: translateY(-2px) rotate(225deg);
+    }
+
+    .grading-mode-menu {
+      position: absolute;
+      z-index: 40;
+      top: calc(100% + 5px);
+      left: 0;
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #e4e8f0;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(31,44,72,.14);
+    }
+
+    .grading-mode-menu[hidden] { display: none; }
+
+    .grading-mode-option {
+      width: 100%;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 5px;
+      color: #202b40;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+      transition: background .15s ease, color .15s ease;
+    }
+
+    .grading-mode-option:hover { background: #f5f7fb; }
+    .grading-mode-option.is-selected { color: #26385e; background: #eef5ff; }
+    .grading-mode-option:focus-visible { outline: 2px solid rgba(79,102,216,.3); outline-offset: -2px; }
 
     .button {
       min-height: 32px;
@@ -1659,12 +1697,16 @@
       <section class="workspace" id="questionWorkspace">
         <aside class="rail" aria-label="题号导航">
           <div class="grading-mode-dock">
-            <label class="grading-mode-select-wrap">
-              <select class="grading-mode-select" data-grading-view-select aria-label="批改方式">
-                <option value="question" data-grading-view-option="question">按题批改</option>
-                <option value="student" data-grading-view-option="student">按学生批改</option>
-              </select>
-            </label>
+            <div class="grading-mode-dropdown" data-grading-view-dropdown>
+              <button class="grading-mode-trigger" type="button" data-grading-view-trigger aria-haspopup="listbox" aria-expanded="false">
+                <span data-grading-view-current>按题批改</span>
+                <span class="grading-mode-trigger__arrow" aria-hidden="true"></span>
+              </button>
+              <div class="grading-mode-menu" role="listbox" aria-label="批改方式" hidden>
+                <button class="grading-mode-option is-selected" type="button" role="option" aria-selected="true" data-grading-view-option="question">按题批改</button>
+                <button class="grading-mode-option" type="button" role="option" aria-selected="false" data-grading-view-option="student">按学生批改</button>
+              </div>
+            </div>
           </div>
           <nav class="question-list" id="questionList"></nav>
           <div class="rail-footer">
@@ -1735,12 +1777,16 @@
       <section class="student-workspace" id="studentWorkspace" aria-label="按学生批改" hidden>
         <aside class="student-roster">
           <div class="grading-mode-dock">
-            <label class="grading-mode-select-wrap">
-              <select class="grading-mode-select" data-grading-view-select aria-label="批改方式">
-                <option value="question" data-grading-view-option="question">按题批改</option>
-                <option value="student" data-grading-view-option="student">按学生批改</option>
-              </select>
-            </label>
+            <div class="grading-mode-dropdown" data-grading-view-dropdown>
+              <button class="grading-mode-trigger" type="button" data-grading-view-trigger aria-haspopup="listbox" aria-expanded="false">
+                <span data-grading-view-current>按学生批改</span>
+                <span class="grading-mode-trigger__arrow" aria-hidden="true"></span>
+              </button>
+              <div class="grading-mode-menu" role="listbox" aria-label="批改方式" hidden>
+                <button class="grading-mode-option" type="button" role="option" aria-selected="false" data-grading-view-option="question">按题批改</button>
+                <button class="grading-mode-option is-selected" type="button" role="option" aria-selected="true" data-grading-view-option="student">按学生批改</button>
+              </div>
+            </div>
           </div>
           <nav class="student-list" id="studentList" aria-label="选择学生"></nav>
           <footer class="student-roster__footer">
@@ -2781,19 +2827,66 @@
         showToast(`${activeStudentName} · 第 ${questionId} 题已标记为${labels[nextResult].name}`);
       }
 
+      function gradingViewLabel(view) {
+        if (view === "student") return isExam ? "按学生赋分" : "按学生批改";
+        return isExam ? "按题赋分" : "按题批改";
+      }
+
+      function closeGradingViewDropdowns() {
+        document.querySelectorAll("[data-grading-view-dropdown]").forEach((dropdown) => {
+          dropdown.classList.remove("is-open");
+          dropdown.querySelector(".grading-mode-menu").hidden = true;
+          dropdown.querySelector("[data-grading-view-trigger]").setAttribute("aria-expanded", "false");
+        });
+      }
+
+      function syncGradingViewDropdowns() {
+        document.querySelectorAll("[data-grading-view-dropdown]").forEach((dropdown) => {
+          const trigger = dropdown.querySelector("[data-grading-view-trigger]");
+          const current = dropdown.querySelector("[data-grading-view-current]");
+          current.textContent = gradingViewLabel(gradingView);
+          trigger.setAttribute("aria-expanded", "false");
+          dropdown.classList.remove("is-open");
+          dropdown.querySelector(".grading-mode-menu").hidden = true;
+          dropdown.querySelectorAll("[data-grading-view-option]").forEach((option) => {
+            const selected = option.dataset.gradingViewOption === gradingView;
+            option.classList.toggle("is-selected", selected);
+            option.setAttribute("aria-selected", String(selected));
+          });
+        });
+      }
+
       function setGradingView(view) {
         gradingView = view === "student" ? "student" : "question";
         questionWorkspace.hidden = gradingView !== "question";
         studentWorkspace.hidden = gradingView !== "student";
-        document.querySelectorAll("[data-grading-view-select]").forEach((select) => {
-          select.value = gradingView;
-        });
+        syncGradingViewDropdowns();
         if (gradingView === "question") renderAll();
         else renderStudentWorkspace();
       }
 
-      document.querySelectorAll("[data-grading-view-select]").forEach((select) => {
-        select.addEventListener("change", () => setGradingView(select.value));
+      document.querySelectorAll("[data-grading-view-dropdown]").forEach((dropdown) => {
+        const trigger = dropdown.querySelector("[data-grading-view-trigger]");
+        const menu = dropdown.querySelector(".grading-mode-menu");
+        trigger.addEventListener("click", () => {
+          const shouldOpen = menu.hidden;
+          closeGradingViewDropdowns();
+          if (!shouldOpen) return;
+          menu.hidden = false;
+          dropdown.classList.add("is-open");
+          trigger.setAttribute("aria-expanded", "true");
+        });
+        dropdown.querySelectorAll("[data-grading-view-option]").forEach((option) => {
+          option.addEventListener("click", () => setGradingView(option.dataset.gradingViewOption));
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest("[data-grading-view-dropdown]")) closeGradingViewDropdowns();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeGradingViewDropdowns();
       });
 
       studentList.addEventListener("click", (event) => {

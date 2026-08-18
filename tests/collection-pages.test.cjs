@@ -408,28 +408,32 @@ test('grading page exposes a four-state top result navigation', () => {
 
 test('grading page switches between synchronized question and student dropdowns', () => {
   assert.doesNotMatch(gradingPage, /student-trace-preview\.html/);
-  assert.match(gradingPage, /data-grading-view-select/);
-  assert.match(gradingPage, /<option value="question"[^>]*>按题批改<\/option>/);
-  assert.match(gradingPage, /<option value="student"[^>]*>按学生批改<\/option>/);
+  assert.match(gradingPage, /data-grading-view-dropdown/);
+  assert.match(gradingPage, /data-grading-view-trigger/);
+  assert.match(gradingPage, /data-grading-view-option="question"[^>]*>按题批改<\/button>/);
+  assert.match(gradingPage, /data-grading-view-option="student"[^>]*>按学生批改<\/button>/);
   assert.doesNotMatch(gradingPage, /data-grading-view="question"/);
   assert.match(gradingPage, /id="questionWorkspace"/);
   assert.match(gradingPage, /id="studentWorkspace"[^>]*hidden/);
   assert.match(gradingPage, /\.workspace\[hidden\]\s*\{\s*display:\s*none/);
   assert.match(gradingPage, /function setGradingView/);
-  assert.match(gradingPage, /document\.querySelectorAll\("\[data-grading-view-select\]"\)\.forEach\(\(select\)/);
-  assert.match(gradingPage, /select\.value = gradingView/);
-  assert.match(gradingPage, /select\.addEventListener\("change", \(\) => setGradingView\(select\.value\)\)/);
+  assert.match(gradingPage, /function syncGradingViewDropdowns\(\)/);
+  assert.match(gradingPage, /trigger\.setAttribute\("aria-expanded", "false"\)/);
+  assert.match(gradingPage, /option\.classList\.toggle\("is-selected", selected\)/);
+  assert.match(gradingPage, /setGradingView\(option\.dataset\.gradingViewOption\)/);
   assert.match(gradingPage, /student\.result = result/);
   assert.match(gradingPage, /renderAll\(\)/);
 });
 
 test('grading mode dropdowns live above both question and student navigation lists', () => {
   assert.doesNotMatch(gradingPage, /<div class="top-actions">/);
-  assert.equal((gradingPage.match(/<select class="grading-mode-select"[^>]*aria-label="批改方式"/g) || []).length, 2);
-  assert.match(gradingPage, /<aside class="rail"[^>]*>\s*<div class="grading-mode-dock">[\s\S]*?<select class="grading-mode-select"[\s\S]*?<nav class="question-list"/);
-  assert.match(gradingPage, /<aside class="student-roster">\s*<div class="grading-mode-dock">[\s\S]*?<select class="grading-mode-select"[\s\S]*?<nav class="student-list"/);
-  assert.match(gradingPage, /\.grading-mode-select-wrap\s*\{[^}]*position:\s*relative/s);
-  assert.match(gradingPage, /\.grading-mode-select\s*\{[^}]*appearance:\s*none[^}]*width:\s*100%/s);
+  assert.equal((gradingPage.match(/class="grading-mode-dropdown" data-grading-view-dropdown/g) || []).length, 2);
+  assert.match(gradingPage, /<aside class="rail"[^>]*>\s*<div class="grading-mode-dock">[\s\S]*?data-grading-view-trigger[\s\S]*?<nav class="question-list"/);
+  assert.match(gradingPage, /<aside class="student-roster">\s*<div class="grading-mode-dock">[\s\S]*?data-grading-view-trigger[\s\S]*?<nav class="student-list"/);
+  assert.match(gradingPage, /\.grading-mode-dropdown\s*\{[^}]*position:\s*relative/s);
+  assert.match(gradingPage, /\.grading-mode-menu\s*\{[^}]*position:\s*absolute[^}]*box-shadow:/s);
+  assert.match(gradingPage, /\.grading-mode-option\.is-selected\s*\{[^}]*background:\s*#eef5ff/s);
+  assert.match(gradingPage, /event\.key === "Escape"[\s\S]*closeGradingViewDropdowns/s);
 });
 
 test('student grading mode provides a roster, centered paper, and structured tools', () => {
