@@ -311,12 +311,16 @@ test('generated homework and exams select grading mode from task kind', () => {
   assert.match(indexPage, /taskId:\s*task\.id/);
 });
 
-test('grading demo renders generated task metadata from query parameters', () => {
-  for (const key of ['taskTitle', 'taskKind', 'className', 'students', 'pages']) {
+test('grading demo renders generated task title and class context from query parameters', () => {
+  for (const key of ['taskTitle', 'className']) {
     assert.match(gradingPage, new RegExp(`params\\.get\\(["']${key}["']\\)`));
   }
   assert.match(gradingPage, /gradingTaskTitle/);
-  assert.match(gradingPage, /gradingTaskMeta/);
+});
+
+test('grading header hides the task metadata line', () => {
+  assert.doesNotMatch(gradingPage, /id="gradingTaskMeta"/);
+  assert.doesNotMatch(gradingPage, /getElementById\("gradingTaskMeta"\)/);
 });
 
 test('grading completion is persisted by task id and reflected on the list', () => {

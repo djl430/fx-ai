@@ -74,9 +74,8 @@
 
     .title-lockup { display: flex; align-items: center; gap: 14px; min-width: 0; }
     .grading-task-lockup { min-width: 0; }
-    .grading-task-lockup strong, .grading-task-lockup small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .grading-task-lockup strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .grading-task-lockup strong { max-width:460px; color:var(--ink); font-size:15px; }
-    .grading-task-lockup small { margin-top:3px; color:var(--muted); font-size:11px; }
 
     .back-link {
       width: 32px;
@@ -1282,7 +1281,6 @@
         <a class="back-link" href="./index.html?preserveCollection=1" aria-label="返回批改首页">←</a>
           <div class="grading-task-lockup">
             <strong id="gradingTaskTitle">二次函数单元作业</strong>
-            <small id="gradingTaskMeta">作业 · 九年级 2 班 · 42 人 / 84 页</small>
           </div>
         </div>
         <div class="top-actions">
@@ -1409,14 +1407,10 @@
       const isExam = params.get("mode") === "exam";
       const variant = params.get("variant");
       const taskTitle = params.get("taskTitle") || (isExam ? "数学期中质量检测" : "二次函数单元作业");
-      const taskKind = params.get("taskKind") || (isExam ? "考试" : "作业");
       const className = params.get("className") || (isExam ? "八年级 5 班" : "九年级 2 班");
-      const studentsCount = params.get("students") || (isExam ? "40" : "42");
-      const pagesCount = params.get("pages") || (isExam ? "240" : "84");
       const isSimilarityGrouping = variant === "similar";
       document.title = isExam ? "飞象智批 · 试卷批改 Demo" : isSimilarityGrouping ? "飞象智批 · 形似作答分组 Demo" : "飞象智批 · 按题批改 Demo";
       document.getElementById("gradingTaskTitle").textContent = taskTitle;
-      document.getElementById("gradingTaskMeta").textContent = `${taskKind} · ${className} · ${studentsCount} 人 / ${pagesCount} 页`;
 
       const students = ["王晓宇", "李思雨", "陈子涵", "张可欣", "周明远", "许安然", "林嘉言", "苏雨桐", "赵亦辰", "沈乐言", "何宇辰", "宋雨桐", "顾晨然", "刘子涵", "马思源", "郑雨欣"];
 
