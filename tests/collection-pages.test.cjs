@@ -416,6 +416,11 @@ test('exam student scoring uses judgments for objective questions and scores for
   assert.match(gradingPage, /class="student-subjective-score"[\s\S]*data-student-score/s);
 });
 
+test('exam student paper does not format an already formatted score twice', () => {
+  assert.doesNotMatch(gradingPage, /formatScore\(studentScore\(/);
+  assert.match(gradingPage, /class="student-paper-score">\$\{studentScore\(student, question\)\}/);
+});
+
 test('exam student workspace uses scoring labels and total points', () => {
   assert.match(gradingPage, /function studentExamTotal\(name\)/);
   assert.match(gradingPage, /isExam \? `\$\{studentExamTotal\(name\)\} 分` : `\$\{studentAccuracy\(name\)\}%`/);

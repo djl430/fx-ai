@@ -2259,7 +2259,7 @@
               : "";
             const resultMark = student && student.result !== "ungraded"
               ? isExam
-                ? `<span class="student-paper-score">${formatScore(studentScore(student, question))}/${maxScore(question)}</span>`
+                ? `<span class="student-paper-score">${studentScore(student, question)}/${maxScore(question)}</span>`
                 : usesPaperDirectGrading
                   ? `<span class="student-paper-mark is-inline"><span class="mark-icon ${student.result}"></span></span>`
                   : `<span class="student-paper-mark"><span class="mark-icon ${student.result}"></span></span>`
