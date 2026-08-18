@@ -372,6 +372,7 @@ test('grading page switches between synchronized question and student modes', ()
   assert.match(gradingPage, /data-grading-view="student"/);
   assert.match(gradingPage, /id="questionWorkspace"/);
   assert.match(gradingPage, /id="studentWorkspace"[^>]*hidden/);
+  assert.match(gradingPage, /\.workspace\[hidden\]\s*\{\s*display:\s*none/);
   assert.match(gradingPage, /function setGradingView/);
   assert.match(gradingPage, /student\.result = result/);
   assert.match(gradingPage, /renderAll\(\)/);
