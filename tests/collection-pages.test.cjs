@@ -498,6 +498,18 @@ test('student roster omits the summary header', () => {
   assert.match(gradingPage, /\.student-list\s*\{[^}]*padding:\s*12px 10px 16px/s);
 });
 
+test('every grading question expands to one consistent 30-student class', () => {
+  const rosterMatch = gradingPage.match(/const students = \[(.*?)\];\s*const CLASS_SIZE = 30;/s);
+  assert.ok(rosterMatch, 'the grading demo should define a 30-student class roster');
+  const roster = JSON.parse(`[${rosterMatch[1]}]`);
+  assert.equal(roster.length, 30);
+  assert.equal(new Set(roster).size, 30);
+  assert.match(gradingPage, /function expandQuestionStudents\(question, qIndex\)/);
+  assert.match(gradingPage, /return students\.map\(\(name, index\)/);
+  assert.match(gradingPage, /question\.responses\[index % question\.responses\.length\]/);
+  assert.match(gradingPage, /question\.students = expandQuestionStudents\(question, qIndex\)/);
+});
+
 test('student accuracy reuses the question grading color thresholds', () => {
   assert.match(gradingPage, /function accuracyClass\(accuracy\)/);
   assert.match(gradingPage, /if \(accuracy >= 80\) return "is-high"/);

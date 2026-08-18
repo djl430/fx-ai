@@ -1830,7 +1830,8 @@
       document.title = isExam ? "飞象智批 · 试卷批改 Demo" : isSimilarityGrouping ? "飞象智批 · 形似作答分组 Demo" : "飞象智批 · 按题批改 Demo";
       document.getElementById("gradingTaskTitle").textContent = taskTitle;
 
-      const students = ["王晓宇", "李思雨", "陈子涵", "张可欣", "周明远", "许安然", "林嘉言", "苏雨桐", "赵亦辰", "沈乐言", "何宇辰", "宋雨桐", "顾晨然", "刘子涵", "马思源", "郑雨欣"];
+      const students = ["王晓宇", "李思雨", "陈子涵", "张可欣", "周明远", "许安然", "林嘉言", "苏雨桐", "赵亦辰", "沈乐言", "何宇辰", "宋雨桐", "顾晨然", "刘子涵", "马思源", "郑雨欣", "曹源", "孙铭泽", "汪灵希", "宋嘉璇", "吴梓瑜", "马希彤", "陈君宜", "苗昊晨", "国腾兴", "孟瑶儿", "周诗涵", "黄博文", "罗婉清", "唐子墨"];
+      const CLASS_SIZE = 30;
 
       let questions = [
         {
@@ -2066,29 +2067,55 @@
       const resultPattern = ["correct", "correct", "correct", "partial", "correct", "partial", "wrong", "wrong", "ungraded", "correct", "partial", "correct", "correct", "wrong", "ungraded", "correct"];
       const shiftedPatterns = [0, 1, 0, 2, 0, 3, 1, 2];
 
-      questions.forEach((question, qIndex) => {
+      function expandQuestionStudents(question, qIndex) {
+        const shift = shiftedPatterns[qIndex % shiftedPatterns.length];
+        const resultForIndex = (index) => {
+          const initialResult = resultPattern[(index + shift) % resultPattern.length];
+          return isExam && isObjectiveQuestion(question) && initialResult === "partial" ? "wrong" : initialResult;
+        };
+
         if (question.groups) {
-          question.students = question.groups.flatMap(group =>
-            group.students.map((student, index) => ({
-              id: `${question.id}-${group.id}-${index}`,
-              name: student.name,
-              answer: student.answer,
+          const existingByName = new Map(question.groups.flatMap((group) =>
+            group.students.map((student) => [student.name, { ...student, group }])
+          ));
+          return students.map((name, index) => {
+            const existing = existingByName.get(name);
+            if (existing) {
+              return {
+                id: `${question.id}-${index}`,
+                name,
+                answer: existing.answer,
+                result: existing.group.result,
+                groupId: existing.group.id
+              };
+            }
+            const result = resultForIndex(index);
+            const matchingGroups = question.groups.filter((group) => group.result === result);
+            const group = matchingGroups[index % matchingGroups.length] || question.groups[index % question.groups.length];
+            const sample = group.students[index % group.students.length];
+            return {
+              id: `${question.id}-${index}`,
+              name,
+              answer: sample?.answer || question.answer,
               result: group.result,
               groupId: group.id
-            }))
-          );
-          return;
+            };
+          });
         }
-        const shift = shiftedPatterns[qIndex];
-        question.students = students.map((name, index) => {
-          const initialResult = resultPattern[(index + shift) % resultPattern.length];
+
+        return students.map((name, index) => {
+          const result = resultForIndex(index);
           return {
             id: `${question.id}-${index}`,
             name,
-            answer: question.responses[index],
-            result: isExam && isObjectiveQuestion(question) && initialResult === "partial" ? "wrong" : initialResult
+            answer: question.responses[index % question.responses.length],
+            result
           };
         });
+      }
+
+      questions.forEach((question, qIndex) => {
+        question.students = expandQuestionStudents(question, qIndex);
       });
 
       const labels = {
