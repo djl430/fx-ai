@@ -322,6 +322,78 @@
     .assist-card.answer-card { background: #fff; }
     .assist-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
     .answer-value { margin-top: 9px; font-family: "Songti SC", "STSong", serif; font-size: 17px; line-height: 1.7; color: var(--ink); }
+
+    .question-snapshot-card {
+      margin-top: 0;
+      padding: 12px;
+      background: rgba(255,255,255,.95);
+    }
+
+    .question-snapshot-card__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 2px 9px;
+    }
+
+    .question-snapshot-card__hint {
+      color: #8b96ab;
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .question-snapshot-button {
+      position: relative;
+      width: 100%;
+      display: block;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid #e3d8c8;
+      border-radius: 11px;
+      background: #fffdf8;
+      cursor: zoom-in;
+      box-shadow: 0 6px 16px rgba(51,61,83,.08);
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .question-snapshot-button:hover {
+      border-color: #aebce3;
+      box-shadow: 0 10px 24px rgba(44,64,112,.14);
+      transform: translateY(-1px);
+    }
+
+    .question-snapshot-button:focus-visible {
+      outline: 3px solid rgba(79,102,216,.25);
+      outline-offset: 2px;
+    }
+
+    .question-snapshot-thumbnail {
+      width: 100%;
+      aspect-ratio: 38 / 15;
+      display: block;
+      object-fit: contain;
+      background: #fffdf8;
+    }
+
+    .question-snapshot-zoom {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      min-width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      padding: 0 8px;
+      border: 1px solid rgba(255,255,255,.82);
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(34,50,85,.78);
+      box-shadow: 0 5px 14px rgba(24,35,59,.18);
+      font-size: 10px;
+      font-weight: 750;
+      backdrop-filter: blur(5px);
+    }
     .basis-card {
       padding: 16px 16px 18px;
       border-color: #dce4ff;
@@ -859,6 +931,19 @@
     .modal-head h2 { margin: 0; font-family: "Songti SC", serif; font-size: 22px; }
     .modal-close { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: white; cursor: pointer; }
     .modal-body { padding: 22px; }
+
+    .question-snapshot-modal { width: min(980px, 94vw); }
+    .question-snapshot-modal__body { background: #e9eef7; }
+    .question-snapshot-preview {
+      width: 100%;
+      max-height: calc(88vh - 110px);
+      display: block;
+      object-fit: contain;
+      border: 1px solid #e1d5c3;
+      border-radius: 14px;
+      background: #fffdf8;
+      box-shadow: 0 18px 44px rgba(31,43,69,.16);
+    }
 
     .preview-paper {
       min-height: 520px;
@@ -1568,6 +1653,17 @@
             <div class="metric-value" id="accuracyValue"></div>
           </section>
 
+          <section class="assist-card question-snapshot-card">
+            <div class="question-snapshot-card__head">
+              <div class="assist-label">题干截图</div>
+              <span class="question-snapshot-card__hint">点击放大</span>
+            </div>
+            <button class="question-snapshot-button" id="questionSnapshotButton" type="button" data-modal="questionSnapshot" aria-label="放大查看题干截图">
+              <img class="question-snapshot-thumbnail" id="questionSnapshotThumbnail" alt="题干截图" />
+              <span class="question-snapshot-zoom" aria-hidden="true">查看大图</span>
+            </button>
+          </section>
+
           <section class="assist-card answer-card">
             <div class="assist-label">答案</div>
             <div class="answer-value" id="answerValue"></div>
@@ -1654,6 +1750,18 @@
           <div class="preview-question">3. 写出函数 y = x² − 4x + 3 的顶点坐标。<br>学生作答：（2，−1）</div>
           <div class="teacher-mark">×　符号检查：常数项应为 −1。</div>
         </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="questionSnapshotModal" aria-hidden="true">
+    <section class="modal question-snapshot-modal" role="dialog" aria-modal="true" aria-labelledby="questionSnapshotTitle">
+      <div class="modal-head">
+        <h2 id="questionSnapshotTitle">题干截图</h2>
+        <button class="modal-close" type="button" aria-label="关闭题干截图">×</button>
+      </div>
+      <div class="modal-body question-snapshot-modal__body">
+        <img class="question-snapshot-preview" id="questionSnapshotPreview" alt="题干截图大图" />
       </div>
     </section>
   </div>
@@ -1972,6 +2080,10 @@
       const explanationText = document.getElementById("explanationText");
       const basisList = document.getElementById("basisList");
       const explanationDetails = document.getElementById("explanationDetails");
+      const questionSnapshotButton = document.getElementById("questionSnapshotButton");
+      const questionSnapshotThumbnail = document.getElementById("questionSnapshotThumbnail");
+      const questionSnapshotPreview = document.getElementById("questionSnapshotPreview");
+      const questionSnapshotTitle = document.getElementById("questionSnapshotTitle");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
       const confirmAllButton = document.getElementById("confirmAll");
       document.querySelectorAll('[data-grading-view-option="question"]').forEach((option) => {
@@ -2083,6 +2195,96 @@
         return accuracyClass(question.accuracy);
       }
 
+      const firstHomeworkSnapshotCopy = {
+        1: {
+          stem: "1. 二次函数 y = 2x² − 4x + 1 的图像开口方向是（　）。",
+          detail: "A. 向下　　B. 向上　　C. 向左　　D. 无法确定"
+        },
+        2: {
+          stem: "2. 求函数 y = x² − 4x + 3 的对称轴。",
+          detail: "对称轴为直线：________________"
+        },
+        3: {
+          stem: "3. 写出函数 y = x² − 4x + 3 的顶点坐标。",
+          detail: "顶点坐标：________________"
+        },
+        4: {
+          stem: "4. 写出函数 y = x² − 4x + 3 在对称轴两侧的增减性。",
+          detail: "请写出自变量的取值范围和对应的增减性。"
+        },
+        5: {
+          stem: "5. 函数 y = x² − 4x + 3 的最小值为________。",
+          detail: "并说明函数取得最小值时 x 的值。"
+        },
+        6: {
+          stem: "6. 写出函数 y = x² − 4x + 3 的开口方向、对称轴和顶点坐标。",
+          detail: "开口方向：______　对称轴：______　顶点：______"
+        }
+      };
+
+      function escapeSnapshotXml(value) {
+        const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" };
+        return String(value).replace(/[&<>"']/g, character => entities[character]);
+      }
+
+      function wrapSnapshotText(value, maxWidth = 28) {
+        const lines = [];
+        let line = "";
+        let width = 0;
+        [...String(value)].forEach((character) => {
+          const characterWidth = /[\u0000-\u00ff]/.test(character) ? .56 : 1;
+          if (line && width + characterWidth > maxWidth) {
+            lines.push(line);
+            line = character;
+            width = characterWidth;
+            return;
+          }
+          line += character;
+          width += characterWidth;
+        });
+        if (line) lines.push(line);
+        return lines;
+      }
+
+      function questionSnapshotCopy(question) {
+        if (usesPaperDirectGrading && firstHomeworkSnapshotCopy[question.id]) {
+          return firstHomeworkSnapshotCopy[question.id];
+        }
+        return {
+          stem: `第 ${question.id} 题　${question.title}`,
+          detail: `题型：${question.type}`
+        };
+      }
+
+      function questionSnapshotDataUrl(question) {
+        const copy = questionSnapshotCopy(question);
+        const lines = [...wrapSnapshotText(copy.stem), ...wrapSnapshotText(copy.detail, 31)];
+        const body = lines.slice(0, 4).map((line, index) =>
+          `<text x="78" y="${142 + index * 39}" class="stem">${escapeSnapshotXml(line)}</text>`
+        ).join("");
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300">
+            <defs>
+              <pattern id="paperLines" width="760" height="38" patternUnits="userSpaceOnUse">
+                <line x1="0" y1="37.5" x2="760" y2="37.5" stroke="#dfe4ec" stroke-width="1" opacity=".72"/>
+              </pattern>
+              <style>
+                .meta { font: 15px 'PingFang SC','Microsoft YaHei',sans-serif; fill: #7b8498; }
+                .stem { font: 22px 'Songti SC','STSong',serif; fill: #172341; }
+              </style>
+            </defs>
+            <rect width="760" height="300" rx="14" fill="#fffdf8"/>
+            <rect width="760" height="300" rx="14" fill="url(#paperLines)"/>
+            <line x1="54" y1="0" x2="54" y2="300" stroke="#f0b4b0" stroke-width="1" opacity=".65"/>
+            <text x="78" y="50" class="meta">第 ${question.id} 题 · 题干截图</text>
+            <text x="682" y="50" class="meta" text-anchor="end">${escapeSnapshotXml(question.type)}</text>
+            <line x1="78" y1="78" x2="682" y2="78" stroke="#cfd6e2" stroke-width="1"/>
+            ${body}
+          </svg>
+        `;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      }
+
       function renderQuestions() {
         questionList.innerHTML = questions.map(question => `
           <button class="question-item ${question.id === activeQuestionId ? "active" : ""}" type="button" data-question="${question.id}">
@@ -2106,9 +2308,17 @@
 
       function renderAssistant() {
         const question = activeQuestion();
+        const snapshotUrl = questionSnapshotDataUrl(question);
+        const snapshotAlt = `第 ${question.id} 题题干截图`;
         metricCard.classList.add("is-hidden");
         metricLabel.textContent = isExam ? "平均分" : "正确率";
         accuracyValue.textContent = questionMetric(question);
+        questionSnapshotThumbnail.src = snapshotUrl;
+        questionSnapshotThumbnail.alt = snapshotAlt;
+        questionSnapshotPreview.src = snapshotUrl;
+        questionSnapshotPreview.alt = `${snapshotAlt}大图`;
+        questionSnapshotTitle.textContent = `第 ${question.id} 题 · 题干截图`;
+        questionSnapshotButton.setAttribute("aria-label", `放大查看第 ${question.id} 题题干截图`);
         answerValue.textContent = question.answer;
         explanationText.textContent = question.explanation;
         const basisItems = [`AI按“${isExam ? "得分点" : "结果"} + 关键过程”联合判断`, ...question.basis];
@@ -2907,7 +3117,8 @@
       });
 
       const modals = {
-        preview: document.getElementById("previewModal")
+        preview: document.getElementById("previewModal"),
+        questionSnapshot: document.getElementById("questionSnapshotModal")
       };
 
       function setModal(modal, open) {

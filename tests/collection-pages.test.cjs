@@ -366,6 +366,19 @@ test('grading page removes the diagnosis entry and modal', () => {
   assert.doesNotMatch(gradingPage, /diagnosis:\s*document\.getElementById/);
 });
 
+test('question grading shows a clickable stem snapshot above the answer', () => {
+  assert.match(gradingPage, /<section class="assist-card question-snapshot-card">[\s\S]*?data-modal="questionSnapshot"[\s\S]*?id="questionSnapshotThumbnail"[\s\S]*?<section class="assist-card answer-card">/);
+  assert.match(gradingPage, /id="questionSnapshotModal"[^>]*aria-hidden="true"/);
+  assert.match(gradingPage, /id="questionSnapshotPreview"/);
+  assert.match(gradingPage, /function questionSnapshotDataUrl\(question\)/);
+  assert.match(gradingPage, /data:image\/svg\+xml/);
+  assert.match(gradingPage, /questionSnapshotThumbnail\.src = snapshotUrl/);
+  assert.match(gradingPage, /questionSnapshotPreview\.src = snapshotUrl/);
+  assert.match(gradingPage, /questionSnapshotButton\.setAttribute\("aria-label", `放大查看第 \$\{question\.id\} 题题干截图`\)/);
+  assert.match(gradingPage, /questionSnapshot:\s*document\.getElementById\("questionSnapshotModal"\)/);
+  assert.match(gradingPage, /二次函数 y = 2x² − 4x \+ 1 的图像开口方向/);
+});
+
 test('grading page exposes a four-state top result navigation', () => {
   assert.match(gradingPage, /<div class="answer-toolbar">[\s\S]*?<nav class="result-navigation" id="resultNavigation"[\s\S]*?<div class="density-control"/);
   const labels = { correct: '正确', partial: '半对', wrong: '错误', ungraded: '未批改' };
