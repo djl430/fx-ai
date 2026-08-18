@@ -414,12 +414,6 @@
       border-radius: 18px;
       background: linear-gradient(145deg, #f3f5ff, #f9fbff);
       box-shadow: 0 16px 38px rgba(54, 76, 146, .08);
-      transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
-    }
-    .basis-card.is-individual {
-      border-color: #becafa;
-      background: linear-gradient(145deg, #eef2ff, #f8faff);
-      box-shadow: 0 18px 42px rgba(54, 76, 146, .13);
     }
     .basis-card__head {
       display: flex;
@@ -2131,7 +2125,6 @@
       const accuracyValue = document.getElementById("accuracyValue");
       const answerValue = document.getElementById("answerValue");
       const explanationText = document.getElementById("explanationText");
-      const basisCard = document.querySelector(".basis-card");
       const basisList = document.getElementById("basisList");
       const explanationDetails = document.getElementById("explanationDetails");
       const questionSnapshotButton = document.getElementById("questionSnapshotButton");
@@ -2360,8 +2353,7 @@
         });
       }
 
-      function setBasisContent(items, individual = false) {
-        basisCard.classList.toggle("is-individual", individual);
+      function setBasisContent(items) {
         basisList.innerHTML = items.map((item, index) =>
           `<li class="${index === 0 ? "is-primary" : ""}">${escapeSnapshotXml(item)}</li>`
         ).join("");
@@ -2369,38 +2361,6 @@
 
       function renderOverallBasis(question) {
         setBasisContent([`AI按“${isExam ? "得分点" : "结果"} + 关键过程”联合判断`, ...question.basis]);
-      }
-
-      function renderStudentBasis(studentId) {
-        const question = activeQuestion();
-        const student = question.students.find(item => item.id === studentId);
-        if (!student) {
-          renderOverallBasis(question);
-          return;
-        }
-        const group = question.groups?.find(item => item.id === student.groupId);
-        const resultText = isExam
-          ? student.result === "correct"
-            ? `关键得分点完整，建议给 ${maxScore(question)} 分。`
-            : student.result === "partial"
-              ? `命中部分得分点，建议给 ${studentScore(student, question)} / ${maxScore(question)} 分。`
-              : student.result === "wrong"
-                ? "关键得分点未命中，建议给 0 分。"
-                : "作答或过程识别不完整，需要老师确认得分。"
-          : student.result === "correct"
-            ? `与答案“${question.answer}”的关键结论一致，建议判为正确。`
-            : student.result === "partial"
-              ? "作答命中部分关键点，但表达或过程不完整，建议判为半对。"
-              : student.result === "wrong"
-                ? `关键结论与答案“${question.answer}”不一致，建议判为错误。`
-                : "作答不完整或识别不清，建议老师确认后再批改。";
-        const items = [
-          `AI识别作答：“${student.answer || "未作答"}”`,
-          resultText,
-          ...(group?.reason ? [`主要差异：${group.reason}`] : []),
-          ...(group?.basis ? [group.basis] : [])
-        ];
-        setBasisContent(items, true);
       }
 
       function renderAssistant() {
@@ -3120,14 +3080,6 @@
             }
           });
         });
-        groupsScroll.querySelectorAll("[data-student-card]").forEach(card => {
-          card.addEventListener("mouseenter", () => renderStudentBasis(card.dataset.studentCard));
-          card.addEventListener("mouseleave", () => renderOverallBasis(activeQuestion()));
-          card.addEventListener("focusin", () => renderStudentBasis(card.dataset.studentCard));
-          card.addEventListener("focusout", event => {
-            if (!card.contains(event.relatedTarget)) renderOverallBasis(activeQuestion());
-          });
-        });
       }
 
       function studentCard(student) {
@@ -3136,7 +3088,7 @@
           ? `<span class="score-mark" data-score-editor><input class="score-input" type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" placeholder="待评" data-score-input data-student="${student.id}" aria-label="${student.name}第 ${question.id} 题得分"> / ${maxScore(question)} 分</span>`
           : `<span class="paper-trace-mark ${student.result}"><span class="mark-icon ${student.result}"></span></span>`;
         return `
-          <article class="student-card" data-result="${student.result}" data-student-card="${student.id}">
+          <article class="student-card" data-result="${student.result}">
             <header class="student-card-head">
               <span class="student-name">${student.name}</span>
             </header>
@@ -3175,7 +3127,6 @@
           student.score = nextScore;
           student.result = nextScore === max ? "correct" : nextScore === 0 ? "wrong" : "partial";
           renderAll();
-          renderStudentBasis(studentId);
           showToast(`${student.name}：已调整为 ${formatScore(nextScore)} / ${max} 分`);
           return;
         }
@@ -3184,7 +3135,6 @@
         student.result = cycle[oldResult];
         delete student.partResults;
         renderCardResult(paper.closest(".student-card"), paper, student, question);
-        renderStudentBasis(studentId);
         showToast(`${student.name}：${labels[oldResult].name} → ${labels[student.result].name}`);
       }
 
@@ -3205,7 +3155,6 @@
         student.score = score;
         student.result = score === max ? "correct" : score === 0 ? "wrong" : "partial";
         renderAll();
-        renderStudentBasis(studentId);
       }
 
       function renderAll() {

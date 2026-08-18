@@ -385,19 +385,15 @@ test('question snapshot card removes redundant zoom copy', () => {
   assert.doesNotMatch(gradingPage, />查看大图<\/span>/);
 });
 
-test('question grading swaps overall AI basis for student basis on hover', () => {
+test('question grading keeps the overall AI basis while hovering students', () => {
   assert.doesNotMatch(gradingPage, /id="basisScope"/);
   assert.doesNotMatch(gradingPage, /class="basis-scope"/);
-  assert.match(gradingPage, /function setBasisContent\(items, individual = false\)/);
+  assert.match(gradingPage, /function setBasisContent\(items\)/);
   assert.match(gradingPage, /function renderOverallBasis\(question\)/);
-  assert.match(gradingPage, /function renderStudentBasis\(studentId\)/);
-  assert.match(gradingPage, /data-student-card="\$\{student\.id\}"/);
-  assert.match(gradingPage, /card\.addEventListener\("mouseenter", \(\) => renderStudentBasis\(card\.dataset\.studentCard\)\)/);
-  assert.match(gradingPage, /card\.addEventListener\("mouseleave", \(\) => renderOverallBasis\(activeQuestion\(\)\)\)/);
-  assert.match(gradingPage, /card\.addEventListener\("focusin", \(\) => renderStudentBasis\(card\.dataset\.studentCard\)\)/);
-  assert.match(gradingPage, /card\.addEventListener\("focusout"/);
-  assert.match(gradingPage, /basisCard\.classList\.toggle\("is-individual", individual\)/);
-  assert.match(gradingPage, /renderStudentBasis\(studentId\);/);
+  assert.doesNotMatch(gradingPage, /function renderStudentBasis\(studentId\)/);
+  assert.doesNotMatch(gradingPage, /data-student-card="\$\{student\.id\}"/);
+  assert.doesNotMatch(gradingPage, /renderStudentBasis\(/);
+  assert.doesNotMatch(gradingPage, /basis-card\.is-individual/);
 });
 
 test('grading page exposes a four-state top result navigation', () => {
