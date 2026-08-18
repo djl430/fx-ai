@@ -1297,7 +1297,7 @@
         <aside class="rail" aria-label="题号导航">
           <nav class="question-list" id="questionList"></nav>
           <div class="rail-footer">
-            <button class="button primary" type="button" id="confirmAll">确认全部题目批改</button>
+            <button class="button primary" type="button" id="confirmAll">一键确认批改</button>
           </div>
         </aside>
 
@@ -1658,7 +1658,7 @@
       const explanationDetails = document.getElementById("explanationDetails");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
       const confirmAllButton = document.getElementById("confirmAll");
-      confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "确认全部题目批改";
+      confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "一键确认批改";
 
       const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
 
@@ -1691,7 +1691,7 @@
       }
 
       function showTaskCompletion() {
-        confirmAllButton.textContent = isExam ? "✓ 已确认全部题目赋分" : "✓ 已确认全部题目批改";
+        confirmAllButton.textContent = isExam ? "✓ 已确认全部题目赋分" : "✓ 已确认全部批改";
         confirmAllButton.disabled = true;
       }
 

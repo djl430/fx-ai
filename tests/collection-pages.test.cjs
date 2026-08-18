@@ -402,6 +402,12 @@ test('student grading matches the reference interaction', () => {
   assert.match(gradingPage, /confirmAllStudents\.addEventListener/);
 });
 
+test('question grading uses the one-click confirmation label', () => {
+  assert.match(gradingPage, /id="confirmAll">一键确认批改</);
+  assert.match(gradingPage, /confirmAllButton\.textContent = isExam \? "确认全部题目赋分" : "一键确认批改"/);
+  assert.match(gradingPage, /isExam \? "✓ 已确认全部题目赋分" : "✓ 已确认全部批改"/);
+});
+
 test('grading result rail contains only four functional lines', () => {
   assert.equal((gradingPage.match(/data-result-target=/g) || []).length, 4);
   assert.doesNotMatch(gradingPage, /\.result-rail::before/);
