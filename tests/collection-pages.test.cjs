@@ -444,6 +444,11 @@ test('grading mode dropdowns live above both question and student navigation lis
   assert.match(gradingPage, /event\.key === "Escape"[\s\S]*closeGradingViewDropdowns/s);
 });
 
+test('grading mode dropdown arrow points down when closed and up when open', () => {
+  assert.match(gradingPage, /\.grading-mode-trigger__arrow\s*\{[^}]*transform:\s*translateY\(-2px\) rotate\(225deg\)/s);
+  assert.match(gradingPage, /\.grading-mode-dropdown\.is-open \.grading-mode-trigger__arrow\s*\{[^}]*transform:\s*translateY\(2px\) rotate\(45deg\)/s);
+});
+
 test('student grading mode provides a roster, centered paper, and structured tools', () => {
   assert.match(gradingPage, /id="studentList"/);
   assert.match(gradingPage, /id="studentPageStack"/);
