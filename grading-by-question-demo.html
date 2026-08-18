@@ -959,20 +959,29 @@
       box-shadow: 0 18px 44px rgba(31,43,69,.16);
     }
 
-    .preview-paper {
-      min-height: 520px;
-      padding: 30px 42px;
-      border: 1px solid #eadfce;
-      border-radius: 14px;
+    .similar-answer-modal { width: min(900px, 94vw); }
+    .similar-answer-modal__body { padding: 20px 22px 22px; }
+    .similar-answer-modal__intro { margin: 0 0 16px; color: #68758d; font-size: 13px; }
+    .similar-answer-preview-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .similar-answer-crop {
+      min-height: 176px;
+      position: relative;
+      overflow: hidden;
+      padding: 18px 20px;
+      border: 1px solid #e6dac9;
+      border-radius: 12px;
       background:
-        repeating-linear-gradient(to bottom, transparent 0 31px, rgba(91,105,133,.09) 31px 32px),
-        #fffdf8;
-      box-shadow: 0 14px 35px rgba(60,67,84,.09);
+        linear-gradient(90deg, transparent 0 36px, rgba(216,83,83,.1) 36px 37px, transparent 37px),
+        repeating-linear-gradient(to bottom, transparent 0 31px, rgba(75,90,120,.07) 31px 32px),
+        #fffdfa;
+      box-shadow: 0 10px 26px rgba(39,51,77,.09);
+      font-family: "Songti SC", "STSong", serif;
     }
-
-    .preview-paper h3 { margin: 0 0 26px; text-align: center; font-family: "Songti SC", serif; font-size: 24px; }
-    .preview-question { margin: 25px 0; font-family: "Songti SC", serif; line-height: 1.8; }
-    .teacher-mark { margin: 8px 0 0 52px; color: #db4d59; font-family: "Kaiti SC", "STKaiti", serif; font-size: 20px; transform: rotate(-1deg); }
+    .similar-answer-crop__student { display: flex; justify-content: space-between; gap: 12px; color: #6f7580; font-size: 11px; }
+    .similar-answer-crop__question { margin: 20px 0 8px; color: #2d3340; font-size: 13px; line-height: 1.75; }
+    .similar-answer-crop__response { color: #1f2737; font-family: "Kaiti SC", "STKaiti", serif; font-size: 21px; }
+    .similar-answer-crop__mark { position: absolute; right: 18px; bottom: 13px; transform: rotate(-7deg); }
+    .similar-answer-modal__footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 18px; border-top: 1px solid var(--line); }
 
     .student-workspace {
       min-height: 0;
@@ -1150,6 +1159,64 @@
       background: rgba(226,232,255,.9);
       box-shadow: inset 4px 0 0 var(--brand), 0 3px 10px rgba(52,72,134,.12);
     }
+
+    .student-paper-question-shell { position: relative; }
+
+    .similar-answer-suggestion {
+      position: absolute;
+      top: 0;
+      left: calc(100% + 22px);
+      z-index: 12;
+      width: 258px;
+      padding: 15px;
+      border: 1px solid #ccd7f3;
+      border-radius: 14px;
+      color: #34415c;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 18px 42px rgba(37,55,99,.18);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(7px);
+      transition: opacity .16s ease, transform .16s ease;
+    }
+
+    .similar-answer-suggestion::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -22px;
+      width: 22px;
+      height: 100%;
+    }
+
+    .student-paper-question-shell:hover .similar-answer-suggestion,
+    .student-paper-question-shell:focus-within .similar-answer-suggestion {
+      pointer-events: auto;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .similar-answer-suggestion__head { display: flex; align-items: center; gap: 8px; color: var(--brand); font-size: 11px; font-weight: 850; }
+    .similar-answer-suggestion__spark { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; background: #edf2ff; font-size: 13px; }
+    .similar-answer-suggestion strong { display: block; margin-top: 10px; color: var(--ink); font-size: 14px; }
+    .similar-answer-suggestion p { margin: 6px 0 0; color: #758097; font-size: 11px; line-height: 1.6; }
+    .similar-answer-suggestion__actions { display: flex; gap: 8px; margin-top: 12px; }
+    .similar-answer-suggestion__action {
+      min-height: 31px;
+      flex: 1;
+      padding: 0 9px;
+      border: 1px solid #d7dfef;
+      border-radius: 8px;
+      color: #475878;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .similar-answer-suggestion__action:hover { border-color: #aebde3; background: #f8faff; }
+    .similar-answer-suggestion__action.is-primary { color: #fff; border-color: #40588f; background: #40588f; }
+    .similar-answer-suggestion__action.is-primary:hover { background: #334a7e; }
 
     .student-paper-question strong { font-size: 15px; }
     .student-paper-question p { margin: 7px 0; color: #696e78; font-size: 12px; }
@@ -1532,6 +1599,17 @@
       .student-paper-question.is-answer-pinned .student-answer-peek {
         transform: translateY(-100%);
       }
+
+      .similar-answer-suggestion {
+        top: calc(100% + 8px);
+        right: 10px;
+        left: auto;
+        width: 270px;
+        transform: translateY(6px);
+      }
+
+      .student-paper-question-shell:hover .similar-answer-suggestion,
+      .student-paper-question-shell:focus-within .similar-answer-suggestion { transform: translateY(0); }
     }
 
     @media (max-width: 1180px) {
@@ -1754,22 +1832,19 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <div class="modal-backdrop" id="previewModal" aria-hidden="true">
-    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+  <div class="modal-backdrop" id="similarAnswerModal" aria-hidden="true">
+    <section class="modal similar-answer-modal" role="dialog" aria-modal="true" aria-labelledby="similarAnswerTitle">
       <div class="modal-head">
-        <h2 id="previewTitle">学生留痕预览</h2>
-        <button class="modal-close" type="button" aria-label="关闭">×</button>
+        <h2 id="similarAnswerTitle">相同作答预览</h2>
+        <button class="modal-close" type="button" aria-label="关闭相同作答预览">×</button>
       </div>
-      <div class="modal-body">
-        <div class="preview-paper">
-          <h3>二次函数单元作业</h3>
-          <div class="preview-question">1. 二次函数 y = 2x² − 4x + 1 的图像开口方向是（　）。<br>学生作答：向上</div>
-          <div class="teacher-mark">✓　判断正确，注意结合二次项系数。</div>
-          <div class="preview-question">2. 求函数 y = x² − 4x + 3 的对称轴。<br>学生作答：x = 2</div>
-          <div class="teacher-mark">✓　配方过程完整。</div>
-          <div class="preview-question">3. 写出函数 y = x² − 4x + 3 的顶点坐标。<br>学生作答：（2，−1）</div>
-          <div class="teacher-mark">×　符号检查：常数项应为 −1。</div>
-        </div>
+      <div class="modal-body similar-answer-modal__body">
+        <p class="similar-answer-modal__intro">AI 判断以下 4 位学生的作答语义一致，请核对切图后决定是否同步批改结果。</p>
+        <div class="similar-answer-preview-grid" id="similarAnswerPreviewGrid"></div>
+      </div>
+      <div class="similar-answer-modal__footer">
+        <button class="button ghost modal-close-secondary" type="button">暂不修改</button>
+        <button class="button primary" id="similarAnswerApplyAll" type="button" data-similar-answer-apply>一起修改</button>
       </div>
     </section>
   </div>
@@ -2511,6 +2586,36 @@
         `;
       }
 
+      function similarAnswerStudents(questionId) {
+        if (!usesPaperDirectGrading || activeStudentName !== students[0] || Number(questionId) !== 1) return [];
+        const question = questions.find((item) => item.id === Number(questionId));
+        const source = question?.students.find((student) => student.name === activeStudentName);
+        if (!question || !source) return [];
+        const normalizedAnswer = studentChoiceSelection(source.answer);
+        return question.students
+          .filter((student) => studentChoiceSelection(student.answer) === normalizedAnswer)
+          .slice(0, 4);
+      }
+
+      function similarAnswerSuggestionMarkup(question) {
+        const matchingStudents = similarAnswerStudents(question.id);
+        if (matchingStudents.length !== 4) return "";
+        return `
+          <aside class="similar-answer-suggestion" role="note" aria-label="相同作答批量修改建议">
+            <div class="similar-answer-suggestion__head">
+              <span class="similar-answer-suggestion__spark" aria-hidden="true">✦</span>
+              <span>AI 批改建议</span>
+            </div>
+            <strong>检测到 4 人相同作答</strong>
+            <p>4 人均选择 B（向上），可复用当前批改结果，提高批改效率。</p>
+            <div class="similar-answer-suggestion__actions">
+              <button class="similar-answer-suggestion__action" type="button" data-similar-answer-preview data-question-id="${question.id}">预览 4 人作答</button>
+              <button class="similar-answer-suggestion__action is-primary" type="button" data-similar-answer-apply data-question-id="${question.id}">一起修改</button>
+            </div>
+          </aside>
+        `;
+      }
+
       function studentPaperMarkup(pageQuestions) {
         return `
           <header class="student-paper-head">
@@ -2544,10 +2649,14 @@
                 <div class="student-paper-answer ${student ? "" : "is-empty"}">学生作答：${student?.answer || "暂无作答"}</div>
                 ${resultMark}
               `;
+            const similarAnswerSuggestion = usesPaperDirectGrading ? similarAnswerSuggestionMarkup(question) : "";
             return `
-              <section class="student-paper-question" ${directGradingAttributes}>
-                ${paperQuestionContent}
-              </section>
+              <div class="student-paper-question-shell">
+                <section class="student-paper-question" ${directGradingAttributes}>
+                  ${paperQuestionContent}
+                </section>
+                ${similarAnswerSuggestion}
+              </div>
             `;
           }).join("")}
         `;
@@ -2739,6 +2848,42 @@
         renderStudentWorkspace();
       }
 
+      function renderSimilarAnswerPreview(questionId) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const matchingStudents = similarAnswerStudents(questionId);
+        const previewGrid = document.getElementById("similarAnswerPreviewGrid");
+        if (!question || matchingStudents.length !== 4) return false;
+        previewGrid.innerHTML = matchingStudents.map((student) => `
+          <article class="similar-answer-crop">
+            <div class="similar-answer-crop__student">
+              <strong>${escapeSnapshotXml(student.name)}</strong>
+              <span>第 1 题 · ${labels[student.result].name}</span>
+            </div>
+            <div class="similar-answer-crop__question">二次函数 y = 2x² − 4x + 1 的图像开口方向是（　）。</div>
+            <div class="similar-answer-crop__response">学生作答：（${escapeSnapshotXml(studentChoiceSelection(student.answer))}）</div>
+            ${student.result === "ungraded" ? "" : `<span class="similar-answer-crop__mark"><span class="mark-icon ${student.result}"></span></span>`}
+          </article>
+        `).join("");
+        document.getElementById("similarAnswerApplyAll").dataset.questionId = String(questionId);
+        return true;
+      }
+
+      function applySimilarAnswerBatch(questionId) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const source = question?.students.find((student) => student.name === activeStudentName);
+        const matchingStudents = similarAnswerStudents(questionId);
+        if (!question || !source || matchingStudents.length !== 4) return;
+        matchingStudents.forEach((student) => {
+          student.result = source.result;
+          delete student.partResults;
+          studentCompletion.delete(student.name);
+        });
+        renderStudentWorkspace();
+        const modal = document.getElementById("similarAnswerModal");
+        if (modal.classList.contains("open")) setModal(modal, false);
+        showToast(`已同步修改 4 人 · 第 ${question.id} 题均标记为${labels[source.result].name}`);
+      }
+
       function pinStudentPaperAnswer(questionId) {
         window.clearTimeout(studentAnswerPinTimer);
         studentPageStack.querySelectorAll(".is-answer-pinned").forEach((item) => item.classList.remove("is-answer-pinned"));
@@ -2834,6 +2979,22 @@
       });
 
       studentPageStack.addEventListener("click", (event) => {
+        const similarPreview = event.target.closest("[data-similar-answer-preview]");
+        if (similarPreview) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (renderSimilarAnswerPreview(similarPreview.dataset.questionId)) {
+            setModal(modals.similarAnswer, true);
+          }
+          return;
+        }
+        const similarApply = event.target.closest("[data-similar-answer-apply]");
+        if (similarApply) {
+          event.preventDefault();
+          event.stopPropagation();
+          applySimilarAnswerBatch(similarApply.dataset.questionId);
+          return;
+        }
         const paperQuestion = event.target.closest("[data-student-paper-question]");
         if (paperQuestion) {
           cycleStudentPaperResult(paperQuestion.dataset.studentPaperQuestion);
@@ -3220,7 +3381,7 @@
       });
 
       const modals = {
-        preview: document.getElementById("previewModal"),
+        similarAnswer: document.getElementById("similarAnswerModal"),
         questionSnapshot: document.getElementById("questionSnapshotModal")
       };
 
@@ -3231,6 +3392,10 @@
       }
 
       document.querySelectorAll("[data-modal]").forEach(button => button.addEventListener("click", () => setModal(modals[button.dataset.modal], true)));
+      document.getElementById("similarAnswerApplyAll").addEventListener("click", (event) => {
+        applySimilarAnswerBatch(event.currentTarget.dataset.questionId);
+      });
+      document.querySelector("#similarAnswerModal .modal-close-secondary").addEventListener("click", () => setModal(modals.similarAnswer, false));
       document.querySelectorAll(".modal-backdrop").forEach(modal => {
         modal.querySelector(".modal-close").addEventListener("click", () => setModal(modal, false));
         modal.addEventListener("click", event => { if (event.target === modal) setModal(modal, false); });
