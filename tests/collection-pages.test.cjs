@@ -670,6 +670,11 @@ test('student-specific grading evidence is one direct text explanation', () => {
   assert.doesNotMatch(evidenceSource, /<[^>]+>/);
 });
 
+test('student-specific grading evidence prefixes the text with an AI icon', () => {
+  assert.match(gradingPage, /class="student-evidence__icon" aria-hidden="true">✦<\/span>\s*<p class="student-evidence__text">/);
+  assert.match(gradingPage, /\.student-evidence__icon \{[\s\S]*?border-radius: 50%;/);
+});
+
 test('question navigation omits grading capability badges below question numbers', () => {
   assert.doesNotMatch(gradingPage, /function capabilityBadgeMarkup\(question\)/);
   assert.doesNotMatch(gradingPage, /class="q-capability"/);

@@ -806,6 +806,9 @@
       top: calc(100% - 4px);
       right: 10px;
       left: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
       max-height: 238px;
       overflow: auto;
       padding: 12px;
@@ -841,6 +844,7 @@
       transform: translateY(0) scale(1);
     }
     .student-evidence__text { margin: 0; color: #46536d; font-size: 10px; line-height: 1.65; }
+    .student-evidence__icon { width: 18px; height: 18px; display: grid; place-items: center; flex: none; border-radius: 50%; color: var(--brand); background: #edf1ff; font-size: 10px; line-height: 1; }
 
     .paper-trace-mark {
       position: absolute;
@@ -2829,6 +2833,7 @@
         if (!usesPaperDirectGrading || !supportsDisplayedGradingBasis(question)) return "";
         return `
           <aside class="student-evidence" role="tooltip" aria-label="${escapeSnapshotXml(student.name)}的 AI 批改依据">
+            <span class="student-evidence__icon" aria-hidden="true">✦</span>
             <p class="student-evidence__text">${escapeSnapshotXml(studentEvidenceText(question, student))}</p>
           </aside>
         `;
