@@ -3550,14 +3550,14 @@
         matchingStudents.forEach((matchingStudent) => {
           matchingStudent.result = source.result;
           delete matchingStudent.partResults;
+          const paper = groupsScroll.querySelector(`.answer-paper[data-student="${matchingStudent.id}"]`);
+          if (paper) renderCardResult(paper.closest(".student-card"), paper, matchingStudent, question);
         });
-        question.accuracy = Math.round(question.students.filter((student) => student.result === "correct").length / CLASS_SIZE * 100);
         questionSimilarAnswerSource = null;
-        renderGroups();
-        renderQuestions();
+        clearQuestionSimilarAnswerSuggestion();
         const modal = document.getElementById("similarAnswerModal");
         if (modal.classList.contains("open")) setModal(modal, false);
-        showToast(`已同步修改 4 人 · 第 ${question.id} 题均标记为${labels[source.result].name}`);
+        showToast(`已同步修改 4 人，确认本题后更新分组`);
       }
 
       function pinStudentPaperAnswer(questionId) {
@@ -3926,8 +3926,8 @@
         showToast(`已将本组 ${studentsInGroup.length} 份作答批为${labels[result].name}`);
       }
 
-      function bindPaperInteractions() {
-        groupsScroll.querySelectorAll("[data-question-similar-answer-preview]").forEach((button) => {
+      function bindQuestionSimilarAnswerActions(root) {
+        root.querySelectorAll("[data-question-similar-answer-preview]").forEach((button) => {
           button.addEventListener("click", (event) => {
             event.stopPropagation();
             if (renderQuestionSimilarAnswerPreview(button.dataset.questionId, button.dataset.sourceStudentId)) {
@@ -3935,12 +3935,32 @@
             }
           });
         });
-        groupsScroll.querySelectorAll("[data-question-similar-answer-apply]").forEach((button) => {
+        root.querySelectorAll("[data-question-similar-answer-apply]").forEach((button) => {
           button.addEventListener("click", (event) => {
             event.stopPropagation();
             applyQuestionSimilarAnswerBatch(button.dataset.questionId, button.dataset.sourceStudentId);
           });
         });
+      }
+
+      function clearQuestionSimilarAnswerSuggestion() {
+        groupsScroll.querySelectorAll(".student-card.is-similar-source").forEach((card) => {
+          card.classList.remove("is-similar-source");
+          card.querySelector(".question-similar-answer-suggestion")?.remove();
+        });
+      }
+
+      function showQuestionSimilarAnswerSuggestion(question, student, card) {
+        clearQuestionSimilarAnswerSuggestion();
+        const markup = questionSimilarAnswerSuggestionMarkup(question, student);
+        if (!card || !markup) return;
+        card.classList.add("is-similar-source");
+        card.insertAdjacentHTML("beforeend", markup);
+        bindQuestionSimilarAnswerActions(card);
+      }
+
+      function bindPaperInteractions() {
+        bindQuestionSimilarAnswerActions(groupsScroll);
         groupsScroll.querySelectorAll("[data-score-input]").forEach((input) => {
           input.closest("[data-score-editor]").addEventListener("click", (event) => event.stopPropagation());
           input.addEventListener("keydown", (event) => {
@@ -4020,14 +4040,10 @@
         const oldResult = student.result;
         student.result = cycle[oldResult];
         delete student.partResults;
+        renderCardResult(paper.closest(".student-card"), paper, student, question);
         if (usesPaperDirectGrading) {
           questionSimilarAnswerSource = { questionId: question.id, studentId: student.id };
-          question.accuracy = Math.round(question.students.filter((item) => item.result === "correct").length / CLASS_SIZE * 100);
-          renderGroups();
-          renderQuestions();
-          groupsScroll.querySelector(`.answer-paper[data-student="${student.id}"]`)?.focus({ preventScroll: true });
-        } else {
-          renderCardResult(paper.closest(".student-card"), paper, student, question);
+          showQuestionSimilarAnswerSuggestion(question, student, paper.closest(".student-card"));
         }
         showToast(`${student.name}：${labels[oldResult].name} → ${labels[student.result].name}`);
       }
@@ -4141,8 +4157,15 @@
 
       confirmAllButton.addEventListener("click", confirmAllGradingResults);
 
+      function finalizeQuestionGrouping(question) {
+        if (!question || isExam) return;
+        question.accuracy = Math.round(question.students.filter((student) => student.result === "correct").length / CLASS_SIZE * 100);
+        questionSimilarAnswerSource = null;
+      }
+
       confirmQuestionButton.addEventListener("click", () => {
         const currentIndex = questions.findIndex(question => question.id === activeQuestionId);
+        finalizeQuestionGrouping(questions[currentIndex]);
         questions[currentIndex].status = "completed";
         gradingProgress = FxCollectionFlow.markQuestionCompleted(
           gradingProgress,

@@ -861,11 +861,32 @@ test('question grading suggests and applies similar answers only after one resul
   assert.match(gradingPage, /class="similar-answer-suggestion question-similar-answer-suggestion"/);
   assert.match(gradingPage, /data-question-similar-answer-preview/);
   assert.match(gradingPage, /data-question-similar-answer-apply/);
-  assert.match(gradingPage, /questionSimilarAnswerSource = \{ questionId: question\.id, studentId: student\.id \}[\s\S]*renderGroups\(\)/);
+  const cycleResultSource = gradingPage.match(
+    /function cycleResult\(studentId, paper\) \{([\s\S]*?)\n\s*\}\n\n\s*function commitExamScore/
+  )?.[1] || '';
+  assert.match(cycleResultSource, /questionSimilarAnswerSource = \{ questionId: question\.id, studentId: student\.id \}/);
+  assert.match(cycleResultSource, /renderCardResult\(paper\.closest\("\.student-card"\), paper, student, question\)/);
+  assert.match(cycleResultSource, /showQuestionSimilarAnswerSuggestion\(question, student, paper\.closest\("\.student-card"\)\)/);
+  assert.doesNotMatch(cycleResultSource, /renderGroups\(\)/);
   assert.match(gradingPage, /function applyQuestionSimilarAnswerBatch\(questionId, sourceStudentId\)/);
   assert.match(gradingPage, /matchingStudents\.forEach\(\(matchingStudent\) => \{[\s\S]*matchingStudent\.result = source\.result/);
+  const questionBatchSource = gradingPage.match(
+    /function applyQuestionSimilarAnswerBatch\(questionId, sourceStudentId\) \{([\s\S]*?)\n\s*\}\n\n\s*function pinStudentPaperAnswer/
+  )?.[1] || '';
+  assert.match(questionBatchSource, /renderCardResult/);
+  assert.doesNotMatch(questionBatchSource, /renderGroups\(\)/);
   assert.match(gradingPage, /questionSimilarAnswerSource = null/);
   assert.match(gradingPage, /\.question-similar-answer-suggestion \{[\s\S]*opacity: 1;/);
+});
+
+test('question cards move to their new groups only when the teacher confirms the question', () => {
+  assert.match(gradingPage, /function finalizeQuestionGrouping\(question\)/);
+  assert.match(gradingPage, /question\.accuracy = Math\.round\(question\.students\.filter\(\(student\) => student\.result === "correct"\)\.length \/ CLASS_SIZE \* 100\)/);
+  const confirmSource = gradingPage.match(
+    /confirmQuestionButton\.addEventListener\("click", \(\) => \{([\s\S]*?)\n\s*\}\);/
+  )?.[1] || '';
+  assert.match(confirmSource, /finalizeQuestionGrouping\(questions\[currentIndex\]\)/);
+  assert.match(confirmSource, /renderAll\(\)/);
 });
 
 test('question grading uses the one-click confirmation label', () => {
