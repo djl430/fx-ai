@@ -615,10 +615,12 @@ test('question navigation omits grading capability badges below question numbers
   assert.doesNotMatch(gradingPage, /\$\{capabilityBadgeMarkup\(question\)\}/);
 });
 
-test('first homework paper shows process and semantic grading evidence', () => {
+test('first homework paper shows process marks without grading-basis labels', () => {
   assert.match(gradingPage, /function studentPaperEvidenceMarkup\(question, student\)/);
   assert.match(gradingPage, /student-paper-step/);
-  assert.match(gradingPage, /student-paper-rubric/);
+  assert.doesNotMatch(gradingPage, /student-paper-method/);
+  assert.doesNotMatch(gradingPage, /student-paper-rubric/);
+  assert.doesNotMatch(gradingPage, /student-paper-evidence-note/);
   assert.match(gradingPage, /求函数 y = x² − 4x \+ 3 的对称轴和最小值/);
   assert.match(gradingPage, /用配方法求 y = 2x² − 8x \+ 5/);
   assert.match(gradingPage, /无论 x 取何值，y 都不小于 1/);

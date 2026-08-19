@@ -1265,12 +1265,6 @@
     .student-paper-steps { display: grid; gap: 7px; margin: 12px 0 0 8px; }
     .student-paper-step { display: grid; grid-template-columns: minmax(0,1fr) 23px; gap: 10px; align-items: center; min-height: 27px; padding: 2px 8px 3px 0; border-bottom: 1px solid rgba(111,124,147,.16); color: #343b48; font-family: "Kaiti SC", "STKaiti", serif; font-size: 16px; }
     .student-paper-step .mark-icon { width: 21px; height: 21px; }
-    .student-paper-evidence-note { margin-top: 8px; color: #a16d2d; font-family: "PingFang SC", sans-serif; font-size: 10px; }
-    .student-paper-method { display: inline-flex; margin-top: 9px; padding: 3px 7px; border-radius: 999px; color: #31745d; background: rgba(227,246,237,.76); font-family: "PingFang SC", sans-serif; font-size: 9px; font-weight: 800; }
-    .student-paper-rubrics { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
-    .student-paper-rubric { padding: 3px 6px; border-radius: 6px; font-family: "PingFang SC", sans-serif; font-size: 9px; }
-    .student-paper-rubric.is-hit { color: #177b58; background: rgba(226,247,237,.85); }
-    .student-paper-rubric.is-missing { color: #b66a1d; background: rgba(255,241,216,.88); }
     .student-paper-answer.is-empty { color: #aaa69d; font-family: inherit; font-size: 13px; }
 
     .student-paper-prompt {
@@ -2908,22 +2902,12 @@
 
       function studentPaperEvidenceMarkup(question, student) {
         if (!student) return "";
-        const method = student.method
-          ? `<span class="student-paper-method">${escapeSnapshotXml(student.method)}</span>`
-          : "";
         const steps = student.steps?.length
           ? `<div class="student-paper-steps">${student.steps.map((step) => `
               <div class="student-paper-step"><span>${escapeSnapshotXml(step.text)}</span><span class="mark-icon ${step.result}" aria-label="${labels[step.result].name}"></span></div>
             `).join("")}</div>`
           : "";
-        const note = student.evidence
-          ? `<div class="student-paper-evidence-note">AI：${escapeSnapshotXml(student.evidence)}</div>`
-          : "";
-        const rubrics = [
-          ...(student.matchedCriteria || []).map((item) => `<span class="student-paper-rubric is-hit">✓ ${escapeSnapshotXml(item)}</span>`),
-          ...(student.missingCriteria || []).map((item) => `<span class="student-paper-rubric is-missing">缺少 ${escapeSnapshotXml(item)}</span>`)
-        ].join("");
-        return `${method}${steps}${note}${rubrics ? `<div class="student-paper-rubrics">${rubrics}</div>` : ""}`;
+        return steps;
       }
 
       function firstHomeworkPaperQuestionMarkup(question, student, resultMark) {
