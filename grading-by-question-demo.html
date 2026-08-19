@@ -2102,22 +2102,25 @@
             }
           },
           {
-            id: 2, title: "求对称轴和最小值", type: "解答题 · 一题多解", accuracy: 60, status: "pending", answer: "对称轴 x = 2；最小值 −1",
-            stem: "求函数 y = x² − 4x + 3 的对称轴和最小值。",
-            capability: { key: "multiple-solutions", label: "多解" },
-            acceptedMethods: ["配方法", "公式法", "两根中点法"],
-            gradingSummary: "识别 3 种有效解法",
-            explanation: "同一道题可以通过配方、顶点横坐标公式或两根中点求出对称轴，再代入求最小值。",
-            basis: ["对称轴 x = 2，最小值 −1。", "三种方法均成立，不要求过程写法一致。"],
-            resultDistribution: { correct: 18, partial: 6, wrong: 4, ungraded: 2 },
+            id: 2, title: "函数值填空", type: "填空题 · 等值数", accuracy: 60, status: "pending", answer: "1/2 或 0.5",
+            stem: "函数 y = 2x²，当 x = 1/2 时，y = ____。",
+            capability: { key: "equivalent-value", label: "等值答案" },
+            acceptedMethods: ["1/2", "0.5"],
+            gradingSummary: "识别分数与小数的等值表达",
+            explanation: "把 x = 1/2 代入 y = 2x²，得到 y = 2×(1/2)² = 1/2；1/2 与 0.5 等值。",
+            basis: ["1/2 与 0.5 等值，任一形式均判为正确。", "数值正确即可，不要求使用相同的书写形式。"],
+            resultDistribution: { correct: 18, wrong: 10, ungraded: 2 },
             resultProfiles: {
               correct: [
-                { method: "配方法", answer: "y=(x−2)²−1，所以对称轴x=2，最小值−1" },
-                { method: "公式法", answer: "x=−b/2a=2，代入得最小值−1" },
-                { method: "两根中点法", answer: "x₁=1，x₂=3，中点为2，代入得−1" }
+                { answer: "1/2", evidence: "作答与答案一致，判为正确" },
+                { answer: "0.5", evidence: "0.5 与 1/2 等值，判为正确" }
               ],
-              partial: [{ method: "公式法", answer: "x=−b/2a=2", evidence: "只求出对称轴，缺少最小值", regradeResult: "correct" }],
-              wrong: [{ answer: "x=−2，最小值1", evidence: "对称轴符号错误" }, { answer: "未作答", evidence: "未作答，按错误处理" }],
+              wrong: [
+                { answer: "1", evidence: "代入计算结果错误" },
+                { answer: "1/4", evidence: "只计算了 (1/2)²，遗漏系数 2" },
+                { answer: "2", evidence: "没有正确代入 x = 1/2" },
+                { answer: "未作答", evidence: "未作答，按错误处理" }
+              ],
               ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           },
@@ -3086,7 +3089,7 @@
               <div class="student-paper-options"><span>A. 向下</span><span>B. 向上</span><span>C. 向左</span><span>D. 向右</span></div>
             `;
           case 2:
-            return `<div class="student-paper-prompt"><b>2.</b> 求函数 y = x² − 4x + 3 的对称轴和最小值，写出过程。</div>${response(answer, true)}${evidence}`;
+            return `<div class="student-paper-prompt"><b>2.</b> 函数 y = 2x²，当 x = 1/2 时，y=${response(answer)}。</div>`;
           case 3:
             return `<div class="student-paper-prompt"><b>3.</b> 用配方法求 y = 2x² − 8x + 5 的顶点坐标和最小值。</div>${response(answer, true)}${evidence}`;
           case 4:

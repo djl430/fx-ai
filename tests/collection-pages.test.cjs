@@ -613,12 +613,20 @@ test('unanswered work is wrong and only unreadable work stays ungraded', () => {
 });
 
 test('first homework defines authentic AI grading capability cases', () => {
-  assert.match(gradingPage, /capability:\s*\{\s*key:\s*"multiple-solutions",\s*label:\s*"多解"/);
-  assert.match(gradingPage, /配方法[\s\S]*公式法[\s\S]*两根中点法/);
+  assert.match(gradingPage, /capability:\s*\{\s*key:\s*"equivalent-value",\s*label:\s*"等值答案"/);
+  assert.match(gradingPage, /1\/2 与 0\.5 等值/);
   assert.match(gradingPage, /用配方法求 y = 2x² − 8x \+ 5 的顶点坐标和最小值/);
   assert.match(gradingPage, /顶点式[\s\S]*一般式/);
   assert.match(gradingPage, /平方项非负[\s\S]*顶点是最低点/);
   assert.match(gradingPage, /S = x\(20 − 2x\)/);
+});
+
+test('second homework question is a fill-in accepting one half or decimal five tenths', () => {
+  assert.match(gradingPage, /id:\s*2,\s*title:\s*"函数值填空",\s*type:\s*"填空题 · 等值数"/);
+  assert.match(gradingPage, /stem:\s*"函数 y = 2x²，当 x = 1\/2 时，y = ____。"/);
+  assert.match(gradingPage, /answer:\s*"1\/2 或 0\.5"/);
+  assert.match(gradingPage, /correct:\s*\[[\s\S]*?answer:\s*"1\/2"[\s\S]*?answer:\s*"0\.5"/);
+  assert.match(gradingPage, /<b>2\.<\/b> 函数 y = 2x²，当 x = 1\/2 时，y=/);
 });
 
 test('first homework expands explicit result profiles to thirty students', () => {
@@ -674,7 +682,7 @@ test('first homework paper shows process marks without grading-basis labels', ()
   assert.doesNotMatch(gradingPage, /student-paper-method/);
   assert.doesNotMatch(gradingPage, /student-paper-rubric/);
   assert.doesNotMatch(gradingPage, /student-paper-evidence-note/);
-  assert.match(gradingPage, /求函数 y = x² − 4x \+ 3 的对称轴和最小值/);
+  assert.match(gradingPage, /函数 y = 2x²，当 x = 1\/2 时，y=/);
   assert.match(gradingPage, /用配方法求 y = 2x² − 8x \+ 5/);
   assert.match(gradingPage, /无论 x 取何值，y 都不小于 1/);
   assert.match(gradingPage, /20 米长的围栏靠墙围成一个矩形花圃/);
