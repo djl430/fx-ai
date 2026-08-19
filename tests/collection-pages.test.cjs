@@ -824,7 +824,10 @@ test('first student first question suggests batching four semantically matching 
   assert.match(gradingPage, /function similarAnswerStudents\(questionId\)/);
   assert.match(gradingPage, /activeStudentName !== students\[0\][\s\S]*Number\(questionId\) !== 1/);
   assert.match(gradingPage, /\.filter\([\s\S]*studentChoiceSelection[\s\S]*\.slice\(0, 4\)/);
+  assert.match(gradingPage, /const similarAnswerSuggestionQuestionIds = new Set\(\)/);
   assert.match(gradingPage, /function similarAnswerSuggestionMarkup\(question\)/);
+  assert.match(gradingPage, /if \(!similarAnswerSuggestionQuestionIds\.has\(question\.id\)\) return ""/);
+  assert.match(gradingPage, /similarAnswerSuggestionQuestionIds\.add\(Number\(questionId\)\)[\s\S]*updateStudentResult\(questionId, nextResult\)/);
   assert.match(gradingPage, /class="similar-answer-suggestion"/);
   assert.match(gradingPage, /检测到 4 人相同作答/);
   assert.match(gradingPage, /data-similar-answer-preview/);
@@ -838,6 +841,7 @@ test('similar answer preview and batch action update all four students', () => {
   assert.match(gradingPage, /class="similar-answer-crop"/);
   assert.match(gradingPage, /function applySimilarAnswerBatch\(questionId\)/);
   assert.match(gradingPage, /matchingStudents\.forEach\(\(student\) => \{[\s\S]*student\.result = source\.result/s);
+  assert.match(gradingPage, /similarAnswerSuggestionQuestionIds\.delete\(Number\(questionId\)\)/);
   assert.match(gradingPage, /studentCompletion\.delete\(student\.name\)/);
   assert.match(gradingPage, /renderStudentWorkspace\(\)/);
   assert.match(gradingPage, /已同步修改 4 人/);

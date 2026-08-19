@@ -2581,6 +2581,7 @@
       let activeQuestionId = FxCollectionFlow.firstPendingQuestionId(questions);
       let columns = 3;
       let toastTimer;
+      const similarAnswerSuggestionQuestionIds = new Set();
 
       const questionList = document.getElementById("questionList");
       const groupsScroll = document.getElementById("groupsScroll");
@@ -3168,6 +3169,7 @@
       }
 
       function similarAnswerSuggestionMarkup(question) {
+        if (!similarAnswerSuggestionQuestionIds.has(question.id)) return "";
         const matchingStudents = similarAnswerStudents(question.id);
         if (matchingStudents.length !== 4) return "";
         return `
@@ -3449,6 +3451,7 @@
           delete student.partResults;
           studentCompletion.delete(student.name);
         });
+        similarAnswerSuggestionQuestionIds.delete(Number(questionId));
         renderStudentWorkspace();
         const modal = document.getElementById("similarAnswerModal");
         if (modal.classList.contains("open")) setModal(modal, false);
@@ -3475,6 +3478,7 @@
           wrong: "partial",
           partial: "correct"
         }[student.result] || "correct";
+        similarAnswerSuggestionQuestionIds.add(Number(questionId));
         updateStudentResult(questionId, nextResult);
         pinStudentPaperAnswer(questionId);
         showToast(`${activeStudentName} · 第 ${questionId} 题已标记为${labels[nextResult].name}`);
