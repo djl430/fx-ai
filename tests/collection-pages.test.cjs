@@ -670,6 +670,17 @@ test('student grading lets teachers edit the hovered question answer and grading
   assert.match(gradingPage, /保存并重新批改本题/);
 });
 
+test('choice questions hide grading basis in both grading views', () => {
+  assert.match(gradingPage, /function supportsDisplayedGradingBasis\(question\)/);
+  assert.match(gradingPage, /return !question\.type\.includes\("选择题"\)/);
+  assert.match(gradingPage, /basisCard\.hidden = !supportsDisplayedGradingBasis\(question\)/);
+  assert.match(gradingPage, /const showGradingBasis = supportsDisplayedGradingBasis\(question\)/);
+  assert.match(gradingPage, /\$\{showGradingBasis \? gradingBasisMarkup : ""\}/);
+  assert.match(gradingPage, /studentGradingRuleField\.hidden = !showGradingBasis/);
+  assert.match(gradingPage, /studentRuleTitle\.textContent = showGradingBasis \? "修改答案与批改标准" : "修改答案"/);
+  assert.match(gradingPage, /showGradingBasis\s*\? studentGradingRuleInput\.value\.split/);
+});
+
 test('student rule save reuses the question regrade pipeline and syncs its progress', () => {
   assert.match(gradingPage, /function applyTeacherRule\(question, nextAnswer, nextRules\)/);
   assert.match(gradingPage, /question\.teacherBasis = \[\.\.\.nextRules\]/);

@@ -415,6 +415,7 @@
       background: linear-gradient(145deg, #f3f5ff, #f9fbff);
       box-shadow: 0 16px 38px rgba(54, 76, 146, .08);
     }
+    .basis-card[hidden] { display: none; }
     .basis-card__head {
       display: flex;
       align-items: center;
@@ -1085,6 +1086,8 @@
     .student-rule-form textarea { min-height: 142px; resize: vertical; }
     .student-rule-form input:focus,
     .student-rule-form textarea:focus { outline: 3px solid rgba(79,102,216,.15); border-color: #8393d8; }
+    .student-rule-basis-field { display: grid; gap: 9px; }
+    .student-rule-basis-field[hidden] { display: none; }
     .student-rule-hint { margin: 2px 0 0; color: #8a6634; font-size: 10px; line-height: 1.55; }
     .student-rule-actions { display: flex; justify-content: flex-end; gap: 9px; padding: 15px 22px 20px; border-top: 1px solid var(--line); }
 
@@ -2016,8 +2019,10 @@
           <div class="student-rule-context" id="studentRuleQuestionLabel">当前题目</div>
           <label for="studentGradingAnswerInput">老师答案</label>
           <input id="studentGradingAnswerInput" type="text" autocomplete="off" />
-          <label for="studentGradingRuleInput">老师的批改依据与得分要求</label>
-          <textarea id="studentGradingRuleInput" rows="6" placeholder="每行一条，例如：方法正确得 1 分"></textarea>
+          <div class="student-rule-basis-field" id="studentGradingRuleField">
+            <label for="studentGradingRuleInput">老师的批改依据与得分要求</label>
+            <textarea id="studentGradingRuleInput" rows="6" placeholder="每行一条，例如：方法正确得 1 分"></textarea>
+          </div>
           <p class="student-rule-hint">保存后，AI 只重新批改这道题的全班 30 人，并同步按题批改和按学生批改结果。</p>
         </div>
         <div class="student-rule-actions">
@@ -2569,10 +2574,13 @@
       const confirmStudent = document.getElementById("confirmStudent");
       const confirmAllStudents = document.getElementById("confirmAllStudents");
       const studentRuleEditor = document.getElementById("studentRuleEditor");
+      const studentRuleTitle = document.getElementById("studentRuleTitle");
       const studentRuleQuestionLabel = document.getElementById("studentRuleQuestionLabel");
       const studentGradingAnswerInput = document.getElementById("studentGradingAnswerInput");
+      const studentGradingRuleField = document.getElementById("studentGradingRuleField");
       const studentGradingRuleInput = document.getElementById("studentGradingRuleInput");
       const metricCard = document.querySelector(".metric-card");
+      const basisCard = document.querySelector(".basis-card");
       const metricLabel = document.getElementById("metricLabel");
       const accuracyValue = document.getElementById("accuracyValue");
       const answerValue = document.getElementById("answerValue");
@@ -2983,6 +2991,7 @@
         questionSnapshotButton.setAttribute("aria-label", `放大查看第 ${question.id} 题题干截图`);
         answerValue.textContent = question.answer;
         explanationText.textContent = question.explanation;
+        basisCard.hidden = !supportsDisplayedGradingBasis(question);
         renderOverallBasis(question);
         renderRuleEditor(question);
         confirmQuestionButton.textContent = isExam ? "确认本题赋分" : "确认本题批改";
@@ -3113,15 +3122,23 @@
         }
       }
 
+      function supportsDisplayedGradingBasis(question) {
+        return !question.type.includes("选择题");
+      }
+
       function studentAnswerPeekMarkup(question) {
+        const showGradingBasis = supportsDisplayedGradingBasis(question);
         const scoringPoints = question.teacherBasis || question.scoringPoints || question.acceptedMethods || [];
+        const gradingBasisMarkup = `
+          <span class="student-answer-peek__basis-label">${question.teacherBasis ? "老师批改依据" : "批改依据"}</span>
+          ${scoringPoints.length ? `<ul>${scoringPoints.map((point) => `<li>${point}</li>`).join("")}</ul>` : ""}
+        `;
         return `
           <aside class="student-answer-peek" id="studentAnswerPeek-${question.id}" role="note">
             <span class="student-answer-peek__label">答案</span>
             <strong>${question.answer}</strong>
-            <span class="student-answer-peek__basis-label">${question.teacherBasis ? "老师批改依据" : "批改依据"}</span>
-            ${scoringPoints.length ? `<ul>${scoringPoints.map((point) => `<li>${point}</li>`).join("")}</ul>` : ""}
-            <button class="student-answer-peek__edit" type="button" data-student-rule-edit="${question.id}" ${regradingQuestions.has(question.id) ? "disabled" : ""}>修改答案与标准</button>
+            ${showGradingBasis ? gradingBasisMarkup : ""}
+            <button class="student-answer-peek__edit" type="button" data-student-rule-edit="${question.id}" ${regradingQuestions.has(question.id) ? "disabled" : ""}>${showGradingBasis ? "修改答案与标准" : "修改答案"}</button>
           </aside>
         `;
       }
@@ -3523,11 +3540,15 @@
       function openStudentRuleEditor(questionId) {
         const question = questions.find((item) => item.id === Number(questionId));
         if (!usesPaperDirectGrading || !question || regradingQuestions.has(question.id)) return;
+        const showGradingBasis = supportsDisplayedGradingBasis(question);
         activeQuestionId = question.id;
         editingStudentRuleQuestionId = question.id;
+        studentRuleTitle.textContent = showGradingBasis ? "修改答案与批改标准" : "修改答案";
         studentRuleQuestionLabel.textContent = `第 ${question.id} 题 · ${question.title}`;
         studentGradingAnswerInput.value = question.answer;
-        studentGradingRuleInput.value = (question.teacherBasis || question.basis).join("\n");
+        studentGradingRuleField.hidden = !showGradingBasis;
+        studentGradingRuleInput.disabled = !showGradingBasis;
+        studentGradingRuleInput.value = showGradingBasis ? (question.teacherBasis || question.basis).join("\n") : "";
         setModal(modals.studentRule, true);
         studentGradingAnswerInput.focus();
       }
@@ -3925,10 +3946,11 @@
         event.preventDefault();
         const question = questions.find((item) => item.id === editingStudentRuleQuestionId);
         if (!usesPaperDirectGrading || !question || regradingQuestions.has(question.id)) return;
+        const showGradingBasis = supportsDisplayedGradingBasis(question);
         const nextAnswer = studentGradingAnswerInput.value.trim();
-        const nextRules = studentGradingRuleInput.value.split("\n").map((item) => item.trim()).filter(Boolean);
-        if (!nextAnswer || !nextRules.length) {
-          showToast("请填写老师答案和至少一条批改依据");
+        const nextRules = showGradingBasis ? studentGradingRuleInput.value.split("\n").map((item) => item.trim()).filter(Boolean) : [`选择 ${studentChoiceSelection(nextAnswer)} 判为正确，其他选项判为错误。`];
+        if (!nextAnswer || (showGradingBasis && !nextRules.length)) {
+          showToast(showGradingBasis ? "请填写老师答案和至少一条批改依据" : "请填写老师答案");
           return;
         }
         editingStudentRuleQuestionId = null;
