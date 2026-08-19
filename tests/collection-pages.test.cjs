@@ -600,8 +600,6 @@ test('first homework expands explicit result profiles to thirty students', () =>
 });
 
 test('question grading renders verifiable AI capability evidence', () => {
-  assert.match(gradingPage, /function capabilityBadgeMarkup\(question\)/);
-  assert.match(gradingPage, /class="q-capability"/);
   assert.match(gradingPage, /function capabilityProofMarkup\(question\)/);
   assert.match(gradingPage, /class="capability-proof"/);
   assert.match(gradingPage, /AI 已完成本题批改/);
@@ -609,6 +607,12 @@ test('question grading renders verifiable AI capability evidence', () => {
   assert.match(gradingPage, /solution-method-tag/);
   assert.match(gradingPage, /step-evidence/);
   assert.match(gradingPage, /criterion-chip/);
+});
+
+test('question navigation omits grading capability badges below question numbers', () => {
+  assert.doesNotMatch(gradingPage, /function capabilityBadgeMarkup\(question\)/);
+  assert.doesNotMatch(gradingPage, /class="q-capability"/);
+  assert.doesNotMatch(gradingPage, /\$\{capabilityBadgeMarkup\(question\)\}/);
 });
 
 test('first homework paper shows process and semantic grading evidence', () => {

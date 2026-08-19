@@ -304,16 +304,6 @@
     .active .q-number { color: white; background: var(--brand); border-color: var(--brand); }
     .q-meta { min-width: 0; }
     .q-title { display: block; font-size: 13px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .q-capability {
-      display: inline-flex;
-      margin-top: 5px;
-      padding: 2px 6px;
-      border-radius: 6px;
-      color: #536a9e;
-      background: #edf2ff;
-      font-size: 9px;
-      font-weight: 800;
-    }
     .q-state { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 10px; color: var(--muted); }
     .q-state::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
     .q-state.pending { color: var(--amber); font-weight: 700; }
@@ -2677,12 +2667,6 @@
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       }
 
-      function capabilityBadgeMarkup(question) {
-        return usesPaperDirectGrading && question.capability
-          ? `<span class="q-capability">${escapeSnapshotXml(question.capability.label)}</span>`
-          : "";
-      }
-
       function capabilityProofMarkup(question) {
         if (!usesPaperDirectGrading || !question.capability) return "";
         const reviewed = question.students.filter((student) => student.result !== "ungraded").length;
@@ -2725,7 +2709,6 @@
           <button class="question-item ${question.id === activeQuestionId ? "active" : ""}" type="button" data-question="${question.id}">
             <span class="q-meta">
               <span class="q-title">第 ${question.id} 题</span>
-              ${capabilityBadgeMarkup(question)}
               <span class="q-state ${question.status === "pending" ? "pending" : ""}">${question.status === "pending" ? "待确认" : "已完成"}</span>
             </span>
             <span class="q-rate ${metricClass(question)}">${questionMetric(question)}</span>
