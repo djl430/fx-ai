@@ -358,6 +358,7 @@
     }
 
     .assist-card.answer-card { background: #fff; }
+    .answer-card__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .assist-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
     .answer-value { margin-top: 9px; font-family: "Songti SC", "STSong", serif; font-size: 17px; line-height: 1.7; color: var(--ink); }
 
@@ -455,15 +456,17 @@
       color: #263454;
       font-weight: 900;
     }
-    .rule-edit-button { margin-left: auto; padding: 4px 8px; border: 1px solid #cfd9f3; border-radius: 7px; color: #4b6195; background: rgba(255,255,255,.78); font-size: 10px; font-weight: 800; cursor: pointer; }
-    .rule-edit-button:hover { border-color: #aebce3; background: #fff; }
-    .rule-edit-button:disabled { opacity: .48; cursor: wait; }
+    .answer-edit-button { margin-left: auto; padding: 4px 8px; border: 1px solid #cfd9f3; border-radius: 7px; color: #4b6195; background: #f8faff; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .answer-edit-button:hover { border-color: #aebce3; background: #f1f5ff; }
+    .answer-edit-button:disabled { opacity: .48; cursor: wait; }
     .grading-rule-editor { display: grid; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #dce4f6; }
     .grading-rule-editor[hidden] { display: none; }
     .grading-rule-editor label { color: #384868; font-size: 11px; font-weight: 850; }
     .grading-rule-editor input,
     .grading-rule-editor textarea { width: 100%; padding: 9px 10px; border: 1px solid #cfd9ed; border-radius: 9px; color: #33415d; background: #fff; font-size: 11px; line-height: 1.55; }
     .grading-rule-editor textarea { resize: vertical; }
+    .grading-rule-field { display: grid; gap: 8px; }
+    .grading-rule-field[hidden] { display: none; }
     .grading-rule-editor__actions { display: flex; justify-content: flex-end; gap: 7px; }
     .grading-rule-editor__actions button { min-height: 28px; padding: 0 9px; border: 1px solid #d4dced; border-radius: 7px; color: #53617d; background: #fff; font-size: 10px; font-weight: 800; cursor: pointer; }
     .grading-rule-editor__actions button[type="submit"] { color: #fff; border-color: #40588f; background: #40588f; }
@@ -1885,32 +1888,36 @@
           </section>
 
           <section class="assist-card answer-card">
-            <div class="assist-label">答案</div>
+            <div class="answer-card__head">
+              <div class="assist-label">答案</div>
+              <button class="answer-edit-button" id="editGradingAnswer" type="button" hidden>编辑答案</button>
+            </div>
             <div class="answer-value" id="answerValue"></div>
             <details class="answer-details" id="explanationDetails">
               <summary>解析</summary>
               <div class="explanation" id="explanationText"></div>
             </details>
-          </section>
-
-          <section class="assist-card basis-card">
-            <div class="basis-card__head">
-              <span class="basis-card__icon" aria-hidden="true">✦</span>
-              <div class="assist-label">AI 批改依据</div>
-              <button class="rule-edit-button" id="editGradingRule" type="button" hidden>编辑标准</button>
-            </div>
-            <ul class="basis-list" id="basisList"></ul>
-            <form class="grading-rule-editor" id="gradingRuleEditor" hidden>
+            <form class="grading-rule-editor" id="gradingAnswerEditor" hidden>
               <label for="gradingAnswerInput">答案</label>
               <input id="gradingAnswerInput" type="text" />
-              <label for="gradingRuleInput">批改标准与得分要求</label>
-              <textarea id="gradingRuleInput" rows="6"></textarea>
+              <div class="grading-rule-field" id="gradingRuleField">
+                <label for="gradingRuleInput">批改标准与得分要求</label>
+                <textarea id="gradingRuleInput" rows="6"></textarea>
+              </div>
               <div class="grading-rule-editor__actions">
                 <button type="button" data-rule-cancel>取消</button>
                 <button type="submit">保存并重新批改</button>
               </div>
             </form>
             <div class="question-regrade-status" id="questionRegradeStatus" role="status" aria-live="polite" hidden></div>
+          </section>
+
+          <section class="assist-card basis-card">
+            <div class="basis-card__head">
+              <span class="basis-card__icon" aria-hidden="true">✦</span>
+              <div class="assist-label">AI 批改依据</div>
+            </div>
+            <ul class="basis-list" id="basisList"></ul>
           </section>
         </aside>
 
@@ -2588,9 +2595,10 @@
       const answerValue = document.getElementById("answerValue");
       const explanationText = document.getElementById("explanationText");
       const basisList = document.getElementById("basisList");
-      const editGradingRule = document.getElementById("editGradingRule");
-      const gradingRuleEditor = document.getElementById("gradingRuleEditor");
+      const editGradingAnswer = document.getElementById("editGradingAnswer");
+      const gradingAnswerEditor = document.getElementById("gradingAnswerEditor");
       const gradingAnswerInput = document.getElementById("gradingAnswerInput");
+      const gradingRuleField = document.getElementById("gradingRuleField");
       const gradingRuleInput = document.getElementById("gradingRuleInput");
       const questionRegradeStatus = document.getElementById("questionRegradeStatus");
       const explanationDetails = document.getElementById("explanationDetails");
@@ -2914,9 +2922,11 @@
 
       function renderRuleEditor(question) {
         const editable = usesPaperDirectGrading;
-        editGradingRule.hidden = !editable;
-        editGradingRule.disabled = !editable || regradingQuestions.has(question.id);
-        gradingRuleEditor.hidden = !editable || editingRuleQuestionId !== question.id;
+        const showGradingBasis = supportsDisplayedGradingBasis(question);
+        editGradingAnswer.hidden = !editable;
+        editGradingAnswer.disabled = !editable || regradingQuestions.has(question.id);
+        gradingAnswerEditor.hidden = !editable || editingRuleQuestionId !== question.id;
+        gradingRuleField.hidden = !showGradingBasis;
         answerZone.classList.toggle("is-regrading", regradingQuestions.has(question.id));
         renderRegradeStatus(question);
       }
@@ -3110,7 +3120,7 @@
       }
 
       function supportsDisplayedGradingBasis(question) {
-        return !question.type.includes("选择题");
+        return !/(选择题|判断题)/.test(question.type);
       }
 
       function studentAnswerPeekMarkup(question) {
@@ -3896,7 +3906,7 @@
         renderGroups();
       }
 
-      editGradingRule.addEventListener("click", () => {
+      editGradingAnswer.addEventListener("click", () => {
         const question = activeQuestion();
         if (!usesPaperDirectGrading || regradingQuestions.has(question.id)) return;
         editingRuleQuestionId = question.id;
@@ -3906,19 +3916,22 @@
         gradingAnswerInput.focus();
       });
 
-      gradingRuleEditor.querySelector("[data-rule-cancel]").addEventListener("click", () => {
+      gradingAnswerEditor.querySelector("[data-rule-cancel]").addEventListener("click", () => {
         editingRuleQuestionId = null;
         renderRuleEditor(activeQuestion());
       });
 
-      gradingRuleEditor.addEventListener("submit", (event) => {
+      gradingAnswerEditor.addEventListener("submit", (event) => {
         event.preventDefault();
         const question = activeQuestion();
         if (!usesPaperDirectGrading || editingRuleQuestionId !== question.id) return;
+        const showGradingBasis = supportsDisplayedGradingBasis(question);
         const nextAnswer = gradingAnswerInput.value.trim();
-        const nextRules = gradingRuleInput.value.split("\n").map((item) => item.trim()).filter(Boolean);
-        if (!nextAnswer || !nextRules.length) {
-          showToast("请填写答案和至少一条批改标准");
+        const nextRules = showGradingBasis
+          ? gradingRuleInput.value.split("\n").map((item) => item.trim()).filter(Boolean)
+          : [`答案 ${nextAnswer} 判为正确，其他作答判为错误。`];
+        if (!nextAnswer || (showGradingBasis && !nextRules.length)) {
+          showToast(showGradingBasis ? "请填写答案和至少一条批改标准" : "请填写答案");
           return;
         }
         applyTeacherRule(question, nextAnswer, nextRules);

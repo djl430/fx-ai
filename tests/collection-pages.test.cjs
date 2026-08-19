@@ -683,9 +683,12 @@ test('first homework paper shows process marks without grading-basis labels', ()
   assert.match(gradingPage, /20 米长的围栏靠墙围成一个矩形花圃/);
 });
 
-test('teacher rule save immediately regrades only the active question', () => {
-  assert.match(gradingPage, /id="editGradingRule"/);
-  assert.match(gradingPage, /id="gradingRuleEditor"/);
+test('teacher edits the answer card and regrades only the active question', () => {
+  const answerCard = gradingPage.match(/<section class="assist-card answer-card">[\s\S]*?<\/section>/)?.[0] || '';
+  const basisCard = gradingPage.match(/<section class="assist-card basis-card">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.match(answerCard, /id="editGradingAnswer"[\s\S]*?>编辑答案<\/button>/);
+  assert.match(answerCard, /id="gradingAnswerEditor"/);
+  assert.doesNotMatch(basisCard, /编辑答案|编辑标准|gradingAnswerEditor/);
   assert.doesNotMatch(gradingPage, /保存后将立即按新标准重新批改本题全班30人/);
   assert.doesNotMatch(gradingPage, /grading-rule-editor__notice/);
   assert.match(gradingPage, /function startQuestionRegrade\(question\)/);
@@ -706,13 +709,15 @@ test('student grading lets teachers edit the hovered question answer and grading
 
 test('choice questions hide grading basis in both grading views', () => {
   assert.match(gradingPage, /function supportsDisplayedGradingBasis\(question\)/);
-  assert.match(gradingPage, /return !question\.type\.includes\("选择题"\)/);
+  assert.match(gradingPage, /return !\/\(选择题\|判断题\)\/\.test\(question\.type\)/);
   assert.match(gradingPage, /basisCard\.hidden = !supportsDisplayedGradingBasis\(question\)/);
   assert.match(gradingPage, /const showGradingBasis = supportsDisplayedGradingBasis\(question\)/);
   assert.match(gradingPage, /\$\{showGradingBasis \? gradingBasisMarkup : ""\}/);
   assert.match(gradingPage, /studentGradingRuleField\.hidden = !showGradingBasis/);
   assert.match(gradingPage, /studentRuleTitle\.textContent = showGradingBasis \? "修改答案与批改标准" : "修改答案"/);
   assert.match(gradingPage, /showGradingBasis\s*\? studentGradingRuleInput\.value\.split/);
+  assert.match(gradingPage, /gradingRuleField\.hidden = !showGradingBasis/);
+  assert.match(gradingPage, /showGradingBasis\s*\? gradingRuleInput\.value\.split/);
 });
 
 test('student rule save reuses the question regrade pipeline and syncs its progress', () => {
