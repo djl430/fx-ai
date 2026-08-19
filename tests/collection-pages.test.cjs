@@ -583,6 +583,18 @@ test('first homework paper renders type-appropriate question content', () => {
   assert.match(gradingPage, /已知抛物线顶点为（1，−3），且经过点（0，−1），求函数解析式/);
 });
 
+test('first homework choice question uses realistic option-only student responses', () => {
+  const questionOneSource = gradingPage.match(
+    /if \(usesPaperDirectGrading\) \{\s*questions = \[\s*\{([\s\S]*?)\n\s*\},\s*\{\s*\n\s*id: 2,/
+  )?.[1] || '';
+  const profileAnswers = [...questionOneSource.matchAll(/\{\s*answer:\s*"([^"]+)"/g)]
+    .map((match) => match[1]);
+
+  assert.deepEqual(profileAnswers, ['B', 'A', 'C', 'D', '未作答']);
+  assert.match(questionOneSource, /resultDistribution:\s*\{\s*correct:\s*24,\s*wrong:\s*4,\s*ungraded:\s*2\s*\}/);
+  assert.doesNotMatch(questionOneSource, /partial:/);
+});
+
 test('first homework defines authentic AI grading capability cases', () => {
   assert.match(gradingPage, /capability:\s*\{\s*key:\s*"multiple-solutions",\s*label:\s*"多解"/);
   assert.match(gradingPage, /配方法[\s\S]*公式法[\s\S]*两根中点法/);

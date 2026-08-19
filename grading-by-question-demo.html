@@ -2106,11 +2106,14 @@
             id: 1, title: "图像开口方向", type: "选择题 · 二次函数图像", accuracy: 80, status: "pending", answer: "向上（选 B）",
             explanation: "二次项系数 2 大于 0，所以抛物线开口向上。",
             basis: ["识别二次项系数 a = 2。", "a＞0 时图像开口向上。"],
-            resultDistribution: { correct: 24, partial: 2, wrong: 2, ungraded: 2 },
+            resultDistribution: { correct: 24, wrong: 4, ungraded: 2 },
             resultProfiles: {
-              correct: [{ answer: "B，向上" }, { answer: "向上" }, { answer: "a＞0，所以向上" }],
-              partial: [{ answer: "B", evidence: "结论正确，未说明方向" }],
-              wrong: [{ answer: "A，向下", evidence: "开口方向判断错误" }],
+              correct: [{ answer: "B" }],
+              wrong: [
+                { answer: "A", evidence: "选择了错误选项 A" },
+                { answer: "C", evidence: "选择了错误选项 C" },
+                { answer: "D", evidence: "选择了错误选项 D" }
+              ],
               ungraded: [{ answer: "未作答" }]
             }
           },
