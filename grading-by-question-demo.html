@@ -1887,6 +1887,7 @@
             <strong id="gradingTaskTitle">二次函数单元作业</strong>
           </div>
         </div>
+        <button class="button ghost" type="button" id="viewInsightsButton">查看学情</button>
       </header>
 
       <section class="workspace" id="questionWorkspace">
@@ -2648,6 +2649,7 @@
       const questionSnapshotThumbnail = document.getElementById("questionSnapshotThumbnail");
       const questionSnapshotPreview = document.getElementById("questionSnapshotPreview");
       const questionSnapshotTitle = document.getElementById("questionSnapshotTitle");
+      const viewInsightsButton = document.getElementById("viewInsightsButton");
       const confirmQuestionButton = document.getElementById("confirmQuestion");
       const confirmAllButton = document.getElementById("confirmAll");
       document.querySelectorAll('[data-grading-view-option="question"]').forEach((option) => {
@@ -4110,6 +4112,10 @@
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
       }
+
+      viewInsightsButton.addEventListener("click", () => {
+        showToast(`已进入「${taskTitle}」学情页`);
+      });
 
       document.querySelectorAll(".density-button").forEach(button => {
         button.addEventListener("click", () => {

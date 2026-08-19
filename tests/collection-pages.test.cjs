@@ -331,6 +331,12 @@ test('grading header hides the task metadata line', () => {
   assert.doesNotMatch(gradingPage, /getElementById\("gradingTaskMeta"\)/);
 });
 
+test('grading header exposes an insights entry with task-specific feedback', () => {
+  assert.match(gradingPage, /id="viewInsightsButton"[^>]*>查看学情<\/button>/);
+  assert.match(gradingPage, /viewInsightsButton\.addEventListener\("click"/);
+  assert.match(gradingPage, /showToast\(`已进入「\$\{taskTitle\}」学情页`\)/);
+});
+
 test('grading completion is persisted by task id and reflected on the list', () => {
   assert.match(gradingPage, /params\.get\(["']taskId["']\)/);
   assert.match(gradingPage, /questions\.every\(.*status\s*===\s*["']completed["']/s);
