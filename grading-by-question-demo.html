@@ -1921,6 +1921,168 @@
         }
       ];
 
+      if (usesPaperDirectGrading) {
+        questions = [
+          {
+            id: 1, title: "图像开口方向", type: "选择题 · 二次函数图像", accuracy: 80, status: "pending", answer: "向上（选 B）",
+            explanation: "二次项系数 2 大于 0，所以抛物线开口向上。",
+            basis: ["识别二次项系数 a = 2。", "a＞0 时图像开口向上。"],
+            resultDistribution: { correct: 24, partial: 2, wrong: 2, ungraded: 2 },
+            resultProfiles: {
+              correct: [{ answer: "B，向上" }, { answer: "向上" }, { answer: "a＞0，所以向上" }],
+              partial: [{ answer: "B", evidence: "结论正确，未说明方向" }],
+              wrong: [{ answer: "A，向下", evidence: "开口方向判断错误" }],
+              ungraded: [{ answer: "未作答" }]
+            }
+          },
+          {
+            id: 2, title: "求对称轴和最小值", type: "解答题 · 一题多解", accuracy: 60, status: "pending", answer: "对称轴 x = 2；最小值 −1",
+            stem: "求函数 y = x² − 4x + 3 的对称轴和最小值。",
+            capability: { key: "multiple-solutions", label: "多解" },
+            acceptedMethods: ["配方法", "公式法", "两根中点法"],
+            gradingSummary: "识别 3 种有效解法",
+            explanation: "同一道题可以通过配方、顶点横坐标公式或两根中点求出对称轴，再代入求最小值。",
+            basis: ["对称轴 x = 2，最小值 −1。", "三种方法均成立，不要求过程写法一致。"],
+            resultDistribution: { correct: 18, partial: 6, wrong: 4, ungraded: 2 },
+            resultProfiles: {
+              correct: [
+                { method: "配方法", answer: "y=(x−2)²−1，所以对称轴x=2，最小值−1" },
+                { method: "公式法", answer: "x=−b/2a=2，代入得最小值−1" },
+                { method: "两根中点法", answer: "x₁=1，x₂=3，中点为2，代入得−1" }
+              ],
+              partial: [{ method: "公式法", answer: "x=−b/2a=2", evidence: "只求出对称轴，缺少最小值", regradeResult: "correct" }],
+              wrong: [{ answer: "x=−2，最小值1", evidence: "对称轴符号错误" }],
+              ungraded: [{ answer: "未作答" }]
+            }
+          },
+          {
+            id: 3, title: "配方法求顶点和最小值", type: "解答题 · 过程批改", accuracy: 53, status: "pending", answer: "y=2(x−2)²−3；顶点（2，−3）；最小值−3",
+            stem: "用配方法求 y = 2x² − 8x + 5 的顶点坐标和最小值。",
+            capability: { key: "process", label: "过程" },
+            gradingSummary: "逐步标注 4 个得分点",
+            scoringPoints: ["提出公因数", "完成配方", "正确化简", "写出顶点和最小值"],
+            explanation: "AI 按配方过程逐步判断；方法正确但局部计算错误时保留过程得分。",
+            basis: ["提出公因数与配方各 1 分。", "化简及顶点、最小值结论各 1 分。"],
+            resultDistribution: { correct: 16, partial: 8, wrong: 4, ungraded: 2 },
+            resultProfiles: {
+              correct: [{
+                answer: "2(x²−4x)+5=2[(x−2)²−4]+5=2(x−2)²−3，所以顶点(2,−3)，最小值−3",
+                steps: [
+                  { text: "2(x²−4x)+5", result: "correct" },
+                  { text: "2[(x−2)²−4]+5", result: "correct" },
+                  { text: "2(x−2)²−3", result: "correct" },
+                  { text: "顶点(2,−3)，最小值−3", result: "correct" }
+                ]
+              }],
+              partial: [
+                {
+                  answer: "2(x²−4x)+5=2[(x−2)²−4]+5=2(x−2)²+3，顶点(2,3)",
+                  evidence: "方法正确，常数项计算错误",
+                  steps: [
+                    { text: "2(x²−4x)+5", result: "correct" },
+                    { text: "2[(x−2)²−4]+5", result: "correct" },
+                    { text: "2(x−2)²+3", result: "wrong" },
+                    { text: "顶点(2,3)，最小值3", result: "wrong" }
+                  ],
+                  regradeResult: "correct"
+                },
+                {
+                  answer: "顶点(2,−3)，最小值−3",
+                  evidence: "答案正确，但缺少题目要求的配方过程",
+                  steps: [{ text: "缺少配方过程", result: "partial" }]
+                }
+              ],
+              wrong: [{
+                answer: "y=2(x−4)²+5，顶点(4,5)",
+                evidence: "配方与结论均错误",
+                steps: [{ text: "2(x−4)²+5", result: "wrong" }, { text: "顶点(4,5)", result: "wrong" }]
+              }],
+              ungraded: [{ answer: "未作答" }]
+            }
+          },
+          {
+            id: 4, title: "求函数解析式", type: "解答题 · 等价表达", accuracy: 67, status: "pending", answer: "y=2(x−1)²−3，或 y=2x²−4x−1",
+            stem: "已知抛物线顶点为（1，−3），且经过点（0，−1），求函数解析式。",
+            capability: { key: "equivalent", label: "等价表达" },
+            acceptedMethods: ["顶点式", "一般式"],
+            gradingSummary: "识别 2 种等价表达",
+            explanation: "顶点式与展开后的一般式表示同一个函数，均应判为正确。",
+            basis: ["由顶点设 y=a(x−1)²−3。", "代入点（0，−1）求得 a=2。"],
+            resultDistribution: { correct: 20, partial: 5, wrong: 3, ungraded: 2 },
+            resultProfiles: {
+              correct: [
+                { method: "顶点式", answer: "设y=a(x−1)²−3，代入(0,−1)得a=2，所以y=2(x−1)²−3" },
+                { method: "一般式", answer: "y=2x²−4x−1" }
+              ],
+              partial: [{ answer: "y=a(x−1)²−3", evidence: "形式正确，但没有求出 a", regradeResult: "correct" }],
+              wrong: [{ answer: "y=2(x+1)²−3", evidence: "顶点横坐标符号错误" }],
+              ungraded: [{ answer: "未作答" }]
+            }
+          },
+          {
+            id: 5, title: "说明函数最小值", type: "说理题 · 语义批改", accuracy: 53, status: "pending", answer: "同意；平方项非负；x=2 时最小值为1",
+            stem: "小明说：函数 y = (x−2)² + 1 无论 x 取何值，y 都不小于 1。你同意吗？说明理由。",
+            capability: { key: "semantic", label: "语义" },
+            gradingSummary: "按 3 条老师标准语义判定",
+            scoringPoints: ["结论：同意（1分）", "依据：平方项非负或顶点是最低点（2分）", "取等：x=2时最小值为1（1分）"],
+            explanation: "AI 按数学语义而不是固定关键词，识别平方非负、顶点最低等含义相同的理由。",
+            basis: ["明确同意，1 分。", "说明平方项非负或顶点是最低点，2 分。", "说明 x=2 时最小值为1，1 分。"],
+            resultDistribution: { correct: 16, partial: 8, wrong: 4, ungraded: 2 },
+            resultProfiles: {
+              correct: [
+                { answer: "同意，因为平方不可能小于0，所以x=2时最小值是1。", matchedCriteria: ["结论正确", "平方项非负", "取等条件"] },
+                { answer: "同意。抛物线开口向上，顶点(2,1)是最低点。", matchedCriteria: ["结论正确", "顶点是最低点", "最小值位置"] },
+                { answer: "当x=2时取最小值1，其他时候都更大。", matchedCriteria: ["结论正确", "语义说明最小值", "取等条件"] }
+              ],
+              partial: [{ answer: "同意，因为图像开口向上。", matchedCriteria: ["结论正确"], missingCriteria: ["最低点依据", "取等条件"], regradeResult: "correct" }],
+              wrong: [{ answer: "不同意，函数有最大值1。", matchedCriteria: [], missingCriteria: ["正确结论", "平方项非负", "取等条件"] }],
+              ungraded: [{ answer: "未作答" }]
+            }
+          },
+          {
+            id: 6, title: "围栏面积最大值", type: "应用题 · 综合批改", accuracy: 40, status: "pending", answer: "S=x(20−2x)=−2x²+20x；0＜x＜10；x=5时最大面积50平方米",
+            stem: "用 20 米长的围栏靠墙围成一个矩形花圃，设垂直于墙的一边长为 x 米，求面积函数及最大面积。",
+            capability: { key: "comprehensive", label: "综合" },
+            gradingSummary: "综合批改 5 个过程得分点",
+            scoringPoints: ["建立面积关系", "化为二次函数", "写取值范围", "求最大值位置", "结论与单位"],
+            explanation: "先建立 S = x(20 − 2x)，AI 再分别判断化简、定义域、最值计算和实际结论。",
+            basis: ["S=x(20−2x)，并写出0＜x＜10。", "x=5时最大面积为50平方米。"],
+            resultDistribution: { correct: 12, partial: 10, wrong: 6, ungraded: 2 },
+            resultProfiles: {
+              correct: [{
+                answer: "S=x(20−2x)=−2x²+20x，0<x<10。当x=5时，S最大=50平方米。",
+                steps: [
+                  { text: "S=x(20−2x)", result: "correct" },
+                  { text: "S=−2x²+20x", result: "correct" },
+                  { text: "0＜x＜10", result: "correct" },
+                  { text: "x=5", result: "correct" },
+                  { text: "最大面积50平方米", result: "correct" }
+                ]
+              }],
+              partial: [
+                {
+                  answer: "S=−2x²+20x，x=5时最大为50。",
+                  evidence: "建模和最值正确，遗漏取值范围与单位",
+                  steps: [
+                    { text: "S=−2x²+20x", result: "correct" },
+                    { text: "未写0＜x＜10", result: "partial" },
+                    { text: "x=5，最大为50", result: "correct" },
+                    { text: "遗漏面积单位", result: "partial" }
+                  ],
+                  regradeResult: "correct"
+                }
+              ],
+              wrong: [{
+                answer: "S=x(20−x)，x=10时最大面积100平方米。",
+                evidence: "围栏长度关系错误",
+                steps: [{ text: "S=x(20−x)", result: "wrong" }, { text: "x=10，最大100", result: "wrong" }]
+              }],
+              ungraded: [{ answer: "未作答" }]
+            }
+          }
+        ];
+      }
+
       if (isExam && taskId === "quiz") {
         questions = [
           {
@@ -2116,7 +2278,34 @@
       const resultPattern = ["correct", "correct", "correct", "partial", "correct", "partial", "wrong", "wrong", "ungraded", "correct", "partial", "correct", "correct", "wrong", "ungraded", "correct"];
       const shiftedPatterns = [0, 1, 0, 2, 0, 3, 1, 2];
 
+      function expandCapabilityStudents(question) {
+        const resultSequence = Object.entries(question.resultDistribution)
+          .flatMap(([result, count]) => Array(Number(count)).fill(result))
+          .slice(0, CLASS_SIZE);
+        const offsets = {};
+        return students.map((name, index) => {
+          const result = resultSequence[index] || "ungraded";
+          const profiles = question.resultProfiles[result];
+          const offset = offsets[result] || 0;
+          const profile = profiles[offset % profiles.length];
+          offsets[result] = offset + 1;
+          return {
+            id: `${question.id}-${index}`,
+            name,
+            result,
+            ...profile,
+            steps: profile.steps?.map((step) => ({ ...step })),
+            matchedCriteria: profile.matchedCriteria ? [...profile.matchedCriteria] : [],
+            missingCriteria: profile.missingCriteria ? [...profile.missingCriteria] : [],
+            regradeResult: profile.regradeResult || result
+          };
+        });
+      }
+
       function expandQuestionStudents(question, qIndex) {
+        if (usesPaperDirectGrading && question.resultProfiles) {
+          return expandCapabilityStudents(question);
+        }
         const shift = shiftedPatterns[qIndex % shiftedPatterns.length];
         const resultForIndex = (index) => {
           const initialResult = resultPattern[(index + shift) % resultPattern.length];

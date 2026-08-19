@@ -583,6 +583,22 @@ test('first homework paper renders type-appropriate question content', () => {
   assert.match(gradingPage, /写出函数在对称轴两侧的增减性/);
 });
 
+test('first homework defines authentic AI grading capability cases', () => {
+  assert.match(gradingPage, /capability:\s*\{\s*key:\s*"multiple-solutions",\s*label:\s*"多解"/);
+  assert.match(gradingPage, /配方法[\s\S]*公式法[\s\S]*两根中点法/);
+  assert.match(gradingPage, /用配方法求 y = 2x² − 8x \+ 5 的顶点坐标和最小值/);
+  assert.match(gradingPage, /顶点式[\s\S]*一般式/);
+  assert.match(gradingPage, /平方项非负[\s\S]*顶点是最低点/);
+  assert.match(gradingPage, /S = x\(20 − 2x\)/);
+});
+
+test('first homework expands explicit result profiles to thirty students', () => {
+  assert.match(gradingPage, /function expandCapabilityStudents\(question\)/);
+  assert.match(gradingPage, /Object\.entries\(question\.resultDistribution\)/);
+  assert.match(gradingPage, /resultProfiles\[result\]/);
+  assert.match(gradingPage, /CLASS_SIZE/);
+});
+
 test('first homework places grading marks beside student responses', () => {
   assert.match(gradingPage, /class="student-paper-response/);
   assert.match(gradingPage, /student-paper-mark is-inline/);
