@@ -621,6 +621,17 @@ test('first homework paper shows process and semantic grading evidence', () => {
   assert.match(gradingPage, /20 米长的围栏靠墙围成一个矩形花圃/);
 });
 
+test('teacher rule save immediately regrades only the active question', () => {
+  assert.match(gradingPage, /id="editGradingRule"/);
+  assert.match(gradingPage, /id="gradingRuleEditor"/);
+  assert.match(gradingPage, /保存后将立即按新标准重新批改本题全班30人/);
+  assert.match(gradingPage, /function startQuestionRegrade\(question\)/);
+  assert.match(gradingPage, /student\.result = student\.regradeResult/);
+  assert.match(gradingPage, /正在按新标准重新批改本题/);
+  assert.match(gradingPage, /本题全班重批完成/);
+  assert.doesNotMatch(gradingPage, /撤销本次重批/);
+});
+
 test('first homework places grading marks beside student responses', () => {
   assert.match(gradingPage, /class="student-paper-response/);
   assert.match(gradingPage, /student-paper-mark is-inline/);

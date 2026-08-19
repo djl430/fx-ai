@@ -464,6 +464,24 @@
       color: #263454;
       font-weight: 900;
     }
+    .rule-edit-button { margin-left: auto; padding: 4px 8px; border: 1px solid #cfd9f3; border-radius: 7px; color: #4b6195; background: rgba(255,255,255,.78); font-size: 10px; font-weight: 800; cursor: pointer; }
+    .rule-edit-button:hover { border-color: #aebce3; background: #fff; }
+    .rule-edit-button:disabled { opacity: .48; cursor: wait; }
+    .grading-rule-editor { display: grid; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #dce4f6; }
+    .grading-rule-editor[hidden] { display: none; }
+    .grading-rule-editor label { color: #384868; font-size: 11px; font-weight: 850; }
+    .grading-rule-editor input,
+    .grading-rule-editor textarea { width: 100%; padding: 9px 10px; border: 1px solid #cfd9ed; border-radius: 9px; color: #33415d; background: #fff; font-size: 11px; line-height: 1.55; }
+    .grading-rule-editor textarea { resize: vertical; }
+    .grading-rule-editor__notice { margin: 0; color: #a56b25; font-size: 9px; line-height: 1.5; }
+    .grading-rule-editor__actions { display: flex; justify-content: flex-end; gap: 7px; }
+    .grading-rule-editor__actions button { min-height: 28px; padding: 0 9px; border: 1px solid #d4dced; border-radius: 7px; color: #53617d; background: #fff; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .grading-rule-editor__actions button[type="submit"] { color: #fff; border-color: #40588f; background: #40588f; }
+    .question-regrade-status { margin-top: 11px; padding: 10px; border-radius: 10px; color: #425271; background: rgba(255,255,255,.68); font-size: 10px; line-height: 1.5; }
+    .question-regrade-status[hidden] { display: none; }
+    .question-regrade-progress { height: 5px; margin-top: 7px; overflow: hidden; border-radius: 999px; background: #e4e9f4; }
+    .question-regrade-progress span { height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg,#6078d9,#38a583); transition: width .12s ease; }
+    .answer-zone.is-regrading .answer-paper { pointer-events: none; opacity: .72; }
 
     details.assist-card { padding: 0; overflow: hidden; }
     details.assist-card summary { list-style: none; padding: 15px 16px; cursor: pointer; font-size: 13px; font-weight: 750; display: flex; align-items: center; justify-content: space-between; }
@@ -1813,8 +1831,21 @@
             <div class="basis-card__head">
               <span class="basis-card__icon" aria-hidden="true">✦</span>
               <div class="assist-label">AI 批改依据</div>
+              <button class="rule-edit-button" id="editGradingRule" type="button" hidden>编辑标准</button>
             </div>
             <ul class="basis-list" id="basisList"></ul>
+            <form class="grading-rule-editor" id="gradingRuleEditor" hidden>
+              <label for="gradingAnswerInput">答案</label>
+              <input id="gradingAnswerInput" type="text" />
+              <label for="gradingRuleInput">批改标准与得分要求</label>
+              <textarea id="gradingRuleInput" rows="6"></textarea>
+              <p class="grading-rule-editor__notice">保存后将立即按新标准重新批改本题全班30人，并覆盖本题已有批改结果。</p>
+              <div class="grading-rule-editor__actions">
+                <button type="button" data-rule-cancel>取消</button>
+                <button type="submit">保存并重新批改</button>
+              </div>
+            </form>
+            <div class="question-regrade-status" id="questionRegradeStatus" role="status" aria-live="polite" hidden></div>
           </section>
         </aside>
 
@@ -2421,6 +2452,7 @@
       const groupsScroll = document.getElementById("groupsScroll");
       const resultNavigation = document.getElementById("resultNavigation");
       const questionWorkspace = document.getElementById("questionWorkspace");
+      const answerZone = document.querySelector(".answer-zone");
       const studentWorkspace = document.getElementById("studentWorkspace");
       const studentList = document.getElementById("studentList");
       const studentPageStack = document.getElementById("studentPageStack");
@@ -2432,6 +2464,11 @@
       const answerValue = document.getElementById("answerValue");
       const explanationText = document.getElementById("explanationText");
       const basisList = document.getElementById("basisList");
+      const editGradingRule = document.getElementById("editGradingRule");
+      const gradingRuleEditor = document.getElementById("gradingRuleEditor");
+      const gradingAnswerInput = document.getElementById("gradingAnswerInput");
+      const gradingRuleInput = document.getElementById("gradingRuleInput");
+      const questionRegradeStatus = document.getElementById("questionRegradeStatus");
       const explanationDetails = document.getElementById("explanationDetails");
       const questionSnapshotButton = document.getElementById("questionSnapshotButton");
       const questionSnapshotThumbnail = document.getElementById("questionSnapshotThumbnail");
@@ -2449,6 +2486,8 @@
       confirmAllButton.textContent = isExam ? "确认全部题目赋分" : "一键确认批改";
 
       const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
+      const regradingQuestions = new Set();
+      let editingRuleQuestionId = null;
 
       function saveGradingProgress() {
         try {
@@ -2696,6 +2735,7 @@
         questionList.querySelectorAll("[data-question]").forEach(button => {
           button.addEventListener("click", () => {
             activeQuestionId = Number(button.dataset.question);
+            editingRuleQuestionId = null;
             explanationDetails.open = false;
             renderAll();
             groupsScroll.scrollTop = 0;
@@ -2711,6 +2751,66 @@
 
       function renderOverallBasis(question) {
         setBasisContent([`AI按“${isExam ? "得分点" : "结果"} + 关键过程”联合判断`, ...question.basis]);
+      }
+
+      function renderRegradeStatus(question) {
+        if (!usesPaperDirectGrading) {
+          questionRegradeStatus.hidden = true;
+          return;
+        }
+        if (regradingQuestions.has(question.id)) {
+          const progress = Number(question.regradeProgress) || 0;
+          questionRegradeStatus.hidden = false;
+          questionRegradeStatus.innerHTML = `
+            <strong>正在按新标准重新批改本题：${progress}/${CLASS_SIZE}</strong>
+            <div class="question-regrade-progress" aria-hidden="true"><span style="width:${progress / CLASS_SIZE * 100}%"></span></div>
+          `;
+          return;
+        }
+        if (question.regradeCompleted) {
+          questionRegradeStatus.hidden = false;
+          questionRegradeStatus.innerHTML = `<strong>本题全班重批完成：${question.regradeChanges}人结果发生变化</strong><br>已更新结果分组、正确率和学生原纸标记。`;
+          return;
+        }
+        questionRegradeStatus.hidden = true;
+      }
+
+      function renderRuleEditor(question) {
+        const editable = usesPaperDirectGrading;
+        editGradingRule.hidden = !editable;
+        editGradingRule.disabled = !editable || regradingQuestions.has(question.id);
+        gradingRuleEditor.hidden = !editable || editingRuleQuestionId !== question.id;
+        answerZone.classList.toggle("is-regrading", regradingQuestions.has(question.id));
+        renderRegradeStatus(question);
+      }
+
+      function startQuestionRegrade(question) {
+        if (!usesPaperDirectGrading || regradingQuestions.has(question.id)) return;
+        regradingQuestions.add(question.id);
+        editingRuleQuestionId = null;
+        question.regradeProgress = 0;
+        question.regradeCompleted = false;
+        const before = question.students.map((student) => student.result);
+        renderAll();
+        const timer = window.setInterval(() => {
+          question.regradeProgress = Math.min(CLASS_SIZE, question.regradeProgress + 6);
+          if (activeQuestionId === question.id) renderRegradeStatus(question);
+          if (question.regradeProgress < CLASS_SIZE) return;
+          window.clearInterval(timer);
+          question.students.forEach((student) => {
+            student.result = student.regradeResult || student.result;
+            delete student.partResults;
+          });
+          question.accuracy = Math.round(question.students.filter((student) => student.result === "correct").length / CLASS_SIZE * 100);
+          question.regradeChanges = question.students.filter((student, index) => student.result !== before[index]).length;
+          question.regradeCompleted = true;
+          question.status = "pending";
+          studentCompletion.clear();
+          regradingQuestions.delete(question.id);
+          renderAll();
+          if (gradingView === "student") renderStudentWorkspace();
+          showToast(`本题全班重批完成：${question.regradeChanges}人结果发生变化`);
+        }, 120);
       }
 
       function renderAssistant() {
@@ -2729,6 +2829,7 @@
         answerValue.textContent = question.answer;
         explanationText.textContent = question.explanation;
         renderOverallBasis(question);
+        renderRuleEditor(question);
         confirmQuestionButton.textContent = isExam ? "确认本题赋分" : "确认本题批改";
       }
 
@@ -3187,6 +3288,7 @@
 
       function cycleStudentPaperResult(questionId) {
         const question = questions.find((item) => item.id === Number(questionId));
+        if (question && regradingQuestions.has(question.id)) return;
         const student = question?.students.find((item) => item.name === activeStudentName);
         if (!usesPaperDirectGrading || !student) return;
         const nextResult = {
@@ -3569,6 +3671,7 @@
 
       function cycleResult(studentId, paper) {
         const question = activeQuestion();
+        if (regradingQuestions.has(question.id)) return;
         const student = question.students.find(item => item.id === studentId);
 
         if (isExam) {
@@ -3616,6 +3719,37 @@
         renderAssistant();
         renderGroups();
       }
+
+      editGradingRule.addEventListener("click", () => {
+        const question = activeQuestion();
+        if (!usesPaperDirectGrading || regradingQuestions.has(question.id)) return;
+        editingRuleQuestionId = question.id;
+        gradingAnswerInput.value = question.answer;
+        gradingRuleInput.value = question.basis.join("\n");
+        renderRuleEditor(question);
+        gradingAnswerInput.focus();
+      });
+
+      gradingRuleEditor.querySelector("[data-rule-cancel]").addEventListener("click", () => {
+        editingRuleQuestionId = null;
+        renderRuleEditor(activeQuestion());
+      });
+
+      gradingRuleEditor.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const question = activeQuestion();
+        if (!usesPaperDirectGrading || editingRuleQuestionId !== question.id) return;
+        const nextAnswer = gradingAnswerInput.value.trim();
+        const nextRules = gradingRuleInput.value.split("\n").map((item) => item.trim()).filter(Boolean);
+        if (!nextAnswer || !nextRules.length) {
+          showToast("请填写答案和至少一条批改标准");
+          return;
+        }
+        question.answer = nextAnswer;
+        question.basis = nextRules;
+        if (question.scoringPoints) question.scoringPoints = [...nextRules];
+        startQuestionRegrade(question);
+      });
 
       function showToast(message) {
         const toast = document.getElementById("toast");
