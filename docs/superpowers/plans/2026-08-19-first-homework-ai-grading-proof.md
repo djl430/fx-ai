@@ -22,7 +22,7 @@
 - Modify: `grading-by-question-demo.html:1880-2180`
 - Test: `tests/collection-pages.test.cjs:560-720`
 
-- [ ] **Step 1: Add failing data tests**
+- [x] **Step 1: Add failing data tests**
 
 ```js
 test('first homework defines authentic AI grading capability cases', () => {
@@ -41,7 +41,7 @@ test('first homework expands explicit result profiles to thirty students', () =>
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run:
 
@@ -51,7 +51,7 @@ node --test --test-name-pattern="authentic AI grading capability|explicit result
 
 Expected: both tests fail because the metadata and expansion helper are absent.
 
-- [ ] **Step 3: Replace first-homework data**
+- [x] **Step 3: Replace first-homework data**
 
 Use this concrete shape for question 2 and equivalent explicit profiles for questions 3–6:
 
@@ -80,7 +80,7 @@ Use this concrete shape for question 2 and equivalent explicit profiles for ques
 
 Question 3 defines four scored process steps. Question 4 accepts vertex and general forms. Question 5 defines three teacher criteria and matched/missing criteria. Question 6 defines five modeling steps including domain and unit.
 
-- [ ] **Step 4: Expand profiles to 30 shared students**
+- [x] **Step 4: Expand profiles to 30 shared students**
 
 ```js
 function expandCapabilityStudents(question) {
@@ -110,7 +110,7 @@ function expandCapabilityStudents(question) {
 
 Call this from `expandQuestionStudents()` only for `usesPaperDirectGrading && question.resultProfiles`.
 
-- [ ] **Step 5: Verify GREEN and commit**
+- [x] **Step 5: Verify GREEN and commit**
 
 ```bash
 node --test --test-name-pattern="authentic AI grading capability|explicit result profiles" tests/collection-pages.test.cjs
@@ -124,7 +124,7 @@ git commit -m "feat: add authentic AI grading cases"
 - Modify: `grading-by-question-demo.html:220-960, 2410-2460, 3120-3270`
 - Test: `tests/collection-pages.test.cjs:620-740`
 
-- [ ] **Step 1: Add the failing rendering test**
+- [x] **Step 1: Add the failing rendering test**
 
 ```js
 test('question grading renders verifiable AI capability evidence', () => {
@@ -140,13 +140,13 @@ test('question grading renders verifiable AI capability evidence', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 node --test --test-name-pattern="verifiable AI capability evidence" tests/collection-pages.test.cjs
 ```
 
-- [ ] **Step 3: Add compact evidence styles**
+- [x] **Step 3: Add compact evidence styles**
 
 ```css
 .q-capability { display:inline-flex; padding:2px 6px; border-radius:6px; color:#536a9e; background:#edf2ff; font-size:9px; font-weight:800; }
@@ -159,7 +159,7 @@ node --test --test-name-pattern="verifiable AI capability evidence" tests/collec
 .criterion-chip.is-missing { color:#c56a14; background:#fff4e5; }
 ```
 
-- [ ] **Step 4: Render badge, proof strip, and student evidence**
+- [x] **Step 4: Render badge, proof strip, and student evidence**
 
 ```js
 function capabilityBadgeMarkup(question) {
@@ -195,7 +195,7 @@ function studentEvidenceMarkup(question, student) {
 
 Use these in `renderQuestions()`, `renderGroups()`, and `studentCard()`.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 ```bash
 node --test --test-name-pattern="verifiable AI capability evidence" tests/collection-pages.test.cjs
@@ -209,7 +209,7 @@ git commit -m "feat: show AI grading evidence"
 - Modify: `grading-by-question-demo.html:1070-1380, 2300-2410, 2490-2605`
 - Test: `tests/collection-pages.test.cjs:575-680`
 
-- [ ] **Step 1: Add the failing paper test**
+- [x] **Step 1: Add the failing paper test**
 
 ```js
 test('first homework paper shows process and semantic grading evidence', () => {
@@ -223,17 +223,17 @@ test('first homework paper shows process and semantic grading evidence', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 node --test --test-name-pattern="paper shows process and semantic" tests/collection-pages.test.cjs
 ```
 
-- [ ] **Step 3: Update snapshots and paper templates**
+- [x] **Step 3: Update snapshots and paper templates**
 
 Replace `firstHomeworkSnapshotCopy` and `firstHomeworkPaperQuestionMarkup()` entries 2–6 with approved authentic wording. Keep question 1 unchanged so the four-student same-answer suggestion remains available.
 
-- [ ] **Step 4: Render line and rubric evidence**
+- [x] **Step 4: Render line and rubric evidence**
 
 ```js
 function studentPaperEvidenceMarkup(question, student) {
@@ -251,7 +251,7 @@ function studentPaperEvidenceMarkup(question, student) {
 
 Append it inside questions 2–6 and add restrained paper CSS.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 ```bash
 node --test --test-name-pattern="paper shows process and semantic|type-appropriate question content|places grading marks" tests/collection-pages.test.cjs
@@ -265,7 +265,7 @@ git commit -m "feat: annotate authentic grading process"
 - Modify: `grading-by-question-demo.html:430-960, 1740-1790, 2190-2460, 3290-3420`
 - Test: `tests/collection-pages.test.cjs:650-760`
 
-- [ ] **Step 1: Add the failing regrade test**
+- [x] **Step 1: Add the failing regrade test**
 
 ```js
 test('teacher rule save immediately regrades only the active question', () => {
@@ -280,13 +280,13 @@ test('teacher rule save immediately regrades only the active question', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 node --test --test-name-pattern="immediately regrades only the active question" tests/collection-pages.test.cjs
 ```
 
-- [ ] **Step 3: Add the compact editor**
+- [x] **Step 3: Add the compact editor**
 
 ```html
 <button class="rule-edit-button" id="editGradingRule" type="button">编辑标准</button>
@@ -302,7 +302,7 @@ node --test --test-name-pattern="immediately regrades only the active question" 
 
 Hide the editor outside `cluster-homework`.
 
-- [ ] **Step 4: Implement active-question regrading**
+- [x] **Step 4: Implement active-question regrading**
 
 ```js
 const regradingQuestions = new Set();
@@ -338,7 +338,7 @@ function startQuestionRegrade(question) {
 
 Form submission replaces `question.basis` with non-empty trimmed lines and calls `startQuestionRegrade(question)`. Disable only the regrading question's result actions and edit button. Switching questions does not cancel the timer.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 ```bash
 node --test --test-name-pattern="immediately regrades only the active question" tests/collection-pages.test.cjs
@@ -352,7 +352,7 @@ git commit -m "feat: regrade question from teacher rules"
 - Modify if needed: `grading-by-question-demo.html`
 - Modify if needed: `tests/collection-pages.test.cjs`
 
-- [ ] **Step 1: Run all regression tests**
+- [x] **Step 1: Run all regression tests**
 
 ```bash
 node --test tests/collection-pages.test.cjs
@@ -360,7 +360,7 @@ node --test tests/collection-pages.test.cjs
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Parse inline scripts**
+- [x] **Step 2: Parse inline scripts**
 
 ```bash
 node - <<'NODE'
@@ -374,7 +374,7 @@ NODE
 
 Expected: `inline scripts parsed: 2`.
 
-- [ ] **Step 3: Check patch hygiene**
+- [x] **Step 3: Check patch hygiene**
 
 ```bash
 git diff --check
@@ -384,7 +384,7 @@ git diff --stat
 
 Expected: no whitespace errors and only planned files are modified.
 
-- [ ] **Step 4: Commit integration fixes if the worktree is not already clean**
+- [x] **Step 4: Commit integration fixes if the worktree is not already clean**
 
 ```bash
 git add grading-by-question-demo.html tests/collection-pages.test.cjs docs/superpowers/plans/2026-08-19-first-homework-ai-grading-proof.md
