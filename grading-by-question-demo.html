@@ -3223,7 +3223,6 @@
             <strong>检测到 ${matchingStudents.length} 人相同作答</strong>
             <p>${matchingCount} 人作答均为 ${escapeSnapshotXml(answer)}，可同步当前批改结果。</p>
             <div class="similar-answer-suggestion__actions">
-              <button class="similar-answer-suggestion__action" type="button" data-question-similar-answer-preview data-question-id="${question.id}" data-source-student-id="${student.id}">预览 ${matchingStudents.length} 人作答</button>
               <button class="similar-answer-suggestion__action is-primary" type="button" data-question-similar-answer-apply data-question-id="${question.id}" data-source-student-id="${student.id}">一起修改</button>
             </div>
           </aside>
@@ -3501,28 +3500,6 @@
         `).join("");
         document.getElementById("similarAnswerApplyAll").dataset.questionId = String(questionId);
         delete document.getElementById("similarAnswerApplyAll").dataset.sourceStudentId;
-        return true;
-      }
-
-      function renderQuestionSimilarAnswerPreview(questionId, sourceStudentId) {
-        const question = questions.find((item) => item.id === Number(questionId));
-        const matchingStudents = questionSimilarAnswerStudents(questionId, sourceStudentId);
-        const previewGrid = document.getElementById("similarAnswerPreviewGrid");
-        if (!question || matchingStudents.length < 2) return false;
-        previewGrid.innerHTML = matchingStudents.map((student) => `
-          <article class="similar-answer-crop">
-            <div class="similar-answer-crop__student">
-              <strong>${escapeSnapshotXml(student.name)}</strong>
-              <span>第 ${question.id} 题 · ${labels[student.result].name}</span>
-            </div>
-            <div class="similar-answer-crop__question">第 ${question.id} 题 · ${escapeSnapshotXml(question.title)}</div>
-            <div class="similar-answer-crop__response">学生作答：${escapeSnapshotXml(visibleStudentAnswer(student))}</div>
-            ${student.result === "ungraded" ? "" : `<span class="similar-answer-crop__mark"><span class="mark-icon ${student.result}"></span></span>`}
-          </article>
-        `).join("");
-        const applyButton = document.getElementById("similarAnswerApplyAll");
-        applyButton.dataset.questionId = String(questionId);
-        applyButton.dataset.sourceStudentId = sourceStudentId;
         return true;
       }
 
@@ -3928,14 +3905,6 @@
       }
 
       function bindQuestionSimilarAnswerActions(root) {
-        root.querySelectorAll("[data-question-similar-answer-preview]").forEach((button) => {
-          button.addEventListener("click", (event) => {
-            event.stopPropagation();
-            if (renderQuestionSimilarAnswerPreview(button.dataset.questionId, button.dataset.sourceStudentId)) {
-              setModal(modals.similarAnswer, true);
-            }
-          });
-        });
         root.querySelectorAll("[data-question-similar-answer-apply]").forEach((button) => {
           button.addEventListener("click", (event) => {
             event.stopPropagation();

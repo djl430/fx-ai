@@ -859,7 +859,8 @@ test('question grading suggests and applies similar answers only after one resul
   assert.match(gradingPage, /function questionSimilarAnswerSuggestionMarkup\(question, student\)/);
   assert.match(gradingPage, /questionSimilarAnswerSource\?\.studentId !== student\.id[\s\S]*return ""/);
   assert.match(gradingPage, /class="similar-answer-suggestion question-similar-answer-suggestion"/);
-  assert.match(gradingPage, /data-question-similar-answer-preview/);
+  assert.doesNotMatch(gradingPage, /data-question-similar-answer-preview/);
+  assert.doesNotMatch(gradingPage, /function renderQuestionSimilarAnswerPreview/);
   assert.match(gradingPage, /data-question-similar-answer-apply/);
   const cycleResultSource = gradingPage.match(
     /function cycleResult\(studentId, paper\) \{([\s\S]*?)\n\s*\}\n\n\s*function commitExamScore/
@@ -886,7 +887,6 @@ test('question grading batches all twenty-four students who selected B on questi
   )?.[1] || '';
   assert.doesNotMatch(matchingSource, /slice\(0, 4\)/);
   assert.match(gradingPage, /检测到 \$\{matchingStudents\.length\} 人相同作答/);
-  assert.match(gradingPage, /预览 \$\{matchingStudents\.length\} 人作答/);
   assert.match(gradingPage, /已同步修改 \$\{matchingStudents\.length\} 人，确认本题后更新分组/);
 });
 
