@@ -631,14 +631,16 @@ test('unanswered work is wrong and only unreadable work stays ungraded', () => {
   const firstHomeworkSource = gradingPage.match(
     /if \(usesPaperDirectGrading\) \{\s*questions = \[([\s\S]*?)\n\s*\];\s*\n\s*\}/
   )?.[1] || '';
-  assert.equal((firstHomeworkSource.match(/ungraded:\s*\[\{\s*answer:\s*"字迹模糊，无法辨认"\s*\}\]/g) || []).length, 6);
+  assert.equal((firstHomeworkSource.match(/ungraded:\s*\[\{\s*answer:\s*"字迹模糊，无法辨认",\s*displayAnswer:\s*"[^"]+"\s*\}\]/g) || []).length, 6);
   assert.equal((firstHomeworkSource.match(/wrong:[\s\S]*?\{\s*answer:\s*"未作答"/g) || []).length, 6);
   assert.doesNotMatch(firstHomeworkSource, /ungraded:\s*\[\{\s*answer:\s*"未作答"/);
 });
 
-test('unreadable answer cards stay visually blank and explain the issue only in AI evidence', () => {
-  assert.match(gradingPage, /function visibleStudentAnswer\(student\)[\s\S]*isUnreadableResponse\(student\.answer\)[\s\S]*return ""/);
-  assert.match(gradingPage, /<div class="handwriting">\$\{visibleStudentAnswer\(student\)\}<\/div>/);
+test('unreadable answer cards show blurred simulated handwriting and explain the issue in AI evidence', () => {
+  assert.match(gradingPage, /ungraded: \[\{ answer: "字迹模糊，无法辨认", displayAnswer: "B" \}\]/);
+  assert.match(gradingPage, /function visibleStudentAnswer\(student\)[\s\S]*student\.displayAnswer \|\| "╱╲"/);
+  assert.match(gradingPage, /class="handwriting \$\{isUnreadableResponse\(student\.answer\) \? "is-unreadable" : ""\}"/);
+  assert.match(gradingPage, /\.handwriting\.is-unreadable \{[\s\S]*filter:\s*blur\(/);
   assert.match(gradingPage, /student\.result === "ungraded"[\s\S]*字迹模糊，当前无法确认批改结果/);
 });
 
@@ -690,7 +692,7 @@ test('question grading reveals AI evidence as a hover popover outside the answer
   assert.match(gradingPage, /\.answer-paper:focus-visible \+ \.student-evidence/);
   assert.match(gradingPage, /class="student-evidence" role="tooltip"/);
   assert.match(gradingPage, /studentEvidenceText\(question, student\)/);
-  assert.match(gradingPage, /<div class="handwriting">\$\{visibleStudentAnswer\(student\)\}<\/div>\s*<\/div>\s*\$\{studentEvidenceMarkup\(question, student\)\}/);
+  assert.match(gradingPage, /class="handwriting \$\{isUnreadableResponse\(student\.answer\) \? "is-unreadable" : ""\}"[\s\S]*\$\{visibleStudentAnswer\(student\)\}[\s\S]*\$\{studentEvidenceMarkup\(question, student\)\}/);
 });
 
 test('student-specific grading evidence is one direct text explanation', () => {
