@@ -686,7 +686,8 @@ test('first homework paper shows process marks without grading-basis labels', ()
 test('teacher rule save immediately regrades only the active question', () => {
   assert.match(gradingPage, /id="editGradingRule"/);
   assert.match(gradingPage, /id="gradingRuleEditor"/);
-  assert.match(gradingPage, /保存后将立即按新标准重新批改本题全班30人/);
+  assert.doesNotMatch(gradingPage, /保存后将立即按新标准重新批改本题全班30人/);
+  assert.doesNotMatch(gradingPage, /grading-rule-editor__notice/);
   assert.match(gradingPage, /function startQuestionRegrade\(question\)/);
   assert.match(gradingPage, /student\.result = student\.regradeResult/);
   assert.match(gradingPage, /正在按新标准重新批改本题/);
