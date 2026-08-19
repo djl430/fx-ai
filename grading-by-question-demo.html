@@ -2963,7 +2963,7 @@
           if (question.regradeProgress < CLASS_SIZE) return;
           window.clearInterval(timer);
           question.students.forEach((student) => {
-            student.result = student.regradeResult || student.result;
+            student.result = regradeStudentResult(question, student);
             delete student.partResults;
           });
           question.accuracy = Math.round(question.students.filter((student) => student.result === "correct").length / CLASS_SIZE * 100);
@@ -3067,6 +3067,14 @@
         if (isUnansweredResponse(value)) return "未填";
         if (isUnreadableResponse(value)) return "识别不清";
         return value;
+      }
+
+      function regradeStudentResult(question, student) {
+        if (!/选择题/.test(question.type)) return student.regradeResult || student.result;
+        const answer = String(student.answer || "");
+        if (isUnreadableResponse(answer)) return "ungraded";
+        if (isUnansweredResponse(answer)) return "wrong";
+        return studentChoiceSelection(answer) === studentChoiceSelection(question.answer) ? "correct" : "wrong";
       }
 
       function studentPaperResponseMarkup(answer, resultMark, block = false) {

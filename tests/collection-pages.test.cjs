@@ -599,6 +599,26 @@ test('first homework choice question uses option responses plus recognition exce
   assert.doesNotMatch(questionOneSource, /partial:/);
 });
 
+test('changing the first question answer to C genuinely regrades every original choice', () => {
+  const readFunction = (name) => gradingPage.match(
+    new RegExp(`function ${name}\\([^)]*\\) \\{[\\s\\S]*?\\n      \\}`)
+  )?.[0] || '';
+  const evaluateResult = new Function(`
+    ${readFunction('isUnansweredResponse')}
+    ${readFunction('isUnreadableResponse')}
+    ${readFunction('studentChoiceSelection')}
+    ${readFunction('regradeStudentResult')}
+    return regradeStudentResult;
+  `)();
+  const changedQuestion = { type: '选择题 · 二次函数图像', answer: 'C' };
+
+  assert.equal(evaluateResult(changedQuestion, { answer: 'B', result: 'correct', regradeResult: 'correct' }), 'wrong');
+  assert.equal(evaluateResult(changedQuestion, { answer: 'C', result: 'wrong', regradeResult: 'wrong' }), 'correct');
+  assert.equal(evaluateResult(changedQuestion, { answer: '未作答', result: 'wrong' }), 'wrong');
+  assert.equal(evaluateResult(changedQuestion, { answer: '字迹模糊，无法辨认', result: 'ungraded' }), 'ungraded');
+  assert.match(gradingPage, /student\.result = regradeStudentResult\(question, student\)/);
+});
+
 test('unanswered work is wrong and only unreadable work stays ungraded', () => {
   assert.match(gradingPage, /function isUnansweredResponse\(answer\)/);
   assert.match(gradingPage, /未作答\|未填写\|未填\|未写\|没有写\|未完成\|未判断\|空白/);
@@ -718,7 +738,7 @@ test('teacher edits the answer card and regrades only the active question', () =
   assert.doesNotMatch(gradingPage, /保存后将立即按新标准重新批改本题全班30人/);
   assert.doesNotMatch(gradingPage, /grading-rule-editor__notice/);
   assert.match(gradingPage, /function startQuestionRegrade\(question\)/);
-  assert.match(gradingPage, /student\.result = student\.regradeResult/);
+  assert.match(gradingPage, /student\.result = regradeStudentResult\(question, student\)/);
   assert.match(gradingPage, /正在按新标准重新批改本题/);
   assert.match(gradingPage, /showToast\("已完成批改"\)/);
   assert.doesNotMatch(gradingPage, /本题全班重批完成/);
