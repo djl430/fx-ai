@@ -1698,13 +1698,23 @@
     .student-subjective-score input { width: 64px; height: 34px; padding: 0 8px; border: 1px solid #cbd5e6; border-radius: 8px; color: #172341; background: #fff; font-weight: 850; text-align: center; }
     .student-subjective-score input:focus { outline: 3px solid rgba(79,102,216,.16); border-color: #8192dc; }
 
-    .student-review-footer { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--line); background: rgba(255,255,255,.98); }
+    .student-review-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: flex-end;
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.98);
+    }
     .student-review-footer .button {
       min-width: 178px;
       min-height: 38px;
       border-radius: 10px;
       box-shadow: 0 12px 26px rgba(79,102,216,.20);
     }
+    #confirmStudent { display: inline-flex; visibility: visible; }
 
     @media (max-width: 1400px) {
       .student-answer-peek {
