@@ -584,13 +584,17 @@
     .capability-proof__fact { padding: 5px 8px; border-radius: 7px; color: #45536f; background: #edf2fa; font-size: 10px; }
 
     .group-section {
+      position: relative;
       margin-bottom: 18px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: rgba(255,255,255,.86);
       box-shadow: 0 10px 26px rgba(45,64,104,.045);
-      overflow: hidden;
+      overflow: visible;
     }
+
+    .group-section:hover,
+    .group-section:focus-within { z-index: 4; }
 
     .group-section[data-result="correct"] { border-left: 4px solid var(--green); }
     .group-section[data-result="partial"] { border-left: 4px solid var(--amber); }
@@ -754,15 +758,17 @@
     }
 
     .student-card {
+      position: relative;
       min-width: 0;
       border: 1px solid var(--line);
       border-radius: 14px;
       background: #fff;
-      overflow: hidden;
+      overflow: visible;
       transition: .18s ease;
     }
 
-    .student-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(45,64,104,.10); }
+    .student-card:hover,
+    .student-card:focus-within { z-index: 8; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(45,64,104,.10); }
     .student-card[data-result="correct"] { border-color: #cbe9dc; }
     .student-card[data-result="partial"] { border-color: #f0d6a6; }
     .student-card[data-result="wrong"] { border-color: #f0c4c9; }
@@ -804,7 +810,52 @@
     .student-card:hover .answer-paper::after { color: #60709a; background: rgba(238,242,252,.94); }
     .answer-paper:hover { border-color: #c8d2e7; }
     .handwriting { font-family: "Kaiti SC", "STKaiti", serif; font-size: 16px; line-height: 1.7; white-space: pre-line; }
-    .student-evidence { margin-top: 9px; padding-top: 8px; border-top: 1px dashed rgba(103,118,148,.22); font-family: "PingFang SC", sans-serif; }
+    .student-evidence {
+      position: absolute;
+      z-index: 12;
+      top: calc(100% - 4px);
+      right: 10px;
+      left: 10px;
+      max-height: 238px;
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid #d9e2f2;
+      border-radius: 11px;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 16px 34px rgba(42,58,94,.18);
+      font-family: "PingFang SC", sans-serif;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-6px) scale(.985);
+      transform-origin: top center;
+      transition: opacity .16s ease, visibility .16s ease, transform .16s ease;
+      scrollbar-width: thin;
+    }
+    .student-evidence::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: 22px;
+      width: 9px;
+      height: 9px;
+      border-top: 1px solid #d9e2f2;
+      border-left: 1px solid #d9e2f2;
+      background: #fff;
+      transform: rotate(45deg);
+    }
+    .answer-paper:hover + .student-evidence,
+    .answer-paper:focus-visible + .student-evidence {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+    .student-evidence__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .student-evidence__title { color: #2e3d63; font-size: 11px; font-weight: 850; }
+    .student-evidence__capability { padding: 3px 6px; border-radius: 6px; color: #4d6394; background: #edf2ff; font-size: 9px; font-weight: 800; }
+    .student-evidence__summary { margin-top: 6px; color: #6a7690; font-size: 10px; line-height: 1.45; }
+    .student-evidence__guide { margin-top: 8px; padding: 7px 8px; border-radius: 8px; color: #4d5b75; background: #f5f7fb; font-size: 9px; line-height: 1.55; }
+    .student-evidence__guide strong { display: block; margin-bottom: 2px; color: #34435f; }
     .solution-method-tag { display: inline-flex; padding: 3px 7px; border-radius: 999px; color: #177c58; background: #eaf8f2; font-size: 9px; font-weight: 800; }
     .evidence-note { display: block; margin-top: 6px; color: #7a6a50; font-size: 10px; line-height: 1.45; }
     .step-evidence { display: grid; gap: 5px; margin-top: 7px; }
@@ -2679,6 +2730,13 @@
 
       function studentEvidenceMarkup(question, student) {
         if (!usesPaperDirectGrading) return "";
+        const capabilityLabel = question.capability?.label || "结果判断";
+        const summary = question.gradingSummary || question.basis?.[0] || "按答案与关键过程综合判断";
+        const guide = question.acceptedMethods?.length
+          ? `<div class="student-evidence__guide"><strong>可识别解法</strong>${question.acceptedMethods.map(escapeSnapshotXml).join("、")}</div>`
+          : question.scoringPoints?.length
+            ? `<div class="student-evidence__guide"><strong>批改过程要点</strong>${question.scoringPoints.map(escapeSnapshotXml).join("；")}</div>`
+            : "";
         const method = student.method
           ? `<span class="solution-method-tag">${escapeSnapshotXml(student.method)}</span>`
           : "";
@@ -2694,8 +2752,19 @@
           ...(student.matchedCriteria || []).map((item) => `<span class="criterion-chip is-hit">✓ ${escapeSnapshotXml(item)}</span>`),
           ...(student.missingCriteria || []).map((item) => `<span class="criterion-chip is-missing">缺少 ${escapeSnapshotXml(item)}</span>`)
         ].join("");
-        if (!method && !note && !steps && !criteria) return "";
-        return `<div class="student-evidence">${method}${note}${steps}${criteria ? `<div class="criterion-evidence">${criteria}</div>` : ""}</div>`;
+        const fallback = !method && !note && !steps && !criteria
+          ? (question.basis || []).slice(0, 2).map((item) => `<span class="evidence-note">• ${escapeSnapshotXml(item)}</span>`).join("")
+          : "";
+        return `
+          <aside class="student-evidence" role="tooltip" aria-label="${escapeSnapshotXml(student.name)}的 AI 批改依据">
+            <div class="student-evidence__head">
+              <strong class="student-evidence__title">AI 批改依据</strong>
+              <span class="student-evidence__capability">${escapeSnapshotXml(capabilityLabel)}</span>
+            </div>
+            <div class="student-evidence__summary">${escapeSnapshotXml(summary)}</div>
+            ${guide}${method}${note}${steps}${criteria ? `<div class="criterion-evidence">${criteria}</div>` : ""}${fallback}
+          </aside>
+        `;
       }
 
       function renderQuestions() {
@@ -3617,8 +3686,8 @@
             <div class="answer-paper" role="button" tabindex="0" data-student="${student.id}" aria-label="切换${student.name}的批改结果">
               ${mark}
               <div class="handwriting">${student.answer}</div>
-              ${studentEvidenceMarkup(question, student)}
             </div>
+            ${studentEvidenceMarkup(question, student)}
           </article>
         `;
       }

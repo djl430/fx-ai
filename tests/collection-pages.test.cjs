@@ -609,6 +609,17 @@ test('question grading renders verifiable AI capability evidence', () => {
   assert.match(gradingPage, /criterion-chip/);
 });
 
+test('question grading reveals AI evidence as a hover popover outside the answer crop', () => {
+  assert.match(gradingPage, /\.student-evidence \{[\s\S]*?opacity: 0;[\s\S]*?visibility: hidden;/);
+  assert.match(gradingPage, /\.answer-paper:hover \+ \.student-evidence/);
+  assert.match(gradingPage, /\.answer-paper:focus-visible \+ \.student-evidence/);
+  assert.match(gradingPage, /class="student-evidence" role="tooltip"/);
+  assert.match(gradingPage, /AI 批改依据/);
+  assert.match(gradingPage, /question\.acceptedMethods/);
+  assert.match(gradingPage, /question\.scoringPoints/);
+  assert.match(gradingPage, /<div class="handwriting">\$\{student\.answer\}<\/div>\s*<\/div>\s*\$\{studentEvidenceMarkup\(question, student\)\}/);
+});
+
 test('question navigation omits grading capability badges below question numbers', () => {
   assert.doesNotMatch(gradingPage, /function capabilityBadgeMarkup\(question\)/);
   assert.doesNotMatch(gradingPage, /class="q-capability"/);
