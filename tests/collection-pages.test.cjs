@@ -580,7 +580,7 @@ test('first homework paper renders type-appropriate question content', () => {
   }
   assert.match(gradingPage, /function studentChoiceSelection/);
   assert.match(gradingPage, /求函数 y = x² − 4x \+ 3 的对称轴/);
-  assert.match(gradingPage, /写出函数在对称轴两侧的增减性/);
+  assert.match(gradingPage, /已知抛物线顶点为（1，−3），且经过点（0，−1），求函数解析式/);
 });
 
 test('first homework defines authentic AI grading capability cases', () => {
@@ -609,6 +609,16 @@ test('question grading renders verifiable AI capability evidence', () => {
   assert.match(gradingPage, /solution-method-tag/);
   assert.match(gradingPage, /step-evidence/);
   assert.match(gradingPage, /criterion-chip/);
+});
+
+test('first homework paper shows process and semantic grading evidence', () => {
+  assert.match(gradingPage, /function studentPaperEvidenceMarkup\(question, student\)/);
+  assert.match(gradingPage, /student-paper-step/);
+  assert.match(gradingPage, /student-paper-rubric/);
+  assert.match(gradingPage, /求函数 y = x² − 4x \+ 3 的对称轴和最小值/);
+  assert.match(gradingPage, /用配方法求 y = 2x² − 8x \+ 5/);
+  assert.match(gradingPage, /无论 x 取何值，y 都不小于 1/);
+  assert.match(gradingPage, /20 米长的围栏靠墙围成一个矩形花圃/);
 });
 
 test('first homework places grading marks beside student responses', () => {
