@@ -304,6 +304,16 @@
     .active .q-number { color: white; background: var(--brand); border-color: var(--brand); }
     .q-meta { min-width: 0; }
     .q-title { display: block; font-size: 13px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q-capability {
+      display: inline-flex;
+      margin-top: 5px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #536a9e;
+      background: #edf2ff;
+      font-size: 9px;
+      font-weight: 800;
+    }
     .q-state { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 10px; color: var(--muted); }
     .q-state::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
     .q-state.pending { color: var(--amber); font-weight: 700; }
@@ -552,6 +562,19 @@
       scrollbar-width: thin;
     }
 
+    .capability-proof {
+      margin: 0 0 16px;
+      padding: 14px 16px;
+      border: 1px solid #dbe4f7;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f7f9ff, #fff);
+      box-shadow: 0 9px 24px rgba(53,72,119,.06);
+    }
+    .capability-proof__eyebrow { display: flex; align-items: center; gap: 7px; color: #4d6394; font-size: 11px; font-weight: 850; }
+    .capability-proof__spark { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; background: #e9efff; }
+    .capability-proof__facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+    .capability-proof__fact { padding: 5px 8px; border-radius: 7px; color: #45536f; background: #edf2fa; font-size: 10px; }
+
     .group-section {
       margin-bottom: 18px;
       border: 1px solid var(--line);
@@ -773,6 +796,16 @@
     .student-card:hover .answer-paper::after { color: #60709a; background: rgba(238,242,252,.94); }
     .answer-paper:hover { border-color: #c8d2e7; }
     .handwriting { font-family: "Kaiti SC", "STKaiti", serif; font-size: 16px; line-height: 1.7; white-space: pre-line; }
+    .student-evidence { margin-top: 9px; padding-top: 8px; border-top: 1px dashed rgba(103,118,148,.22); font-family: "PingFang SC", sans-serif; }
+    .solution-method-tag { display: inline-flex; padding: 3px 7px; border-radius: 999px; color: #177c58; background: #eaf8f2; font-size: 9px; font-weight: 800; }
+    .evidence-note { display: block; margin-top: 6px; color: #7a6a50; font-size: 10px; line-height: 1.45; }
+    .step-evidence { display: grid; gap: 5px; margin-top: 7px; }
+    .step-evidence__row { display: grid; grid-template-columns: 15px minmax(0,1fr); gap: 6px; align-items: start; color: #58647c; font-size: 10px; line-height: 1.45; }
+    .step-evidence__row .mark-icon { width: 14px; height: 14px; }
+    .criterion-evidence { margin-top: 3px; }
+    .criterion-chip { display: inline-flex; margin: 5px 4px 0 0; padding: 3px 6px; border-radius: 6px; font-size: 9px; }
+    .criterion-chip.is-hit { color: #16845c; background: #eaf8f2; }
+    .criterion-chip.is-missing { color: #b66a1d; background: #fff4e5; }
 
     .paper-trace-mark {
       position: absolute;
@@ -2596,11 +2629,55 @@
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       }
 
+      function capabilityBadgeMarkup(question) {
+        return usesPaperDirectGrading && question.capability
+          ? `<span class="q-capability">${escapeSnapshotXml(question.capability.label)}</span>`
+          : "";
+      }
+
+      function capabilityProofMarkup(question) {
+        if (!usesPaperDirectGrading || !question.capability) return "";
+        const reviewed = question.students.filter((student) => student.result !== "ungraded").length;
+        const pendingReview = question.students.filter((student) => student.result === "ungraded").length;
+        return `
+          <section class="capability-proof" aria-label="本题 AI 批改能力摘要">
+            <div class="capability-proof__eyebrow"><span class="capability-proof__spark" aria-hidden="true">✦</span><span>AI 已完成本题批改</span></div>
+            <div class="capability-proof__facts">
+              <span class="capability-proof__fact">${reviewed} 份已批改</span>
+              <span class="capability-proof__fact">${escapeSnapshotXml(question.gradingSummary)}</span>
+              ${pendingReview ? `<span class="capability-proof__fact">${pendingReview} 份待老师复核</span>` : ""}
+            </div>
+          </section>
+        `;
+      }
+
+      function studentEvidenceMarkup(question, student) {
+        if (!usesPaperDirectGrading) return "";
+        const method = student.method
+          ? `<span class="solution-method-tag">${escapeSnapshotXml(student.method)}</span>`
+          : "";
+        const note = student.evidence
+          ? `<span class="evidence-note">${escapeSnapshotXml(student.evidence)}</span>`
+          : "";
+        const steps = student.steps?.length
+          ? `<div class="step-evidence">${student.steps.map((step) => `
+              <div class="step-evidence__row"><span class="mark-icon ${step.result}" aria-hidden="true"></span><span>${escapeSnapshotXml(step.text)}</span></div>
+            `).join("")}</div>`
+          : "";
+        const criteria = [
+          ...(student.matchedCriteria || []).map((item) => `<span class="criterion-chip is-hit">✓ ${escapeSnapshotXml(item)}</span>`),
+          ...(student.missingCriteria || []).map((item) => `<span class="criterion-chip is-missing">缺少 ${escapeSnapshotXml(item)}</span>`)
+        ].join("");
+        if (!method && !note && !steps && !criteria) return "";
+        return `<div class="student-evidence">${method}${note}${steps}${criteria ? `<div class="criterion-evidence">${criteria}</div>` : ""}</div>`;
+      }
+
       function renderQuestions() {
         questionList.innerHTML = questions.map(question => `
           <button class="question-item ${question.id === activeQuestionId ? "active" : ""}" type="button" data-question="${question.id}">
             <span class="q-meta">
               <span class="q-title">第 ${question.id} 题</span>
+              ${capabilityBadgeMarkup(question)}
               <span class="q-state ${question.status === "pending" ? "pending" : ""}">${question.status === "pending" ? "待确认" : "已完成"}</span>
             </span>
             <span class="q-rate ${metricClass(question)}">${questionMetric(question)}</span>
@@ -3313,7 +3390,7 @@
           renderSimilarityGroups(question);
           return;
         }
-        groupsScroll.innerHTML = order.map(result => {
+        groupsScroll.innerHTML = capabilityProofMarkup(question) + order.map(result => {
           const group = question.students.filter(student => student.result === result);
           return `
             <section class="group-section" data-result="${result}">
@@ -3445,6 +3522,7 @@
             <div class="answer-paper" role="button" tabindex="0" data-student="${student.id}" aria-label="切换${student.name}的批改结果">
               ${mark}
               <div class="handwriting">${student.answer}</div>
+              ${studentEvidenceMarkup(question, student)}
             </div>
           </article>
         `;

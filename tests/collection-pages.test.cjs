@@ -599,6 +599,18 @@ test('first homework expands explicit result profiles to thirty students', () =>
   assert.match(gradingPage, /CLASS_SIZE/);
 });
 
+test('question grading renders verifiable AI capability evidence', () => {
+  assert.match(gradingPage, /function capabilityBadgeMarkup\(question\)/);
+  assert.match(gradingPage, /class="q-capability"/);
+  assert.match(gradingPage, /function capabilityProofMarkup\(question\)/);
+  assert.match(gradingPage, /class="capability-proof"/);
+  assert.match(gradingPage, /AI 已完成本题批改/);
+  assert.match(gradingPage, /function studentEvidenceMarkup\(question, student\)/);
+  assert.match(gradingPage, /solution-method-tag/);
+  assert.match(gradingPage, /step-evidence/);
+  assert.match(gradingPage, /criterion-chip/);
+});
+
 test('first homework places grading marks beside student responses', () => {
   assert.match(gradingPage, /class="student-paper-response/);
   assert.match(gradingPage, /student-paper-mark is-inline/);
