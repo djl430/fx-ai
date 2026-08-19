@@ -616,6 +616,12 @@ test('unanswered work is wrong and only unreadable work stays ungraded', () => {
   assert.doesNotMatch(firstHomeworkSource, /ungraded:\s*\[\{\s*answer:\s*"未作答"/);
 });
 
+test('unreadable answer cards stay visually blank and explain the issue only in AI evidence', () => {
+  assert.match(gradingPage, /function visibleStudentAnswer\(student\)[\s\S]*isUnreadableResponse\(student\.answer\)[\s\S]*return ""/);
+  assert.match(gradingPage, /<div class="handwriting">\$\{visibleStudentAnswer\(student\)\}<\/div>/);
+  assert.match(gradingPage, /student\.result === "ungraded"[\s\S]*字迹模糊，当前无法确认批改结果/);
+});
+
 test('first homework defines authentic AI grading capability cases', () => {
   assert.match(gradingPage, /capability:\s*\{\s*key:\s*"equivalent-value",\s*label:\s*"等值答案"/);
   assert.match(gradingPage, /1\/2 与 0\.5 等值/);
@@ -658,7 +664,7 @@ test('question grading reveals AI evidence as a hover popover outside the answer
   assert.match(gradingPage, /\.answer-paper:focus-visible \+ \.student-evidence/);
   assert.match(gradingPage, /class="student-evidence" role="tooltip"/);
   assert.match(gradingPage, /studentEvidenceText\(question, student\)/);
-  assert.match(gradingPage, /<div class="handwriting">\$\{student\.answer\}<\/div>\s*<\/div>\s*\$\{studentEvidenceMarkup\(question, student\)\}/);
+  assert.match(gradingPage, /<div class="handwriting">\$\{visibleStudentAnswer\(student\)\}<\/div>\s*<\/div>\s*\$\{studentEvidenceMarkup\(question, student\)\}/);
 });
 
 test('student-specific grading evidence is one direct text explanation', () => {

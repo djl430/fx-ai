@@ -3826,6 +3826,11 @@
         });
       }
 
+      function visibleStudentAnswer(student) {
+        if (isUnreadableResponse(student.answer)) return "";
+        return student.answer;
+      }
+
       function studentCard(student) {
         const question = activeQuestion();
         const mark = isExam
@@ -3838,7 +3843,7 @@
             </header>
             <div class="answer-paper" role="button" tabindex="0" data-student="${student.id}" aria-label="切换${student.name}的批改结果">
               ${mark}
-              <div class="handwriting">${student.answer}</div>
+              <div class="handwriting">${visibleStudentAnswer(student)}</div>
             </div>
             ${studentEvidenceMarkup(question, student)}
           </article>
