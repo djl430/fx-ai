@@ -1470,15 +1470,15 @@
       line-height: 1.55;
     }
 
-    .student-answer-peek ul {
-      margin: 8px 0 0;
-      padding: 8px 0 0 16px;
+    .student-answer-peek__evidence {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 9px;
+      padding-top: 9px;
       border-top: 1px solid var(--line);
-      font-size: 11px;
-      line-height: 1.65;
     }
 
-    .student-answer-peek__basis-label { display: block; margin-top: 9px; color: #6d7890; font-size: 9px; font-weight: 800; }
     .student-answer-peek__edit { width: 100%; min-height: 30px; margin-top: 10px; border: 1px solid #cbd6ee; border-radius: 8px; color: #43598d; background: #f6f8ff; font-size: 10px; font-weight: 850; cursor: pointer; }
     .student-answer-peek__edit:hover { border-color: #9dace0; background: #edf1ff; }
     .student-answer-peek__edit:disabled { opacity: .55; cursor: wait; }
@@ -3112,18 +3112,19 @@
         return !/(选择题|判断题)/.test(question.type);
       }
 
-      function studentAnswerPeekMarkup(question) {
+      function studentAnswerPeekMarkup(question, student) {
         const showGradingBasis = supportsDisplayedGradingBasis(question);
-        const scoringPoints = question.teacherBasis || question.scoringPoints || question.acceptedMethods || [];
-        const gradingBasisMarkup = `
-          <span class="student-answer-peek__basis-label">${question.teacherBasis ? "老师批改依据" : "批改依据"}</span>
-          ${scoringPoints.length ? `<ul>${scoringPoints.map((point) => `<li>${point}</li>`).join("")}</ul>` : ""}
-        `;
+        const individualEvidence = showGradingBasis ? studentEvidenceText(question, student) : "";
         return `
           <aside class="student-answer-peek" id="studentAnswerPeek-${question.id}" role="note">
             <span class="student-answer-peek__label">答案</span>
             <strong>${question.answer}</strong>
-            ${showGradingBasis ? gradingBasisMarkup : ""}
+            ${individualEvidence ? `
+              <div class="student-answer-peek__evidence">
+                <span class="student-evidence__icon" aria-hidden="true">✦</span>
+                <p class="student-evidence__text">${escapeSnapshotXml(individualEvidence)}</p>
+              </div>
+            ` : ""}
             <button class="student-answer-peek__edit" type="button" data-student-rule-edit="${question.id}" ${regradingQuestions.has(question.id) ? "disabled" : ""}>${showGradingBasis ? "修改答案与标准" : "修改答案"}</button>
           </aside>
         `;
@@ -3185,7 +3186,7 @@
               ? firstHomeworkPaperQuestionMarkup(question, student, resultMark)
               : "";
             const paperQuestionContent = usesPaperDirectGrading
-              ? `${directPaperQuestionContent}${studentAnswerPeekMarkup(question)}`
+              ? `${directPaperQuestionContent}${studentAnswerPeekMarkup(question, student)}`
               : `
                 <strong>第 ${question.id} 题 · ${question.title}</strong>
                 <p>${question.type}</p>

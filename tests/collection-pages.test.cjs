@@ -722,7 +722,7 @@ test('choice questions hide grading basis in both grading views', () => {
   assert.match(gradingPage, /return !\/\(选择题\|判断题\)\/\.test\(question\.type\)/);
   assert.match(gradingPage, /basisCard\.hidden = !supportsDisplayedGradingBasis\(question\)/);
   assert.match(gradingPage, /const showGradingBasis = supportsDisplayedGradingBasis\(question\)/);
-  assert.match(gradingPage, /\$\{showGradingBasis \? gradingBasisMarkup : ""\}/);
+  assert.match(gradingPage, /const individualEvidence = showGradingBasis \? studentEvidenceText\(question, student\) : ""/);
   assert.match(gradingPage, /studentGradingRuleField\.hidden = !showGradingBasis/);
   assert.match(gradingPage, /studentRuleTitle\.textContent = showGradingBasis \? "修改答案与批改标准" : "修改答案"/);
   assert.match(gradingPage, /showGradingBasis\s*\? studentGradingRuleInput\.value\.split/);
@@ -739,7 +739,7 @@ test('student rule save reuses the question regrade pipeline and syncs its progr
   assert.match(gradingPage, /function renderStudentRegradeStatus\(\)/);
   assert.match(gradingPage, /正在按老师的新答案与标准重新批改第 \$\{question\.id\} 题/);
   assert.match(gradingPage, /if \(gradingView === "student"\) renderStudentRegradeStatus\(\)/);
-  assert.match(gradingPage, /question\.teacherBasis \|\| question\.scoringPoints \|\| question\.acceptedMethods/);
+  assert.match(gradingPage, /studentGradingRuleInput\.value = showGradingBasis \? \(question\.teacherBasis \|\| question\.basis\)\.join\("\\n"\) : ""/);
 });
 
 test('first homework places grading marks beside student responses', () => {
@@ -757,10 +757,14 @@ test('student confirmation buttons reuse question grading button shape and color
 });
 
 test('first homework shows an answer card beside the active paper question', () => {
-  assert.match(gradingPage, /function studentAnswerPeekMarkup/);
+  assert.match(gradingPage, /function studentAnswerPeekMarkup\(question, student\)/);
   assert.match(gradingPage, /class="student-answer-peek"/);
   assert.match(gradingPage, /student-answer-peek__label">答案</);
   assert.doesNotMatch(gradingPage, /student-answer-peek__label">标准答案</);
+  assert.match(gradingPage, /studentEvidenceText\(question, student\)/);
+  assert.match(gradingPage, /student-answer-peek__evidence[\s\S]*?student-evidence__icon[\s\S]*?student-evidence__text/);
+  assert.match(gradingPage, /studentAnswerPeekMarkup\(question, student\)/);
+  assert.doesNotMatch(gradingPage, /student-answer-peek__basis-label/);
   assert.match(gradingPage, /role="note"/);
   assert.match(gradingPage, /aria-describedby="studentAnswerPeek-/);
   assert.match(gradingPage, /开口向上/);
