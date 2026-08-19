@@ -840,16 +840,7 @@
       visibility: visible;
       transform: translateY(0) scale(1);
     }
-    .student-evidence__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .student-evidence__title { color: #2e3d63; font-size: 11px; font-weight: 850; }
-    .student-evidence__capability { padding: 3px 6px; border-radius: 6px; color: #4d6394; background: #edf2ff; font-size: 9px; font-weight: 800; }
-    .student-evidence__summary { margin-top: 6px; color: #6a7690; font-size: 10px; line-height: 1.45; }
-    .student-evidence__guide { margin-top: 8px; padding: 7px 8px; border-radius: 8px; color: #4d5b75; background: #f5f7fb; font-size: 9px; line-height: 1.55; }
-    .student-evidence__guide strong { display: block; margin-bottom: 2px; color: #34435f; }
-    .student-evidence__text { margin: 7px 0 0; color: #58647c; font-size: 10px; line-height: 1.55; }
-    .student-evidence__text strong { color: #34435f; }
-    .step-evidence { display: grid; gap: 5px; margin-top: 7px; }
-    .step-evidence__row { margin: 0; color: #58647c; font-size: 10px; line-height: 1.5; }
+    .student-evidence__text { margin: 0; color: #46536d; font-size: 10px; line-height: 1.65; }
 
     .paper-trace-mark {
       position: absolute;
@@ -2810,42 +2801,32 @@
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       }
 
+      function studentEvidenceText(question, student) {
+        const statements = [];
+        if (student.method) statements.push(`AI 识别为${student.method}`);
+        if (student.evidence) statements.push(student.evidence);
+        if (student.matchedCriteria?.length) statements.push(`作答满足${student.matchedCriteria.join("、")}`);
+        if (student.missingCriteria?.length) statements.push(`但缺少${student.missingCriteria.join("、")}`);
+        if (student.steps?.length && !student.evidence) {
+          const correctSteps = student.steps.filter((step) => step.result === "correct").length;
+          statements.push(correctSteps === student.steps.length
+            ? `${student.steps.length}个关键步骤均正确`
+            : `${student.steps.length}个关键步骤中${correctSteps}个正确`);
+        }
+        if (!statements.length) {
+          if (student.result === "ungraded") statements.push("字迹模糊，当前无法确认批改结果");
+          else if (student.result === "correct") statements.push("答案与关键过程符合本题批改标准");
+          else if (student.result === "partial") statements.push("作答部分符合本题批改标准");
+          else statements.push("作答与本题答案不一致");
+        }
+        return `${statements.join("，").replace(/[。；，]+$/, "")}。`;
+      }
+
       function studentEvidenceMarkup(question, student) {
         if (!usesPaperDirectGrading || !supportsDisplayedGradingBasis(question)) return "";
-        const capabilityLabel = question.capability?.label || "结果判断";
-        const summary = question.gradingSummary || question.basis?.[0] || "按答案与关键过程综合判断";
-        const guide = question.teacherBasis?.length
-          ? `<div class="student-evidence__guide"><strong>老师批改依据</strong>${question.teacherBasis.map(escapeSnapshotXml).join("；")}</div>`
-          : question.acceptedMethods?.length
-            ? `<div class="student-evidence__guide"><strong>可识别解法</strong>${question.acceptedMethods.map(escapeSnapshotXml).join("、")}</div>`
-            : question.scoringPoints?.length
-              ? `<div class="student-evidence__guide"><strong>批改过程要点</strong>${question.scoringPoints.map(escapeSnapshotXml).join("；")}</div>`
-              : "";
-        const method = student.method
-          ? `<p class="student-evidence__text"><strong>识别解法：</strong>${escapeSnapshotXml(student.method)}</p>`
-          : "";
-        const note = student.evidence
-          ? `<p class="student-evidence__text"><strong>判断说明：</strong>${escapeSnapshotXml(student.evidence)}</p>`
-          : "";
-        const steps = student.steps?.length
-          ? `<div class="step-evidence">${student.steps.map((step, index) => `
-              <p class="step-evidence__row">过程 ${index + 1}：${escapeSnapshotXml(step.text)}；判断：${labels[step.result].name}</p>
-            `).join("")}</div>`
-          : "";
-        const matchedCriteria = (student.matchedCriteria || []).map(escapeSnapshotXml).join("、");
-        const missingCriteria = (student.missingCriteria || []).map(escapeSnapshotXml).join("、");
-        const criteria = `${matchedCriteria ? `<p class="student-evidence__text"><strong>已覆盖要点：</strong>${matchedCriteria}</p>` : ""}${missingCriteria ? `<p class="student-evidence__text"><strong>缺少要点：</strong>${missingCriteria}</p>` : ""}`;
-        const fallback = !method && !note && !steps && !criteria
-          ? `<p class="student-evidence__text"><strong>判断依据：</strong>${(question.basis || []).slice(0, 2).map(escapeSnapshotXml).join("；")}</p>`
-          : "";
         return `
           <aside class="student-evidence" role="tooltip" aria-label="${escapeSnapshotXml(student.name)}的 AI 批改依据">
-            <div class="student-evidence__head">
-              <strong class="student-evidence__title">AI 批改依据</strong>
-              <span class="student-evidence__capability">${escapeSnapshotXml(capabilityLabel)}</span>
-            </div>
-            <div class="student-evidence__summary">${escapeSnapshotXml(summary)}</div>
-            ${guide}${method}${note}${steps}${criteria}${fallback}
+            <p class="student-evidence__text">${escapeSnapshotXml(studentEvidenceText(question, student))}</p>
           </aside>
         `;
       }
