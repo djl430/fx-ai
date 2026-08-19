@@ -633,9 +633,10 @@ test('question grading renders verifiable AI capability evidence', () => {
   assert.match(gradingPage, /class="capability-proof"/);
   assert.match(gradingPage, /AI 已完成本题批改/);
   assert.match(gradingPage, /function studentEvidenceMarkup\(question, student\)/);
-  assert.match(gradingPage, /solution-method-tag/);
+  assert.match(gradingPage, /student-evidence__text/);
   assert.match(gradingPage, /step-evidence/);
-  assert.match(gradingPage, /criterion-chip/);
+  assert.match(gradingPage, /已覆盖要点：/);
+  assert.match(gradingPage, /缺少要点：/);
 });
 
 test('question grading reveals AI evidence as a hover popover outside the answer crop', () => {
@@ -647,6 +648,21 @@ test('question grading reveals AI evidence as a hover popover outside the answer
   assert.match(gradingPage, /question\.acceptedMethods/);
   assert.match(gradingPage, /question\.scoringPoints/);
   assert.match(gradingPage, /<div class="handwriting">\$\{student\.answer\}<\/div>\s*<\/div>\s*\$\{studentEvidenceMarkup\(question, student\)\}/);
+});
+
+test('student-specific grading evidence uses text without process grading symbols', () => {
+  const evidenceSource = gradingPage.match(
+    /function studentEvidenceMarkup\(question, student\) \{([\s\S]*?)\n\s*\}\n\n\s*function renderQuestions/
+  )?.[1] || '';
+
+  assert.match(evidenceSource, /识别解法：/);
+  assert.match(evidenceSource, /过程 \$\{index \+ 1\}：/);
+  assert.match(evidenceSource, /判断：\$\{labels\[step\.result\]\.name\}/);
+  assert.match(evidenceSource, /已覆盖要点：/);
+  assert.match(evidenceSource, /缺少要点：/);
+  assert.doesNotMatch(evidenceSource, /mark-icon/);
+  assert.doesNotMatch(evidenceSource, /✓/);
+  assert.doesNotMatch(evidenceSource, /criterion-chip/);
 });
 
 test('question navigation omits grading capability badges below question numbers', () => {

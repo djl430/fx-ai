@@ -857,15 +857,10 @@
     .student-evidence__summary { margin-top: 6px; color: #6a7690; font-size: 10px; line-height: 1.45; }
     .student-evidence__guide { margin-top: 8px; padding: 7px 8px; border-radius: 8px; color: #4d5b75; background: #f5f7fb; font-size: 9px; line-height: 1.55; }
     .student-evidence__guide strong { display: block; margin-bottom: 2px; color: #34435f; }
-    .solution-method-tag { display: inline-flex; padding: 3px 7px; border-radius: 999px; color: #177c58; background: #eaf8f2; font-size: 9px; font-weight: 800; }
-    .evidence-note { display: block; margin-top: 6px; color: #7a6a50; font-size: 10px; line-height: 1.45; }
+    .student-evidence__text { margin: 7px 0 0; color: #58647c; font-size: 10px; line-height: 1.55; }
+    .student-evidence__text strong { color: #34435f; }
     .step-evidence { display: grid; gap: 5px; margin-top: 7px; }
-    .step-evidence__row { display: grid; grid-template-columns: 15px minmax(0,1fr); gap: 6px; align-items: start; color: #58647c; font-size: 10px; line-height: 1.45; }
-    .step-evidence__row .mark-icon { width: 14px; height: 14px; }
-    .criterion-evidence { margin-top: 3px; }
-    .criterion-chip { display: inline-flex; margin: 5px 4px 0 0; padding: 3px 6px; border-radius: 6px; font-size: 9px; }
-    .criterion-chip.is-hit { color: #16845c; background: #eaf8f2; }
-    .criterion-chip.is-missing { color: #b66a1d; background: #fff4e5; }
+    .step-evidence__row { margin: 0; color: #58647c; font-size: 10px; line-height: 1.5; }
 
     .paper-trace-mark {
       position: absolute;
@@ -2839,7 +2834,7 @@
       }
 
       function studentEvidenceMarkup(question, student) {
-        if (!usesPaperDirectGrading) return "";
+        if (!usesPaperDirectGrading || !supportsDisplayedGradingBasis(question)) return "";
         const capabilityLabel = question.capability?.label || "结果判断";
         const summary = question.gradingSummary || question.basis?.[0] || "按答案与关键过程综合判断";
         const guide = question.teacherBasis?.length
@@ -2850,22 +2845,21 @@
               ? `<div class="student-evidence__guide"><strong>批改过程要点</strong>${question.scoringPoints.map(escapeSnapshotXml).join("；")}</div>`
               : "";
         const method = student.method
-          ? `<span class="solution-method-tag">${escapeSnapshotXml(student.method)}</span>`
+          ? `<p class="student-evidence__text"><strong>识别解法：</strong>${escapeSnapshotXml(student.method)}</p>`
           : "";
         const note = student.evidence
-          ? `<span class="evidence-note">${escapeSnapshotXml(student.evidence)}</span>`
+          ? `<p class="student-evidence__text"><strong>判断说明：</strong>${escapeSnapshotXml(student.evidence)}</p>`
           : "";
         const steps = student.steps?.length
-          ? `<div class="step-evidence">${student.steps.map((step) => `
-              <div class="step-evidence__row"><span class="mark-icon ${step.result}" aria-hidden="true"></span><span>${escapeSnapshotXml(step.text)}</span></div>
+          ? `<div class="step-evidence">${student.steps.map((step, index) => `
+              <p class="step-evidence__row">过程 ${index + 1}：${escapeSnapshotXml(step.text)}；判断：${labels[step.result].name}</p>
             `).join("")}</div>`
           : "";
-        const criteria = [
-          ...(student.matchedCriteria || []).map((item) => `<span class="criterion-chip is-hit">✓ ${escapeSnapshotXml(item)}</span>`),
-          ...(student.missingCriteria || []).map((item) => `<span class="criterion-chip is-missing">缺少 ${escapeSnapshotXml(item)}</span>`)
-        ].join("");
+        const matchedCriteria = (student.matchedCriteria || []).map(escapeSnapshotXml).join("、");
+        const missingCriteria = (student.missingCriteria || []).map(escapeSnapshotXml).join("、");
+        const criteria = `${matchedCriteria ? `<p class="student-evidence__text"><strong>已覆盖要点：</strong>${matchedCriteria}</p>` : ""}${missingCriteria ? `<p class="student-evidence__text"><strong>缺少要点：</strong>${missingCriteria}</p>` : ""}`;
         const fallback = !method && !note && !steps && !criteria
-          ? (question.basis || []).slice(0, 2).map((item) => `<span class="evidence-note">• ${escapeSnapshotXml(item)}</span>`).join("")
+          ? `<p class="student-evidence__text"><strong>判断依据：</strong>${(question.basis || []).slice(0, 2).map(escapeSnapshotXml).join("；")}</p>`
           : "";
         return `
           <aside class="student-evidence" role="tooltip" aria-label="${escapeSnapshotXml(student.name)}的 AI 批改依据">
@@ -2874,7 +2868,7 @@
               <span class="student-evidence__capability">${escapeSnapshotXml(capabilityLabel)}</span>
             </div>
             <div class="student-evidence__summary">${escapeSnapshotXml(summary)}</div>
-            ${guide}${method}${note}${steps}${criteria ? `<div class="criterion-evidence">${criteria}</div>` : ""}${fallback}
+            ${guide}${method}${note}${steps}${criteria}${fallback}
           </aside>
         `;
       }
