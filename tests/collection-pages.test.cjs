@@ -720,7 +720,9 @@ test('teacher edits the answer card and regrades only the active question', () =
   assert.match(gradingPage, /function startQuestionRegrade\(question\)/);
   assert.match(gradingPage, /student\.result = student\.regradeResult/);
   assert.match(gradingPage, /正在按新标准重新批改本题/);
-  assert.match(gradingPage, /本题全班重批完成/);
+  assert.match(gradingPage, /showToast\("已完成批改"\)/);
+  assert.doesNotMatch(gradingPage, /本题全班重批完成/);
+  assert.doesNotMatch(gradingPage, /已更新结果分组、正确率和学生原纸标记/);
   assert.doesNotMatch(gradingPage, /撤销本次重批/);
 });
 

@@ -2904,8 +2904,8 @@
           return;
         }
         if (question.regradeCompleted) {
-          questionRegradeStatus.hidden = false;
-          questionRegradeStatus.innerHTML = `<strong>本题全班重批完成：${question.regradeChanges}人结果发生变化</strong><br>已更新结果分组、正确率和学生原纸标记。`;
+          questionRegradeStatus.hidden = true;
+          questionRegradeStatus.innerHTML = "";
           return;
         }
         questionRegradeStatus.hidden = true;
@@ -2974,7 +2974,7 @@
           regradingQuestions.delete(question.id);
           renderAll();
           if (gradingView === "student") renderStudentWorkspace();
-          showToast(`本题全班重批完成：${question.regradeChanges}人结果发生变化`);
+          showToast("已完成批改");
         }, 120);
       }
 
