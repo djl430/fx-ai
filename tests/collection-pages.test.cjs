@@ -927,6 +927,10 @@ test('task cards expose grading, insights, and review actions', () => {
   assert.match(indexPage, /action\.dataset\.action === "open-review"/);
 });
 
+test('insights action announces that the teacher entered the insights page', () => {
+  assert.match(indexPage, /`已进入「\$\{task\.title\}」学情页`/);
+});
+
 test('grading action uses the same visual style as insights and review', () => {
   assert.match(indexPage, /class="task-action"[^>]*data-action="open-task"/);
   assert.doesNotMatch(indexPage, /class="task-action primary"/);
