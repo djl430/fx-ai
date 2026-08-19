@@ -720,6 +720,12 @@ test('question navigation omits grading capability badges below question numbers
 test('first homework paper shows process marks without grading-basis labels', () => {
   assert.match(gradingPage, /function studentPaperEvidenceMarkup\(question, student\)/);
   assert.match(gradingPage, /student-paper-step/);
+  const processMarkup = gradingPage.match(
+    /function studentPaperEvidenceMarkup\(question, student\) \{([\s\S]*?)\n\s*\}\n\n\s*function firstHomeworkPaperQuestionMarkup/
+  )?.[1] || '';
+  assert.match(processMarkup, /step\.result !== "correct" \? "is-error" : ""/);
+  assert.doesNotMatch(processMarkup, /mark-icon/);
+  assert.match(gradingPage, /\.student-paper-step__text\.is-error::after \{[\s\S]*?border: 2px solid var\(--red\)/);
   assert.doesNotMatch(gradingPage, /student-paper-method/);
   assert.doesNotMatch(gradingPage, /student-paper-rubric/);
   assert.doesNotMatch(gradingPage, /student-paper-evidence-note/);
@@ -845,6 +851,21 @@ test('similar answer preview and batch action update all four students', () => {
   assert.match(gradingPage, /studentCompletion\.delete\(student\.name\)/);
   assert.match(gradingPage, /renderStudentWorkspace\(\)/);
   assert.match(gradingPage, /已同步修改 4 人/);
+});
+
+test('question grading suggests and applies similar answers only after one result changes', () => {
+  assert.match(gradingPage, /let questionSimilarAnswerSource = null/);
+  assert.match(gradingPage, /function questionSimilarAnswerStudents\(questionId, sourceStudentId\)/);
+  assert.match(gradingPage, /function questionSimilarAnswerSuggestionMarkup\(question, student\)/);
+  assert.match(gradingPage, /questionSimilarAnswerSource\?\.studentId !== student\.id[\s\S]*return ""/);
+  assert.match(gradingPage, /class="similar-answer-suggestion question-similar-answer-suggestion"/);
+  assert.match(gradingPage, /data-question-similar-answer-preview/);
+  assert.match(gradingPage, /data-question-similar-answer-apply/);
+  assert.match(gradingPage, /questionSimilarAnswerSource = \{ questionId: question\.id, studentId: student\.id \}[\s\S]*renderGroups\(\)/);
+  assert.match(gradingPage, /function applyQuestionSimilarAnswerBatch\(questionId, sourceStudentId\)/);
+  assert.match(gradingPage, /matchingStudents\.forEach\(\(matchingStudent\) => \{[\s\S]*matchingStudent\.result = source\.result/);
+  assert.match(gradingPage, /questionSimilarAnswerSource = null/);
+  assert.match(gradingPage, /\.question-similar-answer-suggestion \{[\s\S]*opacity: 1;/);
 });
 
 test('question grading uses the one-click confirmation label', () => {

@@ -759,6 +759,7 @@
 
     .student-card:hover,
     .student-card:focus-within { z-index: 8; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(45,64,104,.10); }
+    .student-card.is-similar-source { z-index: 12; }
     .student-card[data-result="correct"] { border-color: #cbe9dc; }
     .student-card[data-result="partial"] { border-color: #f0d6a6; }
     .student-card[data-result="wrong"] { border-color: #f0c4c9; }
@@ -1324,12 +1325,32 @@
     .similar-answer-suggestion__action.is-primary { color: #fff; border-color: #40588f; background: #40588f; }
     .similar-answer-suggestion__action.is-primary:hover { background: #334a7e; }
 
+    .question-similar-answer-suggestion {
+      top: calc(100% + 8px);
+      right: auto;
+      left: 10px;
+      z-index: 18;
+      pointer-events: auto;
+      opacity: 1;
+      transform: none;
+    }
+    .question-similar-answer-suggestion::before { display: none; }
+
     .student-paper-question strong { font-size: 15px; }
     .student-paper-question p { margin: 7px 0; color: #696e78; font-size: 12px; }
     .student-paper-answer { color: #30343d; font-family: "Kaiti SC", "STKaiti", serif; font-size: 19px; line-height: 1.65; }
     .student-paper-steps { display: grid; gap: 7px; margin: 12px 0 0 8px; }
-    .student-paper-step { display: grid; grid-template-columns: minmax(0,1fr) 23px; gap: 10px; align-items: center; min-height: 27px; padding: 2px 8px 3px 0; border-bottom: 1px solid rgba(111,124,147,.16); color: #343b48; font-family: "Kaiti SC", "STKaiti", serif; font-size: 16px; }
-    .student-paper-step .mark-icon { width: 21px; height: 21px; }
+    .student-paper-step { min-height: 27px; padding: 2px 8px 3px 0; border-bottom: 1px solid rgba(111,124,147,.16); color: #343b48; font-family: "Kaiti SC", "STKaiti", serif; font-size: 16px; }
+    .student-paper-step__text { position: relative; display: inline-block; padding: 1px 6px; }
+    .student-paper-step__text.is-error::after {
+      content: "";
+      position: absolute;
+      inset: -3px -8px;
+      border: 2px solid var(--red);
+      border-radius: 48% 52% 46% 54%;
+      transform: rotate(-2deg);
+      pointer-events: none;
+    }
     .student-paper-answer.is-empty { color: #aaa69d; font-family: inherit; font-size: 13px; }
 
     .student-paper-prompt {
@@ -2582,6 +2603,7 @@
       let columns = 3;
       let toastTimer;
       const similarAnswerSuggestionQuestionIds = new Set();
+      let questionSimilarAnswerSource = null;
 
       const questionList = document.getElementById("questionList");
       const groupsScroll = document.getElementById("groupsScroll");
@@ -3104,7 +3126,7 @@
         if (!student) return "";
         const steps = student.steps?.length
           ? `<div class="student-paper-steps">${student.steps.map((step) => `
-              <div class="student-paper-step"><span>${escapeSnapshotXml(step.text)}</span><span class="mark-icon ${step.result}" aria-label="${labels[step.result].name}"></span></div>
+              <div class="student-paper-step"><span class="student-paper-step__text ${step.result !== "correct" ? "is-error" : ""}">${escapeSnapshotXml(step.text)}</span></div>
             `).join("")}</div>`
           : "";
         return steps;
@@ -3166,6 +3188,45 @@
         return question.students
           .filter((student) => studentChoiceSelection(student.answer) === normalizedAnswer)
           .slice(0, 4);
+      }
+
+      function questionSimilarAnswerStudents(questionId, sourceStudentId) {
+        if (!usesPaperDirectGrading) return [];
+        const question = questions.find((item) => item.id === Number(questionId));
+        const source = question?.students.find((student) => student.id === sourceStudentId);
+        if (!question || !source || isUnansweredResponse(source.answer) || isUnreadableResponse(source.answer)) return [];
+        const normalizedAnswer = /选择题/.test(question.type)
+          ? studentChoiceSelection(source.answer)
+          : String(source.answer || "").replace(/\s+/g, "").toLowerCase();
+        const matches = question.students.filter((student) => {
+          if (student.id === source.id || isUnansweredResponse(student.answer) || isUnreadableResponse(student.answer)) return false;
+          const candidate = /选择题/.test(question.type)
+            ? studentChoiceSelection(student.answer)
+            : String(student.answer || "").replace(/\s+/g, "").toLowerCase();
+          return candidate === normalizedAnswer;
+        });
+        return [source, ...matches].slice(0, 4);
+      }
+
+      function questionSimilarAnswerSuggestionMarkup(question, student) {
+        if (questionSimilarAnswerSource?.questionId !== question.id || questionSimilarAnswerSource?.studentId !== student.id) return "";
+        const matchingStudents = questionSimilarAnswerStudents(question.id, student.id);
+        if (matchingStudents.length !== 4) return "";
+        const answer = /选择题/.test(question.type) ? studentChoiceSelection(student.answer) : visibleStudentAnswer(student);
+        return `
+          <aside class="similar-answer-suggestion question-similar-answer-suggestion" role="note" aria-label="相同作答批量修改建议">
+            <div class="similar-answer-suggestion__head">
+              <span class="similar-answer-suggestion__spark" aria-hidden="true">✦</span>
+              <span>AI 批改建议</span>
+            </div>
+            <strong>检测到 4 人相同作答</strong>
+            <p>4 人作答均为 ${escapeSnapshotXml(answer)}，可同步当前批改结果。</p>
+            <div class="similar-answer-suggestion__actions">
+              <button class="similar-answer-suggestion__action" type="button" data-question-similar-answer-preview data-question-id="${question.id}" data-source-student-id="${student.id}">预览 4 人作答</button>
+              <button class="similar-answer-suggestion__action is-primary" type="button" data-question-similar-answer-apply data-question-id="${question.id}" data-source-student-id="${student.id}">一起修改</button>
+            </div>
+          </aside>
+        `;
       }
 
       function similarAnswerSuggestionMarkup(question) {
@@ -3438,6 +3499,29 @@
           </article>
         `).join("");
         document.getElementById("similarAnswerApplyAll").dataset.questionId = String(questionId);
+        delete document.getElementById("similarAnswerApplyAll").dataset.sourceStudentId;
+        return true;
+      }
+
+      function renderQuestionSimilarAnswerPreview(questionId, sourceStudentId) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const matchingStudents = questionSimilarAnswerStudents(questionId, sourceStudentId);
+        const previewGrid = document.getElementById("similarAnswerPreviewGrid");
+        if (!question || matchingStudents.length !== 4) return false;
+        previewGrid.innerHTML = matchingStudents.map((student) => `
+          <article class="similar-answer-crop">
+            <div class="similar-answer-crop__student">
+              <strong>${escapeSnapshotXml(student.name)}</strong>
+              <span>第 ${question.id} 题 · ${labels[student.result].name}</span>
+            </div>
+            <div class="similar-answer-crop__question">第 ${question.id} 题 · ${escapeSnapshotXml(question.title)}</div>
+            <div class="similar-answer-crop__response">学生作答：${escapeSnapshotXml(visibleStudentAnswer(student))}</div>
+            ${student.result === "ungraded" ? "" : `<span class="similar-answer-crop__mark"><span class="mark-icon ${student.result}"></span></span>`}
+          </article>
+        `).join("");
+        const applyButton = document.getElementById("similarAnswerApplyAll");
+        applyButton.dataset.questionId = String(questionId);
+        applyButton.dataset.sourceStudentId = sourceStudentId;
         return true;
       }
 
@@ -3453,6 +3537,24 @@
         });
         similarAnswerSuggestionQuestionIds.delete(Number(questionId));
         renderStudentWorkspace();
+        const modal = document.getElementById("similarAnswerModal");
+        if (modal.classList.contains("open")) setModal(modal, false);
+        showToast(`已同步修改 4 人 · 第 ${question.id} 题均标记为${labels[source.result].name}`);
+      }
+
+      function applyQuestionSimilarAnswerBatch(questionId, sourceStudentId) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        const source = question?.students.find((student) => student.id === sourceStudentId);
+        const matchingStudents = questionSimilarAnswerStudents(questionId, sourceStudentId);
+        if (!question || !source || matchingStudents.length !== 4) return;
+        matchingStudents.forEach((matchingStudent) => {
+          matchingStudent.result = source.result;
+          delete matchingStudent.partResults;
+        });
+        question.accuracy = Math.round(question.students.filter((student) => student.result === "correct").length / CLASS_SIZE * 100);
+        questionSimilarAnswerSource = null;
+        renderGroups();
+        renderQuestions();
         const modal = document.getElementById("similarAnswerModal");
         if (modal.classList.contains("open")) setModal(modal, false);
         showToast(`已同步修改 4 人 · 第 ${question.id} 题均标记为${labels[source.result].name}`);
@@ -3825,6 +3927,20 @@
       }
 
       function bindPaperInteractions() {
+        groupsScroll.querySelectorAll("[data-question-similar-answer-preview]").forEach((button) => {
+          button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (renderQuestionSimilarAnswerPreview(button.dataset.questionId, button.dataset.sourceStudentId)) {
+              setModal(modals.similarAnswer, true);
+            }
+          });
+        });
+        groupsScroll.querySelectorAll("[data-question-similar-answer-apply]").forEach((button) => {
+          button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            applyQuestionSimilarAnswerBatch(button.dataset.questionId, button.dataset.sourceStudentId);
+          });
+        });
         groupsScroll.querySelectorAll("[data-score-input]").forEach((input) => {
           input.closest("[data-score-editor]").addEventListener("click", (event) => event.stopPropagation());
           input.addEventListener("keydown", (event) => {
@@ -3850,11 +3966,12 @@
 
       function studentCard(student) {
         const question = activeQuestion();
+        const similarSuggestion = questionSimilarAnswerSuggestionMarkup(question, student);
         const mark = isExam
           ? `<span class="score-mark" data-score-editor><input class="score-input" type="number" min="0" max="${maxScore(question)}" step="0.5" value="${scoreInputValue(student, question)}" placeholder="待评" data-score-input data-student="${student.id}" aria-label="${student.name}第 ${question.id} 题得分"> / ${maxScore(question)} 分</span>`
           : `<span class="paper-trace-mark ${student.result}"><span class="mark-icon ${student.result}"></span></span>`;
         return `
-          <article class="student-card" data-result="${student.result}">
+          <article class="student-card ${similarSuggestion ? "is-similar-source" : ""}" data-result="${student.result}">
             <header class="student-card-head">
               <span class="student-name">${student.name}</span>
             </header>
@@ -3863,6 +3980,7 @@
               <div class="handwriting">${visibleStudentAnswer(student)}</div>
             </div>
             ${studentEvidenceMarkup(question, student)}
+            ${similarSuggestion}
           </article>
         `;
       }
@@ -3902,7 +4020,15 @@
         const oldResult = student.result;
         student.result = cycle[oldResult];
         delete student.partResults;
-        renderCardResult(paper.closest(".student-card"), paper, student, question);
+        if (usesPaperDirectGrading) {
+          questionSimilarAnswerSource = { questionId: question.id, studentId: student.id };
+          question.accuracy = Math.round(question.students.filter((item) => item.result === "correct").length / CLASS_SIZE * 100);
+          renderGroups();
+          renderQuestions();
+          groupsScroll.querySelector(`.answer-paper[data-student="${student.id}"]`)?.focus({ preventScroll: true });
+        } else {
+          renderCardResult(paper.closest(".student-card"), paper, student, question);
+        }
         showToast(`${student.name}：${labels[oldResult].name} → ${labels[student.result].name}`);
       }
 
@@ -4054,7 +4180,9 @@
 
       document.querySelectorAll("[data-modal]").forEach(button => button.addEventListener("click", () => setModal(modals[button.dataset.modal], true)));
       document.getElementById("similarAnswerApplyAll").addEventListener("click", (event) => {
-        applySimilarAnswerBatch(event.currentTarget.dataset.questionId);
+        const { questionId, sourceStudentId } = event.currentTarget.dataset;
+        if (sourceStudentId) applyQuestionSimilarAnswerBatch(questionId, sourceStudentId);
+        else applySimilarAnswerBatch(questionId);
       });
       document.querySelector("#similarAnswerModal .modal-close-secondary").addEventListener("click", () => setModal(modals.similarAnswer, false));
       document.querySelectorAll(".modal-backdrop").forEach(modal => {
