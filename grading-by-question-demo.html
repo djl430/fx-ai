@@ -1072,9 +1072,11 @@
 
     .student-workspace {
       min-height: 0;
+      height: 100%;
       display: grid;
       grid-template-columns: 190px minmax(980px,1fr);
       background: #eef2f8;
+      overflow: hidden;
     }
 
     .student-workspace[hidden] { display: none; }
@@ -1141,9 +1143,11 @@
     .student-review {
       min-width: 0;
       min-height: 0;
+      height: 100%;
       display: grid;
       grid-template-rows: auto minmax(0,1fr) auto;
       background: #eef2f8;
+      overflow: hidden;
     }
 
     .student-regrade-status {
@@ -1699,8 +1703,7 @@
     .student-subjective-score input:focus { outline: 3px solid rgba(79,102,216,.16); border-color: #8192dc; }
 
     .student-review-footer {
-      position: sticky;
-      bottom: 0;
+      position: relative;
       z-index: 20;
       display: flex;
       justify-content: flex-end;

@@ -538,7 +538,9 @@ test('student confirmation lives in the overall review footer', () => {
   assert.match(gradingPage, /class="student-review-footer"[\s\S]*id="confirmStudent"/);
   assert.doesNotMatch(gradingPage, /class="student-tool-footer"/);
   assert.match(gradingPage, /\.student-review\s*\{[^}]*grid-template-rows:\s*auto minmax\(0,1fr\) auto/s);
-  assert.match(gradingPage, /\.student-review-footer\s*\{[^}]*position:\s*sticky[^}]*bottom:\s*0[^}]*z-index:\s*20/s);
+  assert.match(gradingPage, /\.student-workspace\s*\{[^}]*height:\s*100%[^}]*overflow:\s*hidden/s);
+  assert.match(gradingPage, /\.student-review\s*\{[^}]*height:\s*100%[^}]*overflow:\s*hidden/s);
+  assert.match(gradingPage, /\.student-review-footer\s*\{[^}]*position:\s*relative[^}]*z-index:\s*20/s);
   assert.match(gradingPage, /#confirmStudent\s*\{[^}]*display:\s*inline-flex[^}]*visibility:\s*visible/s);
 });
 
