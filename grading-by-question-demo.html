@@ -1075,6 +1075,19 @@
     .similar-answer-crop__mark { position: absolute; right: 18px; bottom: 13px; transform: rotate(-7deg); }
     .similar-answer-modal__footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 18px; border-top: 1px solid var(--line); }
 
+    .student-rule-modal { width: min(620px, 94vw); }
+    .student-rule-context { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; padding: 11px 12px; border: 1px solid #dfe6f3; border-radius: 11px; color: #485777; background: #f4f7fc; font-size: 12px; }
+    .student-rule-context::before { content: "✦"; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; color: #5369b3; background: #e7edff; }
+    .student-rule-form { display: grid; gap: 9px; }
+    .student-rule-form label { color: #33415f; font-size: 12px; font-weight: 850; }
+    .student-rule-form input,
+    .student-rule-form textarea { width: 100%; padding: 10px 11px; border: 1px solid #ccd6e8; border-radius: 10px; color: #26334f; background: #fff; font-size: 12px; line-height: 1.6; }
+    .student-rule-form textarea { min-height: 142px; resize: vertical; }
+    .student-rule-form input:focus,
+    .student-rule-form textarea:focus { outline: 3px solid rgba(79,102,216,.15); border-color: #8393d8; }
+    .student-rule-hint { margin: 2px 0 0; color: #8a6634; font-size: 10px; line-height: 1.55; }
+    .student-rule-actions { display: flex; justify-content: flex-end; gap: 9px; padding: 15px 22px 20px; border-top: 1px solid var(--line); }
+
     .student-workspace {
       min-height: 0;
       display: grid;
@@ -1147,9 +1160,24 @@
       min-width: 0;
       min-height: 0;
       display: grid;
-      grid-template-rows: minmax(0,1fr) auto;
+      grid-template-rows: auto minmax(0,1fr) auto;
       background: #eef2f8;
     }
+
+    .student-regrade-status {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 18px;
+      border-bottom: 1px solid #d8e2f1;
+      color: #405171;
+      background: linear-gradient(90deg, #f6f8ff, #f3faf7);
+      font-size: 11px;
+    }
+    .student-regrade-status[hidden] { display: none; }
+    .student-regrade-status strong { white-space: nowrap; }
+    .student-regrade-status .question-regrade-progress { flex: 1; margin-top: 0; }
+    .student-regrade-status span[data-student-regrade-count] { color: #6e7990; white-space: nowrap; }
 
     .student-page-stack {
       min-width: 0;
@@ -1420,8 +1448,9 @@
       font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
       pointer-events: none;
       opacity: 0;
+      visibility: hidden;
       transform: translateX(-6px);
-      transition: opacity .14s ease, transform .14s ease;
+      transition: opacity .14s ease, visibility .14s ease, transform .14s ease;
     }
 
     .student-answer-peek::after {
@@ -1432,6 +1461,15 @@
       border-width: 7px 0 7px 7px;
       border-style: solid;
       border-color: transparent transparent transparent #fff;
+    }
+
+    .student-answer-peek::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -24px;
+      width: 24px;
+      height: 100%;
     }
 
     .student-answer-peek__label {
@@ -1458,10 +1496,18 @@
       line-height: 1.65;
     }
 
+    .student-answer-peek__basis-label { display: block; margin-top: 9px; color: #6d7890; font-size: 9px; font-weight: 800; }
+    .student-answer-peek__edit { width: 100%; min-height: 30px; margin-top: 10px; border: 1px solid #cbd6ee; border-radius: 8px; color: #43598d; background: #f6f8ff; font-size: 10px; font-weight: 850; cursor: pointer; }
+    .student-answer-peek__edit:hover { border-color: #9dace0; background: #edf1ff; }
+    .student-answer-peek__edit:disabled { opacity: .55; cursor: wait; }
+
     .student-paper-question[data-student-paper-question]:hover .student-answer-peek,
     .student-paper-question[data-student-paper-question]:focus-visible .student-answer-peek,
+    .student-paper-question[data-student-paper-question]:focus-within .student-answer-peek,
     .student-paper-question.is-answer-pinned .student-answer-peek {
       opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
       transform: translateX(0);
     }
 
@@ -1691,6 +1737,7 @@
 
       .student-paper-question[data-student-paper-question]:hover .student-answer-peek,
       .student-paper-question[data-student-paper-question]:focus-visible .student-answer-peek,
+      .student-paper-question[data-student-paper-question]:focus-within .student-answer-peek,
       .student-paper-question.is-answer-pinned .student-answer-peek {
         transform: translateY(-100%);
       }
@@ -1929,6 +1976,7 @@
         </aside>
 
         <section class="student-review" aria-label="当前学生作业与批改工具">
+          <div class="student-regrade-status" id="studentRegradeStatus" role="status" aria-live="polite" hidden></div>
           <div class="student-page-stack" id="studentPageStack"></div>
           <footer class="student-review-footer">
             <button class="button primary" id="confirmStudent" type="button">确认本学生批改</button>
@@ -1954,6 +2002,29 @@
         <button class="button ghost modal-close-secondary" type="button">暂不修改</button>
         <button class="button primary" id="similarAnswerApplyAll" type="button" data-similar-answer-apply>一起修改</button>
       </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="studentRuleModal" aria-hidden="true">
+    <section class="modal student-rule-modal" role="dialog" aria-modal="true" aria-labelledby="studentRuleTitle">
+      <div class="modal-head">
+        <h2 id="studentRuleTitle">修改答案与批改标准</h2>
+        <button class="modal-close" type="button" aria-label="关闭答案与批改标准编辑">×</button>
+      </div>
+      <form class="student-rule-form" id="studentRuleEditor">
+        <div class="modal-body">
+          <div class="student-rule-context" id="studentRuleQuestionLabel">当前题目</div>
+          <label for="studentGradingAnswerInput">老师答案</label>
+          <input id="studentGradingAnswerInput" type="text" autocomplete="off" />
+          <label for="studentGradingRuleInput">老师的批改依据与得分要求</label>
+          <textarea id="studentGradingRuleInput" rows="6" placeholder="每行一条，例如：方法正确得 1 分"></textarea>
+          <p class="student-rule-hint">保存后，AI 只重新批改这道题的全班 30 人，并同步按题批改和按学生批改结果。</p>
+        </div>
+        <div class="student-rule-actions">
+          <button class="button ghost" type="button" data-student-rule-cancel>取消</button>
+          <button class="button primary" type="submit">保存并重新批改本题</button>
+        </div>
+      </form>
     </section>
   </div>
 
@@ -2491,8 +2562,13 @@
       const studentWorkspace = document.getElementById("studentWorkspace");
       const studentList = document.getElementById("studentList");
       const studentPageStack = document.getElementById("studentPageStack");
+      const studentRegradeStatus = document.getElementById("studentRegradeStatus");
       const confirmStudent = document.getElementById("confirmStudent");
       const confirmAllStudents = document.getElementById("confirmAllStudents");
+      const studentRuleEditor = document.getElementById("studentRuleEditor");
+      const studentRuleQuestionLabel = document.getElementById("studentRuleQuestionLabel");
+      const studentGradingAnswerInput = document.getElementById("studentGradingAnswerInput");
+      const studentGradingRuleInput = document.getElementById("studentGradingRuleInput");
       const metricCard = document.querySelector(".metric-card");
       const metricLabel = document.getElementById("metricLabel");
       const accuracyValue = document.getElementById("accuracyValue");
@@ -2523,6 +2599,7 @@
       const activeQuestion = () => questions.find(q => q.id === activeQuestionId);
       const regradingQuestions = new Set();
       let editingRuleQuestionId = null;
+      let editingStudentRuleQuestionId = null;
 
       function saveGradingProgress() {
         try {
@@ -2732,11 +2809,13 @@
         if (!usesPaperDirectGrading) return "";
         const capabilityLabel = question.capability?.label || "结果判断";
         const summary = question.gradingSummary || question.basis?.[0] || "按答案与关键过程综合判断";
-        const guide = question.acceptedMethods?.length
-          ? `<div class="student-evidence__guide"><strong>可识别解法</strong>${question.acceptedMethods.map(escapeSnapshotXml).join("、")}</div>`
-          : question.scoringPoints?.length
-            ? `<div class="student-evidence__guide"><strong>批改过程要点</strong>${question.scoringPoints.map(escapeSnapshotXml).join("；")}</div>`
-            : "";
+        const guide = question.teacherBasis?.length
+          ? `<div class="student-evidence__guide"><strong>老师批改依据</strong>${question.teacherBasis.map(escapeSnapshotXml).join("；")}</div>`
+          : question.acceptedMethods?.length
+            ? `<div class="student-evidence__guide"><strong>可识别解法</strong>${question.acceptedMethods.map(escapeSnapshotXml).join("、")}</div>`
+            : question.scoringPoints?.length
+              ? `<div class="student-evidence__guide"><strong>批改过程要点</strong>${question.scoringPoints.map(escapeSnapshotXml).join("；")}</div>`
+              : "";
         const method = student.method
           ? `<span class="solution-method-tag">${escapeSnapshotXml(student.method)}</span>`
           : "";
@@ -2821,6 +2900,22 @@
         questionRegradeStatus.hidden = true;
       }
 
+      function renderStudentRegradeStatus() {
+        const question = questions.find((item) => regradingQuestions.has(item.id));
+        if (!usesPaperDirectGrading || !question) {
+          studentRegradeStatus.hidden = true;
+          studentRegradeStatus.innerHTML = "";
+          return;
+        }
+        const progress = Number(question.regradeProgress) || 0;
+        studentRegradeStatus.hidden = false;
+        studentRegradeStatus.innerHTML = `
+          <strong>正在按老师的新答案与标准重新批改第 ${question.id} 题</strong>
+          <div class="question-regrade-progress" aria-hidden="true"><span style="width:${progress / CLASS_SIZE * 100}%"></span></div>
+          <span data-student-regrade-count>${progress}/${CLASS_SIZE}</span>
+        `;
+      }
+
       function renderRuleEditor(question) {
         const editable = usesPaperDirectGrading;
         editGradingRule.hidden = !editable;
@@ -2828,6 +2923,15 @@
         gradingRuleEditor.hidden = !editable || editingRuleQuestionId !== question.id;
         answerZone.classList.toggle("is-regrading", regradingQuestions.has(question.id));
         renderRegradeStatus(question);
+      }
+
+      function applyTeacherRule(question, nextAnswer, nextRules) {
+        question.answer = nextAnswer;
+        question.basis = [...nextRules];
+        question.teacherBasis = [...nextRules];
+        if (question.scoringPoints) question.scoringPoints = [...nextRules];
+        question.gradingSummary = "按老师新标准重新判断全班作答";
+        startQuestionRegrade(question);
       }
 
       function startQuestionRegrade(question) {
@@ -2838,9 +2942,11 @@
         question.regradeCompleted = false;
         const before = question.students.map((student) => student.result);
         renderAll();
+        if (gradingView === "student") renderStudentWorkspace();
         const timer = window.setInterval(() => {
           question.regradeProgress = Math.min(CLASS_SIZE, question.regradeProgress + 6);
           if (activeQuestionId === question.id) renderRegradeStatus(question);
+          if (gradingView === "student") renderStudentRegradeStatus();
           if (question.regradeProgress < CLASS_SIZE) return;
           window.clearInterval(timer);
           question.students.forEach((student) => {
@@ -3005,12 +3111,14 @@
       }
 
       function studentAnswerPeekMarkup(question) {
-        const scoringPoints = question.scoringPoints || question.acceptedMethods || [];
+        const scoringPoints = question.teacherBasis || question.scoringPoints || question.acceptedMethods || [];
         return `
           <aside class="student-answer-peek" id="studentAnswerPeek-${question.id}" role="note">
             <span class="student-answer-peek__label">答案</span>
             <strong>${question.answer}</strong>
+            <span class="student-answer-peek__basis-label">${question.teacherBasis ? "老师批改依据" : "批改依据"}</span>
             ${scoringPoints.length ? `<ul>${scoringPoints.map((point) => `<li>${point}</li>`).join("")}</ul>` : ""}
+            <button class="student-answer-peek__edit" type="button" data-student-rule-edit="${question.id}" ${regradingQuestions.has(question.id) ? "disabled" : ""}>修改答案与标准</button>
           </aside>
         `;
       }
@@ -3258,6 +3366,7 @@
       function renderStudentWorkspace() {
         renderStudentList();
         renderStudentPages();
+        renderStudentRegradeStatus();
         confirmStudent.textContent = studentCompletion.has(activeStudentName)
           ? isExam ? "✓ 已确认赋分，可继续检查" : "✓ 已确认，可继续检查"
           : isExam ? "确认本学生赋分" : "确认批改";
@@ -3408,7 +3517,26 @@
         studentPageStack.scrollTop = 0;
       });
 
+      function openStudentRuleEditor(questionId) {
+        const question = questions.find((item) => item.id === Number(questionId));
+        if (!usesPaperDirectGrading || !question || regradingQuestions.has(question.id)) return;
+        activeQuestionId = question.id;
+        editingStudentRuleQuestionId = question.id;
+        studentRuleQuestionLabel.textContent = `第 ${question.id} 题 · ${question.title}`;
+        studentGradingAnswerInput.value = question.answer;
+        studentGradingRuleInput.value = (question.teacherBasis || question.basis).join("\n");
+        setModal(modals.studentRule, true);
+        studentGradingAnswerInput.focus();
+      }
+
       studentPageStack.addEventListener("click", (event) => {
+        const ruleEdit = event.target.closest("[data-student-rule-edit]");
+        if (ruleEdit) {
+          event.preventDefault();
+          event.stopPropagation();
+          openStudentRuleEditor(ruleEdit.dataset.studentRuleEdit);
+          return;
+        }
         const similarPreview = event.target.closest("[data-similar-answer-preview]");
         if (similarPreview) {
           event.preventDefault();
@@ -3449,6 +3577,7 @@
       });
 
       studentPageStack.addEventListener("keydown", (event) => {
+        if (event.target.closest("[data-student-rule-edit]")) return;
         if (event.key !== "Enter" && event.key !== " ") return;
         const paperQuestion = event.target.closest("[data-student-paper-question]");
         if (!paperQuestion) return;
@@ -3781,10 +3910,27 @@
           showToast("请填写答案和至少一条批改标准");
           return;
         }
-        question.answer = nextAnswer;
-        question.basis = nextRules;
-        if (question.scoringPoints) question.scoringPoints = [...nextRules];
-        startQuestionRegrade(question);
+        applyTeacherRule(question, nextAnswer, nextRules);
+      });
+
+      studentRuleEditor.querySelector("[data-student-rule-cancel]").addEventListener("click", () => {
+        editingStudentRuleQuestionId = null;
+        setModal(modals.studentRule, false);
+      });
+
+      studentRuleEditor.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const question = questions.find((item) => item.id === editingStudentRuleQuestionId);
+        if (!usesPaperDirectGrading || !question || regradingQuestions.has(question.id)) return;
+        const nextAnswer = studentGradingAnswerInput.value.trim();
+        const nextRules = studentGradingRuleInput.value.split("\n").map((item) => item.trim()).filter(Boolean);
+        if (!nextAnswer || !nextRules.length) {
+          showToast("请填写老师答案和至少一条批改依据");
+          return;
+        }
+        editingStudentRuleQuestionId = null;
+        setModal(modals.studentRule, false);
+        applyTeacherRule(question, nextAnswer, nextRules);
       });
 
       function showToast(message) {
@@ -3845,12 +3991,14 @@
 
       const modals = {
         similarAnswer: document.getElementById("similarAnswerModal"),
+        studentRule: document.getElementById("studentRuleModal"),
         questionSnapshot: document.getElementById("questionSnapshotModal")
       };
 
       function setModal(modal, open) {
         modal.classList.toggle("open", open);
         modal.setAttribute("aria-hidden", String(!open));
+        if (!open && modal.id === "studentRuleModal") editingStudentRuleQuestionId = null;
         if (open) modal.querySelector(".modal-close").focus();
       }
 

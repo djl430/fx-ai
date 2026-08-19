@@ -537,7 +537,7 @@ test('student grading pairs every paper page with its tools in one scroll stack'
 test('student confirmation lives in the overall review footer', () => {
   assert.match(gradingPage, /class="student-review-footer"[\s\S]*id="confirmStudent"/);
   assert.doesNotMatch(gradingPage, /class="student-tool-footer"/);
-  assert.match(gradingPage, /\.student-review\s*\{[^}]*grid-template-rows:\s*minmax\(0,1fr\) auto/s);
+  assert.match(gradingPage, /\.student-review\s*\{[^}]*grid-template-rows:\s*auto minmax\(0,1fr\) auto/s);
 });
 
 test('student grading matches the reference interaction', () => {
@@ -647,6 +647,27 @@ test('teacher rule save immediately regrades only the active question', () => {
   assert.match(gradingPage, /正在按新标准重新批改本题/);
   assert.match(gradingPage, /本题全班重批完成/);
   assert.doesNotMatch(gradingPage, /撤销本次重批/);
+});
+
+test('student grading lets teachers edit the hovered question answer and grading basis', () => {
+  assert.match(gradingPage, /data-student-rule-edit="\$\{question\.id\}"/);
+  assert.match(gradingPage, /id="studentRuleModal"/);
+  assert.match(gradingPage, /id="studentGradingAnswerInput"/);
+  assert.match(gradingPage, /id="studentGradingRuleInput"/);
+  assert.match(gradingPage, /修改答案与标准/);
+  assert.match(gradingPage, /保存并重新批改本题/);
+});
+
+test('student rule save reuses the question regrade pipeline and syncs its progress', () => {
+  assert.match(gradingPage, /function applyTeacherRule\(question, nextAnswer, nextRules\)/);
+  assert.match(gradingPage, /question\.teacherBasis = \[\.\.\.nextRules\]/);
+  assert.match(gradingPage, /studentRuleEditor\.addEventListener\("submit"/);
+  assert.match(gradingPage, /applyTeacherRule\(question, nextAnswer, nextRules\)/);
+  assert.match(gradingPage, /id="studentRegradeStatus"/);
+  assert.match(gradingPage, /function renderStudentRegradeStatus\(\)/);
+  assert.match(gradingPage, /正在按老师的新答案与标准重新批改第 \$\{question\.id\} 题/);
+  assert.match(gradingPage, /if \(gradingView === "student"\) renderStudentRegradeStatus\(\)/);
+  assert.match(gradingPage, /question\.teacherBasis \|\| question\.scoringPoints \|\| question\.acceptedMethods/);
 });
 
 test('first homework places grading marks beside student responses', () => {
