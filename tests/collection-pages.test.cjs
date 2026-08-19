@@ -622,6 +622,12 @@ test('unreadable answer cards stay visually blank and explain the issue only in 
   assert.match(gradingPage, /student\.result === "ungraded"[\s\S]*字迹模糊，当前无法确认批改结果/);
 });
 
+test('unreadable choice answers reveal the AI reason while ordinary choice answers stay quiet', () => {
+  assert.match(gradingPage, /function shouldShowStudentEvidence\(question, student\)/);
+  assert.match(gradingPage, /supportsDisplayedGradingBasis\(question\)\s*\|\|\s*\(student\.result === "ungraded" && isUnreadableResponse\(student\.answer\)\)/);
+  assert.match(gradingPage, /if \(!usesPaperDirectGrading \|\| !shouldShowStudentEvidence\(question, student\)\) return ""/);
+});
+
 test('first homework defines authentic AI grading capability cases', () => {
   assert.match(gradingPage, /capability:\s*\{\s*key:\s*"equivalent-value",\s*label:\s*"等值答案"/);
   assert.match(gradingPage, /1\/2 与 0\.5 等值/);

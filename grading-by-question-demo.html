@@ -2842,8 +2842,13 @@
         return `${statements.join("，").replace(/[。；，]+$/, "")}。`;
       }
 
+      function shouldShowStudentEvidence(question, student) {
+        return supportsDisplayedGradingBasis(question)
+          || (student.result === "ungraded" && isUnreadableResponse(student.answer));
+      }
+
       function studentEvidenceMarkup(question, student) {
-        if (!usesPaperDirectGrading || !supportsDisplayedGradingBasis(question)) return "";
+        if (!usesPaperDirectGrading || !shouldShowStudentEvidence(question, student)) return "";
         return `
           <aside class="student-evidence" role="tooltip" aria-label="${escapeSnapshotXml(student.name)}的 AI 批改依据">
             <span class="student-evidence__icon" aria-hidden="true">✦</span>
