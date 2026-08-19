@@ -3205,13 +3205,14 @@
             : String(student.answer || "").replace(/\s+/g, "").toLowerCase();
           return candidate === normalizedAnswer;
         });
-        return [source, ...matches].slice(0, 4);
+        return [source, ...matches];
       }
 
       function questionSimilarAnswerSuggestionMarkup(question, student) {
         if (questionSimilarAnswerSource?.questionId !== question.id || questionSimilarAnswerSource?.studentId !== student.id) return "";
         const matchingStudents = questionSimilarAnswerStudents(question.id, student.id);
-        if (matchingStudents.length !== 4) return "";
+        if (matchingStudents.length < 2) return "";
+        const matchingCount = matchingStudents.length;
         const answer = /选择题/.test(question.type) ? studentChoiceSelection(student.answer) : visibleStudentAnswer(student);
         return `
           <aside class="similar-answer-suggestion question-similar-answer-suggestion" role="note" aria-label="相同作答批量修改建议">
@@ -3219,10 +3220,10 @@
               <span class="similar-answer-suggestion__spark" aria-hidden="true">✦</span>
               <span>AI 批改建议</span>
             </div>
-            <strong>检测到 4 人相同作答</strong>
-            <p>4 人作答均为 ${escapeSnapshotXml(answer)}，可同步当前批改结果。</p>
+            <strong>检测到 ${matchingStudents.length} 人相同作答</strong>
+            <p>${matchingCount} 人作答均为 ${escapeSnapshotXml(answer)}，可同步当前批改结果。</p>
             <div class="similar-answer-suggestion__actions">
-              <button class="similar-answer-suggestion__action" type="button" data-question-similar-answer-preview data-question-id="${question.id}" data-source-student-id="${student.id}">预览 4 人作答</button>
+              <button class="similar-answer-suggestion__action" type="button" data-question-similar-answer-preview data-question-id="${question.id}" data-source-student-id="${student.id}">预览 ${matchingStudents.length} 人作答</button>
               <button class="similar-answer-suggestion__action is-primary" type="button" data-question-similar-answer-apply data-question-id="${question.id}" data-source-student-id="${student.id}">一起修改</button>
             </div>
           </aside>
@@ -3507,7 +3508,7 @@
         const question = questions.find((item) => item.id === Number(questionId));
         const matchingStudents = questionSimilarAnswerStudents(questionId, sourceStudentId);
         const previewGrid = document.getElementById("similarAnswerPreviewGrid");
-        if (!question || matchingStudents.length !== 4) return false;
+        if (!question || matchingStudents.length < 2) return false;
         previewGrid.innerHTML = matchingStudents.map((student) => `
           <article class="similar-answer-crop">
             <div class="similar-answer-crop__student">
@@ -3546,7 +3547,7 @@
         const question = questions.find((item) => item.id === Number(questionId));
         const source = question?.students.find((student) => student.id === sourceStudentId);
         const matchingStudents = questionSimilarAnswerStudents(questionId, sourceStudentId);
-        if (!question || !source || matchingStudents.length !== 4) return;
+        if (!question || !source || matchingStudents.length < 2) return;
         matchingStudents.forEach((matchingStudent) => {
           matchingStudent.result = source.result;
           delete matchingStudent.partResults;
@@ -3557,7 +3558,7 @@
         clearQuestionSimilarAnswerSuggestion();
         const modal = document.getElementById("similarAnswerModal");
         if (modal.classList.contains("open")) setModal(modal, false);
-        showToast(`已同步修改 4 人，确认本题后更新分组`);
+        showToast(`已同步修改 ${matchingStudents.length} 人，确认本题后更新分组`);
       }
 
       function pinStudentPaperAnswer(questionId) {

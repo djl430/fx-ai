@@ -879,6 +879,17 @@ test('question grading suggests and applies similar answers only after one resul
   assert.match(gradingPage, /\.question-similar-answer-suggestion \{[\s\S]*opacity: 1;/);
 });
 
+test('question grading batches all twenty-four students who selected B on question one', () => {
+  assert.match(gradingPage, /resultDistribution: \{ correct: 24, wrong: 4, ungraded: 2 \}/);
+  const matchingSource = gradingPage.match(
+    /function questionSimilarAnswerStudents\(questionId, sourceStudentId\) \{([\s\S]*?)\n\s*\}\n\n\s*function questionSimilarAnswerSuggestionMarkup/
+  )?.[1] || '';
+  assert.doesNotMatch(matchingSource, /slice\(0, 4\)/);
+  assert.match(gradingPage, /检测到 \$\{matchingStudents\.length\} 人相同作答/);
+  assert.match(gradingPage, /预览 \$\{matchingStudents\.length\} 人作答/);
+  assert.match(gradingPage, /已同步修改 \$\{matchingStudents\.length\} 人，确认本题后更新分组/);
+});
+
 test('question cards move to their new groups only when the teacher confirms the question', () => {
   assert.match(gradingPage, /function finalizeQuestionGrouping\(question\)/);
   assert.match(gradingPage, /question\.accuracy = Math\.round\(question\.students\.filter\(\(student\) => student\.result === "correct"\)\.length \/ CLASS_SIZE \* 100\)/);
