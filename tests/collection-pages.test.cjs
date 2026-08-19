@@ -628,10 +628,10 @@ test('first homework expands explicit result profiles to thirty students', () =>
   assert.match(gradingPage, /CLASS_SIZE/);
 });
 
-test('question grading renders verifiable AI capability evidence', () => {
-  assert.match(gradingPage, /function capabilityProofMarkup\(question\)/);
-  assert.match(gradingPage, /class="capability-proof"/);
-  assert.match(gradingPage, /AI 已完成本题批改/);
+test('question grading keeps per-student evidence without a repeated summary card', () => {
+  assert.doesNotMatch(gradingPage, /function capabilityProofMarkup\(question\)/);
+  assert.doesNotMatch(gradingPage, /class="capability-proof"/);
+  assert.doesNotMatch(gradingPage, /AI 已完成本题批改/);
   assert.match(gradingPage, /function studentEvidenceMarkup\(question, student\)/);
   assert.match(gradingPage, /student-evidence__text/);
   assert.match(gradingPage, /step-evidence/);

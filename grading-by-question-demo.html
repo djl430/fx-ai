@@ -571,19 +571,6 @@
       scrollbar-width: thin;
     }
 
-    .capability-proof {
-      margin: 0 0 16px;
-      padding: 14px 16px;
-      border: 1px solid #dbe4f7;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #f7f9ff, #fff);
-      box-shadow: 0 9px 24px rgba(53,72,119,.06);
-    }
-    .capability-proof__eyebrow { display: flex; align-items: center; gap: 7px; color: #4d6394; font-size: 11px; font-weight: 850; }
-    .capability-proof__spark { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; background: #e9efff; }
-    .capability-proof__facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
-    .capability-proof__fact { padding: 5px 8px; border-radius: 7px; color: #45536f; background: #edf2fa; font-size: 10px; }
-
     .group-section {
       position: relative;
       margin-bottom: 18px;
@@ -2817,22 +2804,6 @@
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       }
 
-      function capabilityProofMarkup(question) {
-        if (!usesPaperDirectGrading || !question.capability) return "";
-        const reviewed = question.students.filter((student) => student.result !== "ungraded").length;
-        const pendingReview = question.students.filter((student) => student.result === "ungraded").length;
-        return `
-          <section class="capability-proof" aria-label="本题 AI 批改能力摘要">
-            <div class="capability-proof__eyebrow"><span class="capability-proof__spark" aria-hidden="true">✦</span><span>AI 已完成本题批改</span></div>
-            <div class="capability-proof__facts">
-              <span class="capability-proof__fact">${reviewed} 份已批改</span>
-              <span class="capability-proof__fact">${escapeSnapshotXml(question.gradingSummary)}</span>
-              ${pendingReview ? `<span class="capability-proof__fact">${pendingReview} 份待老师复核</span>` : ""}
-            </div>
-          </section>
-        `;
-      }
-
       function studentEvidenceMarkup(question, student) {
         if (!usesPaperDirectGrading || !supportsDisplayedGradingBasis(question)) return "";
         const capabilityLabel = question.capability?.label || "结果判断";
@@ -3725,7 +3696,7 @@
           renderSimilarityGroups(question);
           return;
         }
-        groupsScroll.innerHTML = capabilityProofMarkup(question) + order.map(result => {
+        groupsScroll.innerHTML = order.map(result => {
           const group = question.students.filter(student => student.result === result);
           return `
             <section class="group-section" data-result="${result}">
