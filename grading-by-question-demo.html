@@ -2117,9 +2117,10 @@
               wrong: [
                 { answer: "A", evidence: "选择了错误选项 A" },
                 { answer: "C", evidence: "选择了错误选项 C" },
-                { answer: "D", evidence: "选择了错误选项 D" }
+                { answer: "D", evidence: "选择了错误选项 D" },
+                { answer: "未作答", evidence: "未作答，按错误处理" }
               ],
-              ungraded: [{ answer: "未作答" }]
+              ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           },
           {
@@ -2138,8 +2139,8 @@
                 { method: "两根中点法", answer: "x₁=1，x₂=3，中点为2，代入得−1" }
               ],
               partial: [{ method: "公式法", answer: "x=−b/2a=2", evidence: "只求出对称轴，缺少最小值", regradeResult: "correct" }],
-              wrong: [{ answer: "x=−2，最小值1", evidence: "对称轴符号错误" }],
-              ungraded: [{ answer: "未作答" }]
+              wrong: [{ answer: "x=−2，最小值1", evidence: "对称轴符号错误" }, { answer: "未作答", evidence: "未作答，按错误处理" }],
+              ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           },
           {
@@ -2183,8 +2184,8 @@
                 answer: "y=2(x−4)²+5，顶点(4,5)",
                 evidence: "配方与结论均错误",
                 steps: [{ text: "2(x−4)²+5", result: "wrong" }, { text: "顶点(4,5)", result: "wrong" }]
-              }],
-              ungraded: [{ answer: "未作答" }]
+              }, { answer: "未作答", evidence: "未作答，按错误处理" }],
+              ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           },
           {
@@ -2202,8 +2203,8 @@
                 { method: "一般式", answer: "y=2x²−4x−1" }
               ],
               partial: [{ answer: "y=a(x−1)²−3", evidence: "形式正确，但没有求出 a", regradeResult: "correct" }],
-              wrong: [{ answer: "y=2(x+1)²−3", evidence: "顶点横坐标符号错误" }],
-              ungraded: [{ answer: "未作答" }]
+              wrong: [{ answer: "y=2(x+1)²−3", evidence: "顶点横坐标符号错误" }, { answer: "未作答", evidence: "未作答，按错误处理" }],
+              ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           },
           {
@@ -2222,8 +2223,8 @@
                 { answer: "当x=2时取最小值1，其他时候都更大。", matchedCriteria: ["结论正确", "语义说明最小值", "取等条件"] }
               ],
               partial: [{ answer: "同意，因为图像开口向上。", matchedCriteria: ["结论正确"], missingCriteria: ["最低点依据", "取等条件"], regradeResult: "correct" }],
-              wrong: [{ answer: "不同意，函数有最大值1。", matchedCriteria: [], missingCriteria: ["正确结论", "平方项非负", "取等条件"] }],
-              ungraded: [{ answer: "未作答" }]
+              wrong: [{ answer: "不同意，函数有最大值1。", matchedCriteria: [], missingCriteria: ["正确结论", "平方项非负", "取等条件"] }, { answer: "未作答", evidence: "未作答，按错误处理" }],
+              ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           },
           {
@@ -2263,8 +2264,8 @@
                 answer: "S=x(20−x)，x=10时最大面积100平方米。",
                 evidence: "围栏长度关系错误",
                 steps: [{ text: "S=x(20−x)", result: "wrong" }, { text: "x=10，最大100", result: "wrong" }]
-              }],
-              ungraded: [{ answer: "未作答" }]
+              }, { answer: "未作答", evidence: "未作答，按错误处理" }],
+              ungraded: [{ answer: "字迹模糊，无法辨认" }]
             }
           }
         ];
@@ -2342,7 +2343,7 @@
               { id: "q1-correct", result: "correct", title: "答案完全正确", basis: "结果与标准答案一致，或写成 0.90 等等值形式。", students: [{ name: "李思雨", answer: "0.9" }, { name: "王晓宇", answer: "3.6 ÷ 4 = 0.9" }, { name: "张可欣", answer: "0.90" }, { name: "赵亦辰", answer: "0.9" }] },
               { id: "q1-partial", result: "partial", title: "过程接近但小数点偏差", basis: "乘法拆解方向正确，但小数位数处理不稳定。", reason: "小数点位置判断错误", students: [{ name: "周明远", answer: "36×25=900，所以是 9" }, { name: "陈子涵", answer: "0.09" }] },
               { id: "q1-wrong", result: "wrong", title: "答案数量级错误", basis: "结果与 0.9 差异较大，无法由同一过程推出。", reason: "把 0.25 当作 25 直接相乘", students: [{ name: "许安然", answer: "90" }, { name: "林嘉言", answer: "9" }] },
-              { id: "q1-ungraded", result: "ungraded", title: "未批改", basis: "作答遮挡或字迹不完整，需要老师确认。", students: [{ name: "苏雨桐", answer: "0.?" }] }
+              { id: "q1-ungraded", result: "ungraded", title: "未批改", basis: "作答遮挡，内容无法稳定识别。", students: [{ name: "苏雨桐", answer: "字迹模糊（识别为 0.?）" }] }
             ]
           },
           {
@@ -2358,7 +2359,7 @@
               { id: "q2-correct", result: "correct", title: "规则表述完整", basis: "能说明两个因数小数位数相加。", students: [{ name: "王晓宇", answer: "一共有两位小数" }, { name: "李思雨", answer: "两位" }, { name: "赵亦辰", answer: "小数点向左数两位" }] },
               { id: "q2-partial", result: "partial", title: "知道要数位但表达不完整", basis: "提到小数位数，但没有说明两因数相加。", reason: "规则表达不完整", students: [{ name: "马思源", answer: "看小数点" }, { name: "郑雨欣", answer: "数小数位" }] },
               { id: "q2-wrong", result: "wrong", title: "位数判断错误", basis: "把一位小数或三位小数作为最终答案。", reason: "未合并两个因数的小数位", students: [{ name: "何宇辰", answer: "一位" }] },
-              { id: "q2-ungraded", result: "ungraded", title: "未批改", basis: "答案被涂改，无法稳定识别。", students: [{ name: "宋雨桐", answer: "两？" }] }
+              { id: "q2-ungraded", result: "ungraded", title: "未批改", basis: "答案被涂改，无法稳定识别。", students: [{ name: "宋雨桐", answer: "严重涂改，无法辨认" }] }
             ]
           },
           {
@@ -2374,7 +2375,7 @@
               { id: "q3-correct", result: "correct", title: "估算方法正确", basis: "将两个因数合理取整，乘积数量级正确。", students: [{ name: "王晓宇", answer: "4×3≈12" }, { name: "李思雨", answer: "约 12" }, { name: "陈子涵", answer: "3.98≈4，2.9≈3，所以约12" }] },
               { id: "q3-partial", result: "partial", title: "计算正确但未体现估算", basis: "结果接近，但过程是精确计算或缺少近似说明。", reason: "估算要求回应不完整", students: [{ name: "张可欣", answer: "3.98×2.9=11.542" }, { name: "周明远", answer: "11.5" }, { name: "许安然", answer: "约 11.5" }] },
               { id: "q3-wrong", result: "wrong", title: "数量级错误", basis: "取整或乘法结果明显偏离合理范围。", reason: "估算数量级错误", students: [{ name: "林嘉言", answer: "约 120" }, { name: "苏雨桐", answer: "约 1.2" }] },
-              { id: "q3-ungraded", result: "ungraded", title: "未批改", basis: "只写了算式，没有给出结果。", students: [{ name: "赵亦辰", answer: "4×3" }] }
+              { id: "q3-incomplete", result: "wrong", title: "答案不完整", basis: "只写了算式，没有给出结果，按错误处理。", students: [{ name: "赵亦辰", answer: "4×3" }] }
             ]
           },
           {
@@ -2390,7 +2391,7 @@
               { id: "q4-correct", result: "correct", title: "验算方法完整", basis: "说明用除法反推或交换因数验算，并写出对应结果。", students: [{ name: "王晓宇", answer: "用积÷一个因数，看是否等于另一个因数" }, { name: "李思雨", answer: "交换两个因数再乘一次" }] },
               { id: "q4-partial", result: "partial", title: "知道要验算但步骤缺失", basis: "提到验算，但没有说明如何判断。", reason: "验算步骤不完整", students: [{ name: "陈子涵", answer: "算完后再验算" }, { name: "张可欣", answer: "检查一遍" }] },
               { id: "q4-wrong", result: "wrong", title: "验算方式不成立", basis: "使用与乘法结果无关的方法。", reason: "验算关系错误", students: [{ name: "周明远", answer: "把两个小数相加" }] },
-              { id: "q4-ungraded", result: "ungraded", title: "未批改", basis: "空白或字迹无法识别。", students: [{ name: "许安然", answer: "未作答" }] }
+              { id: "q4-ungraded", result: "ungraded", title: "未批改", basis: "字迹无法识别，需要老师确认。", students: [{ name: "许安然", answer: "字迹模糊，无法辨认" }] }
             ]
           },
           {
@@ -2406,7 +2407,7 @@
               { id: "q5-correct", result: "correct", title: "规律表述准确", basis: "同时写出方向、位数与倍数。", students: [{ name: "王晓宇", answer: "扩大到原来的100倍" }, { name: "李思雨", answer: "×100" }, { name: "陈子涵", answer: "小数点右移两位，扩大100倍" }] },
               { id: "q5-partial", result: "partial", title: "方向正确但倍数缺失", basis: "知道变大，但没有准确说明 100 倍。", reason: "倍数表达不完整", students: [{ name: "张可欣", answer: "变大" }, { name: "周明远", answer: "扩大" }] },
               { id: "q5-wrong", result: "wrong", title: "方向或倍数错误", basis: "写成缩小或 10 倍。", reason: "位数与倍数对应错误", students: [{ name: "许安然", answer: "缩小100倍" }, { name: "林嘉言", answer: "扩大10倍" }] },
-              { id: "q5-ungraded", result: "ungraded", title: "未批改", basis: "答案修改痕迹较重。", students: [{ name: "苏雨桐", answer: "100?" }] }
+              { id: "q5-ungraded", result: "ungraded", title: "未批改", basis: "答案修改痕迹较重，无法稳定识别。", students: [{ name: "苏雨桐", answer: "严重涂改，无法辨认" }] }
             ]
           },
           {
@@ -2424,7 +2425,7 @@
               { id: "q6-partial-b", result: "partial", title: "关键步骤正确但结果抄写错", basis: "步骤方向正确，最后一行抄写出现偏差。", reason: "抄写或小数点位置错误", students: [{ name: "沈乐言", answer: "2.5×5=125" }] },
               { id: "q6-wrong-a", result: "wrong", title: "运算顺序错误", basis: "未先处理括号，导致后续结果错误。", reason: "运算顺序混淆", students: [{ name: "许安然", answer: "2.5+5=7.5" }, { name: "林嘉言", answer: "先乘后加，得10" }] },
               { id: "q6-wrong-b", result: "wrong", title: "小数点处理错误", basis: "乘法过程能看出，但积的小数位数错误。", reason: "小数点定位错误", students: [{ name: "苏雨桐", answer: "1.25" }, { name: "何宇辰", answer: "125" }] },
-              { id: "q6-ungraded", result: "ungraded", title: "未批改", basis: "作答被涂改或缺少关键步骤，需要老师判断。", students: [{ name: "宋雨桐", answer: "12 ?" }, { name: "顾晨然", answer: "字迹遮挡" }] }
+              { id: "q6-ungraded", result: "ungraded", title: "未批改", basis: "作答被涂改或遮挡，内容无法稳定识别。", students: [{ name: "宋雨桐", answer: "严重涂改，无法辨认" }, { name: "顾晨然", answer: "字迹遮挡" }] }
             ]
           },
           {
@@ -2440,7 +2441,7 @@
               { id: "q7-correct", result: "correct", title: "列式与单位完整", basis: "数量关系、计算结果和单位均正确。", students: [{ name: "王晓宇", answer: "4.6×4=18.4元" }, { name: "李思雨", answer: "18.4 元" }] },
               { id: "q7-partial", result: "partial", title: "数值正确但单位缺失", basis: "计算结果正确，但没有写单位。", reason: "缺少单位", students: [{ name: "陈子涵", answer: "18.4" }, { name: "张可欣", answer: "4.6×4=18.4" }] },
               { id: "q7-wrong", result: "wrong", title: "数量关系错误", basis: "列式未使用单价×数量。", reason: "数量关系识别错误", students: [{ name: "周明远", answer: "4.6+4=8.6" }] },
-              { id: "q7-ungraded", result: "ungraded", title: "未批改", basis: "缺少最终答案。", students: [{ name: "许安然", answer: "4.6×4=" }] }
+              { id: "q7-incomplete", result: "wrong", title: "答案不完整", basis: "缺少最终答案，按错误处理。", students: [{ name: "许安然", answer: "4.6×4=" }] }
             ]
           },
           {
@@ -2456,7 +2457,7 @@
               { id: "q8-correct", result: "correct", title: "比较过程完整", basis: "总价计算正确，比较结论明确。", students: [{ name: "王晓宇", answer: "总价 36 元，小于 40 元，够" }, { name: "李思雨", answer: "够，40>36" }, { name: "陈子涵", answer: "36元，够" }] },
               { id: "q8-partial", result: "partial", title: "结论正确但过程缺失", basis: "结论正确，但没有展示比较依据。", reason: "缺少比较过程", students: [{ name: "张可欣", answer: "够" }] },
               { id: "q8-wrong", result: "wrong", title: "比较方向错误", basis: "计算结果或比较符号导致结论相反。", reason: "比较大小错误", students: [{ name: "周明远", answer: "不够" }] },
-              { id: "q8-ungraded", result: "ungraded", title: "未批改", basis: "作答不完整。", students: [{ name: "许安然", answer: "36" }] }
+              { id: "q8-incomplete", result: "wrong", title: "答案不完整", basis: "只写计算结果，缺少判断结论，按错误处理。", students: [{ name: "许安然", answer: "36" }] }
             ]
           }
         ];
@@ -2464,6 +2465,20 @@
 
       const resultPattern = ["correct", "correct", "correct", "partial", "correct", "partial", "wrong", "wrong", "ungraded", "correct", "partial", "correct", "correct", "wrong", "ungraded", "correct"];
       const shiftedPatterns = [0, 1, 0, 2, 0, 3, 1, 2];
+
+      function isUnansweredResponse(answer) {
+        return /未作答|未填写|未填|未写|没有写|未完成|未判断|空白/.test(String(answer || ""));
+      }
+
+      function isUnreadableResponse(answer) {
+        return /字迹模糊|无法辨认|识别不清|看不清|字迹遮挡|严重涂改/.test(String(answer || ""));
+      }
+
+      function normalizeRecognitionResult(answer, result) {
+        if (isUnansweredResponse(answer)) return "wrong";
+        if (isUnreadableResponse(answer)) return "ungraded";
+        return result === "ungraded" ? "wrong" : result;
+      }
 
       function expandCapabilityStudents(question) {
         const resultSequence = Object.entries(question.resultDistribution)
@@ -2541,6 +2556,13 @@
 
       questions.forEach((question, qIndex) => {
         question.students = expandQuestionStudents(question, qIndex);
+        question.students.forEach((student) => {
+          student.result = normalizeRecognitionResult(student.answer, student.result);
+        });
+        question.groups?.forEach((group) => {
+          const groupResults = new Set(question.students.filter((student) => student.groupId === group.id).map((student) => student.result));
+          if (groupResults.size === 1) group.result = [...groupResults][0];
+        });
       });
 
       const labels = {
@@ -3062,7 +3084,9 @@
         if (/向上|开口朝上|^上$|^B/i.test(value)) return "B";
         if (/向左|^C/i.test(value)) return "C";
         if (/向右|^D/i.test(value)) return "D";
-        return /未|没有|不确定|看不清/.test(value) ? "未填" : value;
+        if (isUnansweredResponse(value)) return "未填";
+        if (isUnreadableResponse(value)) return "识别不清";
+        return value;
       }
 
       function studentPaperResponseMarkup(answer, resultMark, block = false) {
@@ -3078,7 +3102,7 @@
 
       function studentPaperChoiceResponseMarkup(answer, resultMark) {
         const value = studentChoiceSelection(answer);
-        const empty = value === "未填";
+        const empty = value === "未填" || value === "识别不清";
         return `
           <span class="student-paper-response is-choice">
             （<span class="student-paper-answer ${empty ? "is-empty" : ""}">${value}</span>）

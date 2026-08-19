@@ -583,16 +583,33 @@ test('first homework paper renders type-appropriate question content', () => {
   assert.match(gradingPage, /已知抛物线顶点为（1，−3），且经过点（0，−1），求函数解析式/);
 });
 
-test('first homework choice question uses realistic option-only student responses', () => {
+test('first homework choice question uses option responses plus recognition exceptions', () => {
   const questionOneSource = gradingPage.match(
     /if \(usesPaperDirectGrading\) \{\s*questions = \[\s*\{([\s\S]*?)\n\s*\},\s*\{\s*\n\s*id: 2,/
   )?.[1] || '';
   const profileAnswers = [...questionOneSource.matchAll(/\{\s*answer:\s*"([^"]+)"/g)]
     .map((match) => match[1]);
 
-  assert.deepEqual(profileAnswers, ['B', 'A', 'C', 'D', '未作答']);
+  assert.deepEqual(profileAnswers, ['B', 'A', 'C', 'D', '未作答', '字迹模糊，无法辨认']);
   assert.match(questionOneSource, /resultDistribution:\s*\{\s*correct:\s*24,\s*wrong:\s*4,\s*ungraded:\s*2\s*\}/);
   assert.doesNotMatch(questionOneSource, /partial:/);
+});
+
+test('unanswered work is wrong and only unreadable work stays ungraded', () => {
+  assert.match(gradingPage, /function isUnansweredResponse\(answer\)/);
+  assert.match(gradingPage, /未作答\|未填写\|未填\|未写\|没有写\|未完成\|未判断\|空白/);
+  assert.match(gradingPage, /function isUnreadableResponse\(answer\)/);
+  assert.match(gradingPage, /字迹模糊\|无法辨认\|识别不清\|看不清\|字迹遮挡\|严重涂改/);
+  assert.match(gradingPage, /if \(isUnansweredResponse\(answer\)\) return "wrong"/);
+  assert.match(gradingPage, /if \(isUnreadableResponse\(answer\)\) return "ungraded"/);
+  assert.match(gradingPage, /student\.result = normalizeRecognitionResult\(student\.answer, student\.result\)/);
+
+  const firstHomeworkSource = gradingPage.match(
+    /if \(usesPaperDirectGrading\) \{\s*questions = \[([\s\S]*?)\n\s*\];\s*\n\s*\}/
+  )?.[1] || '';
+  assert.equal((firstHomeworkSource.match(/ungraded:\s*\[\{\s*answer:\s*"字迹模糊，无法辨认"\s*\}\]/g) || []).length, 6);
+  assert.equal((firstHomeworkSource.match(/wrong:[\s\S]*?\{\s*answer:\s*"未作答"/g) || []).length, 6);
+  assert.doesNotMatch(firstHomeworkSource, /ungraded:\s*\[\{\s*answer:\s*"未作答"/);
 });
 
 test('first homework defines authentic AI grading capability cases', () => {
