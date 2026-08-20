@@ -54,6 +54,18 @@ test("unified demo keeps pending counts and archived review actions non-navigabl
   }
   assert.match(unifiedDemo, /C=D=>\{if\(f\.reviewDisabled\)return;/);
   assert.match(unifiedDemo, /onAction:\(\)=>\{f\.reviewDisabled\|\|d\(\)\}/);
+  assert.match(
+    unifiedDemo,
+    /function mn\(\{className:f,onAction:m,showPractice:p=!0,only:d,disabled:h=!1\}\)/,
+  );
+  assert.match(
+    unifiedDemo,
+    /disabled:h&&y==="批改复核","aria-disabled":h&&y==="批改复核"\|\|y!=="批改复核"/,
+  );
+  assert.equal(
+    unifiedDemo.match(/disabled:f\.reviewDisabled/g)?.length,
+    4,
+  );
 });
 
 test("unified demo defaults new homework and exam publishing to off", () => {

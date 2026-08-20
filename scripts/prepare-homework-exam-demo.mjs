@@ -40,16 +40,33 @@ const nonNavigableReviewReplacements = [
   ],
   ['C=D=>{if(f.id==="h1"', 'C=D=>{if(f.reviewDisabled)return;if(f.id==="h1"'],
   [
-    'c.jsx(mn,{className:Z.name,onAction:()=>d(),only:"批改复核"})',
-    'c.jsx(mn,{className:Z.name,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+    [
+      'c.jsx(mn,{className:Z.name,onAction:()=>d(),only:"批改复核"})',
+      'c.jsx(mn,{className:Z.name,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+    ],
+    'c.jsx(mn,{className:Z.name,disabled:f.reviewDisabled,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
   ],
   [
-    'onAction:(A,C)=>A==="批改复核"?f.type==="考试"?V(Ut):Z(Ot):m(A,C)',
-    'onAction:(A,C)=>A==="批改复核"?f.reviewDisabled?void 0:f.type==="考试"?V(Ut):Z(Ot):m(A,C)',
+    [
+      'c.jsx(mn,{className:j.name,onAction:(A,C)=>A==="批改复核"?f.type==="考试"?V(Ut):Z(Ot):m(A,C)})',
+      'c.jsx(mn,{className:j.name,onAction:(A,C)=>A==="批改复核"?f.reviewDisabled?void 0:f.type==="考试"?V(Ut):Z(Ot):m(A,C)})',
+    ],
+    'c.jsx(mn,{className:j.name,disabled:f.reviewDisabled,onAction:(A,C)=>A==="批改复核"?f.reviewDisabled?void 0:f.type==="考试"?V(Ut):Z(Ot):m(A,C)})',
   ],
   [
-    'c.jsx(mn,{className:y.name,onAction:()=>d(),only:"批改复核"})',
-    'c.jsx(mn,{className:y.name,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+    [
+      'c.jsx(mn,{className:y.name,onAction:()=>d(),only:"批改复核"})',
+      'c.jsx(mn,{className:y.name,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+    ],
+    'c.jsx(mn,{className:y.name,disabled:f.reviewDisabled,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+  ],
+  [
+    'function mn({className:f,onAction:m,showPractice:p=!0,only:d}){return c.jsx("div",{className:"class-actions",children:Pd.filter(({label:y})=>(!d||y===d)&&(p||y!=="精准练")).map(({label:y})=>c.jsx("button",{"aria-disabled":y!=="批改复核",onClick:Z=>{Z.stopPropagation(),y==="批改复核"&&m(y,f)},children:y},y))})}',
+    'function mn({className:f,onAction:m,showPractice:p=!0,only:d,disabled:h=!1}){return c.jsx("div",{className:"class-actions",children:Pd.filter(({label:y})=>(!d||y===d)&&(p||y!=="精准练")).map(({label:y})=>c.jsx("button",{disabled:h&&y==="批改复核","aria-disabled":h&&y==="批改复核"||y!=="批改复核",onClick:Z=>{Z.stopPropagation(),y==="批改复核"&&m(y,f)},children:y},y))})}',
+  ],
+  [
+    'c.jsx(mn,{className:D.name,onAction:(R,w)=>R==="批改复核"?C(w):m(R,w)})',
+    'c.jsx(mn,{className:D.name,disabled:f.reviewDisabled,onAction:(R,w)=>R==="批改复核"?C(w):m(R,w)})',
   ],
 ];
 
@@ -63,10 +80,12 @@ const defaultPublicReplacements = [
 function applyExactReplacements(source, items, label) {
   for (const [before, after] of items) {
     if (source.includes(after)) continue;
-    if (!source.includes(before)) {
-      throw new Error(`Expected ${label} marker not found: ${before.slice(0, 80)}`);
+    const candidates = Array.isArray(before) ? before : [before];
+    const matchedBefore = candidates.find((candidate) => source.includes(candidate));
+    if (!matchedBefore) {
+      throw new Error(`Expected ${label} marker not found: ${candidates[0].slice(0, 80)}`);
     }
-    source = source.replace(before, after);
+    source = source.replace(matchedBefore, after);
   }
   return source;
 }
