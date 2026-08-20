@@ -77,6 +77,17 @@ const defaultPublicReplacements = [
   ],
 ];
 
+const landingPageTitleReplacements = [
+  [
+    'title:"课堂本 第四章 三角形 第12课 三角形单元复习"',
+    'title:"总复习 1·数与代数｜正比例与反比例"',
+  ],
+  [
+    'title:"2025–2026 八年级下 数学期末模拟测试（四）"',
+    'title:"一次函数随堂检测"',
+  ],
+];
+
 function applyExactReplacements(source, items, label) {
   for (const [before, after] of items) {
     if (source.includes(after)) continue;
@@ -104,6 +115,7 @@ for (const [before, after, replaceEveryOccurrence = false] of replacements) {
 
 demo = applyExactReplacements(demo, nonNavigableReviewReplacements, "interaction");
 demo = applyExactReplacements(demo, defaultPublicReplacements, "default public");
+demo = applyExactReplacements(demo, landingPageTitleReplacements, "landing page title");
 
 writeFileSync(demoUrl, demo);
 
@@ -128,6 +140,11 @@ unifiedDemo = applyExactReplacements(
   unifiedDemo,
   defaultPublicReplacements,
   "unified default public",
+);
+unifiedDemo = applyExactReplacements(
+  unifiedDemo,
+  landingPageTitleReplacements,
+  "unified landing page title",
 );
 
 writeFileSync(unifiedDemoUrl, unifiedDemo);

@@ -78,3 +78,18 @@ test("unified demo defaults new homework and exam publishing to off", () => {
     /\[tl,B\]=i\.useState\(!0\),\[cl,al\]=i\.useState\(!1\)/,
   );
 });
+
+test("unified demo card titles match their grading landing pages", () => {
+  assert.match(
+    unifiedDemo,
+    /id:"h1"[^}]*title:"总复习 1·数与代数｜正比例与反比例"/,
+  );
+  assert.match(
+    unifiedDemo,
+    /id:"e1"[^}]*title:"一次函数随堂检测"/,
+  );
+  assert.doesNotMatch(
+    unifiedDemo,
+    /课堂本 第四章 三角形 第12课 三角形单元复习|2025–2026 八年级下 数学期末模拟测试（四）/,
+  );
+});
