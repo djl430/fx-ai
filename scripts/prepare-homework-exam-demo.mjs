@@ -53,6 +53,13 @@ const nonNavigableReviewReplacements = [
   ],
 ];
 
+const defaultPublicReplacements = [
+  [
+    '[tl,B]=i.useState(!0),[cl,al]=i.useState(!1)',
+    '[tl,B]=i.useState(!1),[cl,al]=i.useState(!1)',
+  ],
+];
+
 function applyExactReplacements(source, items, label) {
   for (const [before, after] of items) {
     if (source.includes(after)) continue;
@@ -77,6 +84,7 @@ for (const [before, after, replaceEveryOccurrence = false] of replacements) {
 }
 
 demo = applyExactReplacements(demo, nonNavigableReviewReplacements, "interaction");
+demo = applyExactReplacements(demo, defaultPublicReplacements, "default public");
 
 writeFileSync(demoUrl, demo);
 
@@ -96,6 +104,11 @@ unifiedDemo = applyExactReplacements(
   unifiedDemo,
   nonNavigableReviewReplacements,
   "unified interaction",
+);
+unifiedDemo = applyExactReplacements(
+  unifiedDemo,
+  defaultPublicReplacements,
+  "unified default public",
 );
 
 writeFileSync(unifiedDemoUrl, unifiedDemo);

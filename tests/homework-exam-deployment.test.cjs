@@ -55,3 +55,14 @@ test("unified demo keeps pending counts and archived review actions non-navigabl
   assert.match(unifiedDemo, /C=D=>\{if\(f\.reviewDisabled\)return;/);
   assert.match(unifiedDemo, /onAction:\(\)=>\{f\.reviewDisabled\|\|d\(\)\}/);
 });
+
+test("unified demo defaults new homework and exam publishing to off", () => {
+  assert.match(
+    unifiedDemo,
+    /\[tl,B\]=i\.useState\(!1\),\[cl,al\]=i\.useState\(!1\)/,
+  );
+  assert.doesNotMatch(
+    unifiedDemo,
+    /\[tl,B\]=i\.useState\(!0\),\[cl,al\]=i\.useState\(!1\)/,
+  );
+});
