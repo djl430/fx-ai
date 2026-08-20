@@ -42,3 +42,17 @@ for (const [before, after, replaceEveryOccurrence = false] of replacements) {
 }
 
 writeFileSync(demoUrl, demo);
+
+const unifiedDemoUrl = new URL("../homework-exam-unified-demo.html", import.meta.url);
+let unifiedDemo = readFileSync(unifiedDemoUrl, "utf8");
+const unifiedBreadcrumbBefore = 'c.jsxs("nav",{className:"breadcrumb",children:[c.jsx(rn,{weight:"bold"}),c.jsx("span",{children:"首页"}),';
+const unifiedBreadcrumbAfter = 'c.jsxs("nav",{className:"breadcrumb",children:[c.jsxs("a",{className:"breadcrumb-home",href:e3,"aria-label":"返回首页",children:[c.jsx(rn,{weight:"bold"}),c.jsx("span",{children:"首页"})]}),';
+
+if (!unifiedDemo.includes(unifiedBreadcrumbAfter)) {
+  if (!unifiedDemo.includes(unifiedBreadcrumbBefore)) {
+    throw new Error("Expected unified demo homepage breadcrumb marker not found");
+  }
+  unifiedDemo = unifiedDemo.replace(unifiedBreadcrumbBefore, unifiedBreadcrumbAfter);
+}
+
+writeFileSync(unifiedDemoUrl, unifiedDemo);
