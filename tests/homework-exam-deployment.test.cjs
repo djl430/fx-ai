@@ -93,3 +93,14 @@ test("unified demo card titles match their grading landing pages", () => {
     /课堂本 第四章 三角形 第12课 三角形单元复习|2025–2026 八年级下 数学期末模拟测试（四）/,
   );
 });
+
+test("all insights buttons open the published class diagnosis page", () => {
+  const diagnosisUrl =
+    "https://zingistop.github.io/four-oclock-class-diagnosis/?v=fbdec8b";
+
+  for (const page of [demo, unifiedDemo]) {
+    assert.match(page, new RegExp(diagnosisUrl.replace(/[?]/g, "\\?")));
+    assert.match(page, /y==="学情"\)\{window\.location\.href=/);
+    assert.match(page, /y!=="批改复核"&&y!=="学情"/);
+  }
+});
