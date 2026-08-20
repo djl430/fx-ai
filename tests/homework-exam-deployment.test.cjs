@@ -3,10 +3,10 @@ const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 
-const demoPath = path.join(__dirname, "..", "homework-exam-unified-demo.html");
+const demoPath = path.join(__dirname, "..", "index.html");
 const demo = readFileSync(demoPath, "utf8");
 
-test("standalone AI grading demo uses deployable links", () => {
+test("deployed AI grading homepage uses deployable links", () => {
   assert.doesNotMatch(demo, /file:\/\/\/Users\//);
   assert.match(
     demo,

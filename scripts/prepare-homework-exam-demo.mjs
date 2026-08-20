@@ -1,20 +1,23 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
-const demoUrl = new URL("../homework-exam-unified-demo.html", import.meta.url);
+const demoUrl = new URL("../index.html", import.meta.url);
 let demo = readFileSync(demoUrl, "utf8");
 
 const replacements = [
   [
     "file:///Users/dengjingli_1/Documents/GitHub/fx-ai/grading-by-question-demo.html?mode=homework&taskId=cluster-homework",
     "grading-by-question-demo.html?mode=homework&taskId=cluster-homework",
+    true,
   ],
   [
     "file:///Users/dengjingli_1/Documents/GitHub/fx-ai/grading-by-question-demo.html?mode=exam&taskId=quiz",
     "grading-by-question-demo.html?mode=exam&taskId=quiz",
+    true,
   ],
   [
     "file:///Users/dengjingli_1/Documents/GitHub/fx-ai/collection-history.html?from=unified",
     "collection-history.html?from=unified",
+    true,
   ],
   [
     ".breadcrumb strong{color:var(--ink)}",
@@ -26,7 +29,11 @@ const replacements = [
   ],
 ];
 
-for (const [before, after] of replacements) {
+for (const [before, after, replaceEveryOccurrence = false] of replacements) {
+  if (replaceEveryOccurrence && demo.includes(before)) {
+    demo = demo.replaceAll(before, after);
+    continue;
+  }
   if (demo.includes(after)) continue;
   if (!demo.includes(before)) {
     throw new Error(`Expected export marker not found: ${before.slice(0, 80)}`);
