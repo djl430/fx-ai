@@ -215,7 +215,7 @@
         historyState = FxCollectionFlow.confirmHistoryRecord(historyState, batch, { title:draft.taskData?.title || task });
         localStorage.setItem('fxCollectionHistoryState', JSON.stringify(historyState));
         localStorage.removeItem(draftKey);
-        location.href = 'index.html?collectionCreated=1';
+        location.href = 'homework-exam-unified-demo.html?collectionCreated=1';
       });
 
       render();

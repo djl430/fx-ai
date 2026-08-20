@@ -1355,7 +1355,7 @@
         historyState = FxCollectionFlow.confirmHistoryRecord(historyState, batch, { title: taskData.title });
         localStorage.setItem('fxCollectionHistoryState', JSON.stringify(historyState));
 
-        const goToList = () => { location.href = 'index.html?collectionCreated=1'; };
+        const goToList = () => { location.href = 'homework-exam-unified-demo.html?collectionCreated=1'; };
         if (hasEmptyGroups) window.setTimeout(goToList, 500);
         else goToList();
       };
