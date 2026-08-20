@@ -36,3 +36,22 @@ test("unified demo homepage breadcrumb remains clickable after returning from re
     /e3="https:\/\/djl430\.github\.io\/fx-homepage-1\/"/,
   );
 });
+
+test("unified demo keeps pending counts and archived review actions non-navigable", () => {
+  assert.match(
+    unifiedDemo,
+    /c\.jsx\("span",\{className:"pending-count",children:D\.pending\}\)/,
+  );
+  assert.doesNotMatch(
+    unifiedDemo,
+    /c\.jsx\("button",\{type:"button",className:"pending-count"/,
+  );
+  for (const taskId of ["h2", "e2", "r1", "p1"]) {
+    assert.match(
+      unifiedDemo,
+      new RegExp(`id:"${taskId}"[^}]*reviewDisabled:!0`),
+    );
+  }
+  assert.match(unifiedDemo, /C=D=>\{if\(f\.reviewDisabled\)return;/);
+  assert.match(unifiedDemo, /onAction:\(\)=>\{f\.reviewDisabled\|\|d\(\)\}/);
+});

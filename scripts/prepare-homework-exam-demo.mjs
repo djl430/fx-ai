@@ -29,6 +29,41 @@ const replacements = [
   ],
 ];
 
+const nonNavigableReviewReplacements = [
+  ['{id:"h2",type:', '{id:"h2",reviewDisabled:!0,type:'],
+  ['{id:"e2",type:', '{id:"e2",reviewDisabled:!0,type:'],
+  ['{id:"r1",type:', '{id:"r1",reviewDisabled:!0,type:'],
+  ['{id:"p1",type:', '{id:"p1",reviewDisabled:!0,type:'],
+  [
+    'c.jsx("button",{type:"button",className:"pending-count","aria-label":`${D.name}待确认 ${D.pending}`,onClick:R=>{R.stopPropagation(),y(f.id,D.name)},children:D.pending})',
+    'c.jsx("span",{className:"pending-count",children:D.pending})',
+  ],
+  ['C=D=>{if(f.id==="h1"', 'C=D=>{if(f.reviewDisabled)return;if(f.id==="h1"'],
+  [
+    'c.jsx(mn,{className:Z.name,onAction:()=>d(),only:"批改复核"})',
+    'c.jsx(mn,{className:Z.name,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+  ],
+  [
+    'onAction:(A,C)=>A==="批改复核"?f.type==="考试"?V(Ut):Z(Ot):m(A,C)',
+    'onAction:(A,C)=>A==="批改复核"?f.reviewDisabled?void 0:f.type==="考试"?V(Ut):Z(Ot):m(A,C)',
+  ],
+  [
+    'c.jsx(mn,{className:y.name,onAction:()=>d(),only:"批改复核"})',
+    'c.jsx(mn,{className:y.name,onAction:()=>{f.reviewDisabled||d()},only:"批改复核"})',
+  ],
+];
+
+function applyExactReplacements(source, items, label) {
+  for (const [before, after] of items) {
+    if (source.includes(after)) continue;
+    if (!source.includes(before)) {
+      throw new Error(`Expected ${label} marker not found: ${before.slice(0, 80)}`);
+    }
+    source = source.replace(before, after);
+  }
+  return source;
+}
+
 for (const [before, after, replaceEveryOccurrence = false] of replacements) {
   if (replaceEveryOccurrence && demo.includes(before)) {
     demo = demo.replaceAll(before, after);
@@ -40,6 +75,8 @@ for (const [before, after, replaceEveryOccurrence = false] of replacements) {
   }
   demo = demo.replace(before, after);
 }
+
+demo = applyExactReplacements(demo, nonNavigableReviewReplacements, "interaction");
 
 writeFileSync(demoUrl, demo);
 
@@ -54,5 +91,11 @@ if (!unifiedDemo.includes(unifiedBreadcrumbAfter)) {
   }
   unifiedDemo = unifiedDemo.replace(unifiedBreadcrumbBefore, unifiedBreadcrumbAfter);
 }
+
+unifiedDemo = applyExactReplacements(
+  unifiedDemo,
+  nonNavigableReviewReplacements,
+  "unified interaction",
+);
 
 writeFileSync(unifiedDemoUrl, unifiedDemo);
