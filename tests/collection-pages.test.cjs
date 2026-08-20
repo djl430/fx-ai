@@ -937,6 +937,12 @@ test('insights action announces that the teacher entered the insights page', () 
   assert.match(indexPage, /`已进入「\$\{task\.title\}」学情页`/);
 });
 
+test('task row blank space announces the pending insights demo', () => {
+  assert.match(indexPage, /<article class="task-row"[^>]*data-action="open-insights-placeholder"/);
+  assert.match(indexPage, /action\.dataset\.action === "open-insights-placeholder"/);
+  assert.match(indexPage, /state\.toast = "点击进入作业学情页，待接入学情页demo"/);
+});
+
 test('grading action uses the same visual style as insights and review', () => {
   assert.match(indexPage, /class="task-action"[^>]*data-action="open-task"/);
   assert.doesNotMatch(indexPage, /class="task-action primary"/);
