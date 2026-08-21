@@ -88,6 +88,13 @@ const landingPageTitleReplacements = [
   ],
 ];
 
+const classDiagnosisReplacements = [
+  [
+    'onClick:R=>{R.stopPropagation(),m("学情",D.name)}',
+    'onClick:R=>{R.stopPropagation(),(f.id==="h1"&&D.name==="七年级1班"||f.id==="e1"&&D.name==="八年级9班")?window.location.href="https://zingistop.github.io/four-oclock-class-diagnosis/?v=fbdec8b#diagnosis":m("学情",D.name)}',
+  ],
+];
+
 function applyExactReplacements(source, items, label) {
   for (const [before, after] of items) {
     if (source.includes(after)) continue;
@@ -116,6 +123,7 @@ for (const [before, after, replaceEveryOccurrence = false] of replacements) {
 demo = applyExactReplacements(demo, nonNavigableReviewReplacements, "interaction");
 demo = applyExactReplacements(demo, defaultPublicReplacements, "default public");
 demo = applyExactReplacements(demo, landingPageTitleReplacements, "landing page title");
+demo = applyExactReplacements(demo, classDiagnosisReplacements, "class diagnosis");
 
 writeFileSync(demoUrl, demo);
 
@@ -145,6 +153,11 @@ unifiedDemo = applyExactReplacements(
   unifiedDemo,
   landingPageTitleReplacements,
   "unified landing page title",
+);
+unifiedDemo = applyExactReplacements(
+  unifiedDemo,
+  classDiagnosisReplacements,
+  "unified class diagnosis",
 );
 
 writeFileSync(unifiedDemoUrl, unifiedDemo);
