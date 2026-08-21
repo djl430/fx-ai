@@ -62,7 +62,7 @@ const nonNavigableReviewReplacements = [
   ],
   [
     'function mn({className:f,onAction:m,showPractice:p=!0,only:d}){return c.jsx("div",{className:"class-actions",children:Pd.filter(({label:y})=>(!d||y===d)&&(p||y!=="精准练")).map(({label:y})=>c.jsx("button",{"aria-disabled":y!=="批改复核",onClick:Z=>{Z.stopPropagation(),y==="批改复核"&&m(y,f)},children:y},y))})}',
-    'function mn({className:f,onAction:m,showPractice:p=!0,only:d,disabled:h=!1}){return c.jsx("div",{className:"class-actions",children:Pd.filter(({label:y})=>(!d||y===d)&&(p||y!=="精准练")).map(({label:y})=>c.jsx("button",{disabled:h&&y==="批改复核","aria-disabled":h&&y==="批改复核"||y!=="批改复核",onClick:Z=>{Z.stopPropagation(),y==="批改复核"&&m(y,f)},children:y},y))})}',
+    'function mn({className:f,onAction:m,showPractice:p=!0,only:d,disabled:h=!1}){return c.jsx("div",{className:"class-actions",children:Pd.filter(({label:y})=>(!d||y===d)&&(p||y!=="精准练")).map(({label:y})=>c.jsx("button",{disabled:h&&y==="批改复核","aria-disabled":h&&y==="批改复核"||y!=="批改复核"&&y!=="学情",onClick:Z=>{if(Z.stopPropagation(),y==="学情"){window.location.href="https://zingistop.github.io/four-oclock-class-diagnosis/?v=fbdec8b";return}y==="批改复核"&&m(y,f)},children:y},y))})}',
   ],
   [
     'c.jsx(mn,{className:D.name,onAction:(R,w)=>R==="批改复核"?C(w):m(R,w)})',

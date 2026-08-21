@@ -94,10 +94,21 @@ test("unified demo card titles match their grading landing pages", () => {
   );
 });
 
+test("all insights buttons open the published class diagnosis page", () => {
+  const diagnosisUrl =
+    "https://zingistop.github.io/four-oclock-class-diagnosis/?v=fbdec8b";
+
+  for (const page of [demo, unifiedDemo]) {
+    assert.match(page, new RegExp(diagnosisUrl.replace(/[?]/g, "\\?")));
+    assert.match(page, /y==="学情"\)\{window\.location\.href=/);
+    assert.match(page, /y!=="批改复核"&&y!=="学情"/);
+  }
+});
+
 test("selected homework and exam class cards open the external diagnosis page", () => {
-  for (const html of [demo, unifiedDemo]) {
+  for (const page of [demo, unifiedDemo]) {
     assert.match(
-      html,
+      page,
       /\(f\.id==="h1"&&D\.name==="七年级1班"\|\|f\.id==="e1"&&D\.name==="八年级9班"\)\?window\.location\.href="https:\/\/zingistop\.github\.io\/four-oclock-class-diagnosis\/\?v=fbdec8b#diagnosis":m\("学情",D\.name\)/,
     );
   }
